@@ -7,7 +7,7 @@ Lernmaterialien und Modulinformationen gibt's [hier](https://homepages.thm.de/~h
 Was findet man hier?
 --------------------
 
-In diesem Repository findet man meine Lösungen für die Aufgabenblätter und Hausübungen aus dem Praktikum von KSP.
+In diesem Repository findet man unsere Lösungen für die Aufgabenblätter und Hausübungen aus dem Praktikum von KSP.
 Die Aufgabe im KSP-Praktikum ist es, eine Virtuelle Maschiene für die Progammiersprache "NINJA" ("Ninja is not Java") 
 zu konstruieren. Die Lösungen (_in Form von C-Code_) sind hier geordnet nach Aufgabenblatt und/oder Hausübung verfügbar.
 
@@ -16,6 +16,12 @@ Wie findet man es?
 Der master-Branch enthält eine fertige Lösung für das aktuelle Aufgabenblatt.
 Der develop-Branch beinhalted den aktuellen Entwicklungsstand. 
 Für Aufgabenblätter und die Hausübungen werden Tags erstellt, sobald die Lösung fertiggestellt und comitted wurde.
+
+Teammitglieder:
+---------------
+
+- Felix Münscher
+- Noah George Michael
 
 Inhaltsverzeichnis:
 --------------------
