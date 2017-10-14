@@ -1,7 +1,3 @@
-//
-// Created by noah on 08.10.17.
-//
-
 #include <stdio.h>
 #include <string.h>
 #include "headers/njvm.h"
@@ -15,12 +11,7 @@
  */
 int main(int argc, char* argv[]) {
 
-    int i, args;
-
-    // Print out all command line arguments
-    for (i = 0; i < argc; i++) {
-        printf("%s\n", argv[i]);
-    }
+    int args;
 
     /*
      * Interpret command line arguments
@@ -40,8 +31,8 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        // Catch any unknown arguments and terminate
-        printf("Error: Unrecognized argument: %s", argv[args]);
+        /* Catch any unknown arguments and terminate */
+        printf("Error: Unrecognized argument '%s'\n", argv[args]);
         return 1;
     }
 
