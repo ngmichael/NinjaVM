@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "headers/njvm.h"
+#include "headers/stack.h"
 
 /**
  * Main entry point - called at program launch
@@ -12,6 +13,8 @@
 int main(int argc, char* argv[]) {
 
     int args;
+
+    initStack(256);
 
     /*
      * Interpret command line arguments
