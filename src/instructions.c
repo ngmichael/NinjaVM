@@ -13,9 +13,11 @@ void execute(unsigned int opcode, int operand) {
     switch (opcode) {
         case HALT: {
             halt = TRUE;
+            break;
         }
         case PUSHC: {
             push(operand);
+            break;
         }
         case ADD: {
             int val1, val2, res;
@@ -23,6 +25,7 @@ void execute(unsigned int opcode, int operand) {
             val2 = pop();
             res = val1 + val2;
             push(res);
+            break;
         }
         case SUB: {
             int val1, val2, res;
@@ -30,6 +33,7 @@ void execute(unsigned int opcode, int operand) {
             val1 = pop();
             res = val1 - val2;
             push(res);
+            break;
         }
         case MUL: {
             int val1, val2, res;
@@ -37,6 +41,7 @@ void execute(unsigned int opcode, int operand) {
             val2 = pop();
             res = val1 * val2;
             push(res);
+            break;
         }
         case DIV: {
             int val1, val2, res;
@@ -50,6 +55,7 @@ void execute(unsigned int opcode, int operand) {
 
             res = val1 / val2;
             push(res);
+            break;
         }
         case MOD: {
             int val1, val2, res;
@@ -63,22 +69,27 @@ void execute(unsigned int opcode, int operand) {
 
             res = val1 % val2;
             push(res);
+            break;
         }
         case RDINT: {
 
+            break;
         }
         case WRINT: {
             int val;
             val = pop();
             printf("%d", val);
+            break;
         }
         case RDCHR: {
 
+            break;
         }
         case WRCHR: {
             char val;
             val = (char) pop();
             printf("%c", val);
+            break;
         }
         default: {
             printf("Error: Illegal opcode: %u\n", opcode);

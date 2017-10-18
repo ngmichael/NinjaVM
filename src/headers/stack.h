@@ -1,12 +1,10 @@
 #ifndef KSP_WS17_18_STACK_H
 #define KSP_WS17_18_STACK_H
 
-#include <stdlib.h>
-
 extern unsigned int sp;
-extern size_t stackSize;
+extern unsigned int stackSize;
 
-void initStack(size_t size);
+void initStack(unsigned int size);
 void push(int value);
 int pop(void);
 

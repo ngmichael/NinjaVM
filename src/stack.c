@@ -1,17 +1,16 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int* stack;
 unsigned int sp;
+unsigned int stackSize;
 
-
-size_t stackSize;
-
-void initStack(size_t size) {
+void initStack(unsigned int size) {
+    sp = 0;
     stackSize = size;
-    stack = (int*) malloc(size);
+    stack = (int*) malloc(sizeof(unsigned int) * size);
     if (stack == NULL) {
-        printf("Error: Failed to initialize stack with size %lu Bytes.\n", size);
+        printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
         exit(1);
     }
 }

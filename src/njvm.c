@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
                 WRCHR   << 24,
                 HALT    << 24
             };
+            printf("%d  %d", prog1[1] >> 24, prog1[1] & 0x00FFFFFF);
             programMemory = malloc(sizeof(unsigned int) * 11);
             memcpy(programMemory, prog1, 11);
         }
@@ -64,27 +65,23 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    printf("Listing contents of program memory: \n");
-
-    pc = 0;
-    while (programMemory[pc] != 0) {
-        unsigned int instruction = programMemory[pc];
-        unsigned int opcode = instruction >> 24;
-        int operand = SIGN_EXTEND(IMMEDIATE(instruction));
-        printf("[%04d]:\t%8s%d\n", pc, opcodes[opcode], operand);
-        printf("%d   %d\n", opcode, operand);
-        pc++;
-    }
-
-    pc = 0;
-
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {
-        unsigned int instruction = programMemory[pc];
-        unsigned int opcode = instruction >> 24;
-        int operand = SIGN_EXTEND(IMMEDIATE(instruction));
-        execute(opcode, operand);
+        unsigned int instruction, opcode;
+        int operand;
+
+        /* Load instruction */
+        instruction = programMemory[pc];
+
+        /* Increment program counter */
         pc = pc + 1;
+
+        /* Decode instruction into opcode and immediate value */
+        opcode = instruction >> 24;
+        operand = SIGN_EXTEND(IMMEDIATE(instruction));
+        
+        /* Execute instruction */
+        execute(opcode, operand);
     }
     printf("Ninja Virtual Machine stopped\n");
 
