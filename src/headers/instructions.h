@@ -13,4 +13,8 @@
 #define RDCHR 9
 #define WRCHR 10
 
+extern char* opcodes[];
+
+void execute(unsigned int opcode, int operand);
+
 #endif /* KSP_WS17_18_INSTRUCTIONS_H */

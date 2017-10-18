@@ -1,5 +1,6 @@
 #include "headers/instructions.h"
 #include "headers/stack.h"
+#include "headers/njvm.h"
 #include <stdio.h>
 
 
@@ -11,7 +12,7 @@ char* opcodes[] = {
 void execute(unsigned int opcode, int operand) {
     switch (opcode) {
         case HALT: {
-            exit = TRUE;
+            halt = TRUE;
         }
         case PUSHC: {
             push(operand);
