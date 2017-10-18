@@ -4,12 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 char* opcodes[] = {
     "halt", "pushc", "add", "sub", "mul", "div", "mod", "rdint", "wrint",
     "rdchr", "wrchr"
 };
 
+/**
+ * Executes an insturction with its operand.
+ * 
+ * @param opcode - the instructionto be executed
+ * @param operand - the instructions immediate value 
+ */
 void execute(unsigned int opcode, int operand) {
     switch (opcode) {
         case HALT: {
