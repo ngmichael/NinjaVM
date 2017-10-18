@@ -3,6 +3,8 @@
 #include "headers/njvm.h"
 #include "headers/stack.h"
 
+int exit;
+
 /**
  * Main entry point - called at program launch
  *
@@ -14,6 +16,7 @@ int main(int argc, char* argv[]) {
 
     int args;
 
+    exit = FALSE;
     initStack(256);
 
     /*

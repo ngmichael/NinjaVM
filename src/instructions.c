@@ -11,7 +11,7 @@ char* opcodes[] = {
 void execute(unsigned int opcode, int operand) {
     switch (opcode) {
         case HALT: {
-
+            exit = TRUE;
         }
         case PUSHC: {
             push(operand);
@@ -67,13 +67,17 @@ void execute(unsigned int opcode, int operand) {
 
         }
         case WRINT: {
-
+            int val;
+            val = pop();
+            printf("%d", val);
         }
         case RDCHR: {
 
         }
         case WRCHR: {
-
+            char val;
+            val = (char) pop();
+            printf("%c", val);
         }
         default: {
             printf("Error: Illegal opcode: %u\n", opcode);
