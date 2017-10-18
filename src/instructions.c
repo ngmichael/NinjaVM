@@ -2,6 +2,7 @@
 #include "headers/stack.h"
 #include "headers/njvm.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 
 char* opcodes[] = {
@@ -72,7 +73,11 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case RDINT: {
-
+            int cleanUp;
+            int read;
+            scanf("%d", &read);
+            push(read);
+            while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
             break;
         }
         case WRINT: {
@@ -82,7 +87,11 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case RDCHR: {
-
+            char read;
+            int cleanUp;
+            scanf("%c", &read);
+            push((int) read);
+            while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
             break;
         }
         case WRCHR: {
