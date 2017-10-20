@@ -12,6 +12,8 @@
 #define WRINT 8
 #define RDCHR 9
 #define WRCHR 10
+#define PUSHG 11
+#define POPG 12
 
 extern char* opcodes[];
 

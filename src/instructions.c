@@ -1,12 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "headers/instructions.h"
 #include "headers/stack.h"
 #include "headers/njvm.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "headers/sda.h"
 
 char* opcodes[] = {
     "halt", "pushc", "add", "sub", "mul", "div", "mod", "rdint", "wrint",
-    "rdchr", "wrchr"
+    "rdchr", "wrchr", "pushg", "popg",
 };
 
 /**
@@ -103,6 +104,14 @@ void execute(unsigned int opcode, int operand) {
             char val;
             val = (char) pop();
             printf("%c", val);
+            break;
+        }
+        case PUSHG: {
+            pushGlobal(operand);
+            break;
+        }
+        case POPG: {
+            popGlobal(operand);
             break;
         }
         default: {
