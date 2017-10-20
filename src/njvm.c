@@ -5,6 +5,7 @@
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "headers/instructions.h"
+#include "headers/sda.h"
 
 int halt, pc;
 unsigned int* programMemory;
@@ -96,6 +97,7 @@ int main(int argc, char* argv[]) {
 
     pc = 0;
     halt = FALSE;
+    initSda(staticVarCount);
     initStack(10000);
 
     printf("Ninja Virtual Machine started\n");
