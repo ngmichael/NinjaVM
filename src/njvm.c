@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     int args;
     unsigned int ninjaIdentifier, ninjaVmVer, staticVarCount, irCount;
 
-    printf("%s\n", argv[0]);
+    programMemory = NULL;
 
     /*
      * Interpret command line arguments
@@ -94,6 +94,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    pc = 0;
+    halt = FALSE;
+    initStack(10000);
+
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {
         unsigned int instruction, opcode;
@@ -108,7 +112,7 @@ int main(int argc, char* argv[]) {
         /* Decode instruction into opcode and immediate value */
         opcode = instruction >> 24;
         operand = SIGN_EXTEND(IMMEDIATE(instruction));
-        
+
         /* Execute instruction */
         execute(opcode, operand);
     }
