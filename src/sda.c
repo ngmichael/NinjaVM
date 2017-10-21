@@ -11,11 +11,22 @@ int* sda;
  * Allocates size * 4 bytes of memory to store
  * n integer values.
  * 
+ * NOTE: If the system can not supply the requested
+ * ammount of memory the function will display an error
+ * message and terminate the VM.
+ * 
  * @param size - number of "slots" for the sda
  */
 void initSda(unsigned int size) {
     sdaSize = size;
     sda = malloc(sizeof(int) * size);
+    if (sda == NULL && size > 0) {
+        printf(
+            "Error: Initialization of static data area for %d Bytes failed.\n",
+            sizeof(int) * size
+        );
+        exit(1);
+    }
 }
 
 /**
