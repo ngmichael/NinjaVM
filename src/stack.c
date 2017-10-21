@@ -5,6 +5,8 @@ int* stack;
 unsigned int sp;
 unsigned int stackSize;
 
+unsigned int fp;
+
 /**
  * Allocates size * 4 Bytes of memory for the stack
  * and sets the stack pointer to point at byte no. 0.
@@ -17,13 +19,15 @@ unsigned int stackSize;
 void initStack(unsigned int size) {
     unsigned int i;
 
-    sp = 0;
-    stackSize = size;
     stack = (int*) malloc(sizeof(unsigned int) * size);
     if (stack == NULL) {
         printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
         exit(1);
     }
+
+    sp = 0;
+    fp = 0;
+    stackSize = size;
 
     for (i = 0; i < stackSize; i++) {
         stack[i] = 0;
@@ -68,4 +72,48 @@ int pop(void) {
     sp = sp - 1;
     value = stack[sp];
     return value;
+}
+
+/**
+ * Creates a new stack frame on the stack.
+ * The stack frames size is specifed with the functions 
+ * first agrument.
+ * 
+ * NOTE: If the newly created stack frame is larger than the
+ * remaining space on the stack the function will display an
+ * error message and terminate the VM.
+ * 
+ * @param size - The size of the new stack frame
+ */
+void allocateStackFrame(unsigned int size) {
+
+    if (sp + (size + 1) > stackSize) {
+        printf(
+            "Error: Can't allocate stack frame with size %d: Stack overflow\n",
+            size
+        );
+        exit(1);
+    }
+
+    push(fp);
+    fp = sp;
+    sp = sp + size;
+}
+
+/**
+ * Releases the current stack frame and makes
+ * the previous stack frame the current one.
+ * 
+ * NOTE: If there is no stack frame allocated, the 
+ * function will display an error message and terminate
+ * the VM.
+ */
+void releaseStackFrame(void) {
+    if (fp == 0) {
+        printf("Error: Can't release stack frame that doesn't exist!\n");
+        exit(1);
+    }
+
+    sp = fp;
+    fp = pop();
 }
