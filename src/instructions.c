@@ -7,7 +7,7 @@
 
 char* opcodes[] = {
     "halt", "pushc", "add", "sub", "mul", "div", "mod", "rdint", "wrint",
-    "rdchr", "wrchr", "pushg", "popg",
+    "rdchr", "wrchr", "pushg", "popg", "asf", "rsf", "pushl", "popl",
 };
 
 /**
@@ -112,6 +112,22 @@ void execute(unsigned int opcode, int operand) {
         }
         case POPG: {
             popGlobal(operand);
+            break;
+        }
+        case ASF: {
+            allocateStackFrame(operand);
+            break;
+        }
+        case RSF: {
+            releaseStackFrame();
+            break;
+        }
+        case PUSHL: {
+            pushLocal(operand);
+            break;
+        }
+        case POPL: {
+            popLocal(operand);
             break;
         }
         default: {

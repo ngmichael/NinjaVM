@@ -50,10 +50,12 @@ int main(int argc, char* argv[]) {
          * the path to the program file
          */
         else if (strstr(argv[args], "--") == NULL) {
+            int err;
             /* Try to load the file */
             code = fopen(argv[args], "r");
             /* Check if the file has been opened successfully... */
             if (code == NULL){
+                err = errno;
                 printf("Could not open %s: %s\n", argv[args], strerror(errno));
                 return errno;
             }

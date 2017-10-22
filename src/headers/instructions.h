@@ -14,6 +14,10 @@
 #define WRCHR 10
 #define PUSHG 11
 #define POPG 12
+#define ASF 13
+#define RSF 14
+#define PUSHL 15
+#define POPL 16
 
 extern char* opcodes[];
 
