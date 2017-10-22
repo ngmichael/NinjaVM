@@ -13,7 +13,7 @@ char* opcodes[] = {
 /**
  * Executes an insturction with its operand.
  * 
- * @param opcode - the instructionto be executed
+ * @param opcode - the instruction to be executed
  * @param operand - the instructions immediate value 
  */
 void execute(unsigned int opcode, int operand) {

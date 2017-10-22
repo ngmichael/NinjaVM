@@ -7,7 +7,8 @@
 #include "headers/instructions.h"
 #include "headers/sda.h"
 
-int halt, pc;
+int halt;
+int pc;
 unsigned int* programMemory;
 
 /**
@@ -21,7 +22,10 @@ int main(int argc, char* argv[]) {
 
     FILE* code;
     int args;
-    unsigned int ninjaIdentifier, ninjaVmVer, staticVarCount, irCount;
+    unsigned int formatIdentifier;
+    unsigned int njvmVersion;
+    unsigned int globalVariableCount;
+    unsigned int instructionCount;
 
     programMemory = NULL;
 
@@ -61,33 +65,33 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    /*Validate that the loaded file is a Ninja-Program*/
-    fread(&ninjaIdentifier, 1, sizeof(unsigned int), code);
-    if (ninjaIdentifier != 0x46424a4e){
+    /* Validate that the loaded file is a Ninja-Program */
+    fread(&formatIdentifier, 1, sizeof(unsigned int), code);
+    if (formatIdentifier != 0x46424a4e){
         printf("Not a Ninja program!\n");
         return 1;
     }
     
-    /*Validate that the Ninja-Program is compiled for this version of the VM.*/
-    fread(&ninjaVmVer, 1, sizeof(unsigned int), code);
-    if (ninjaVmVer != VERSION){
+    /* Validate that the Ninja-Program is compiled for this version of the VM. */
+    fread(&njvmVersion, 1, sizeof(unsigned int), code);
+    if (njvmVersion != VERSION){
         printf("Wrong VM version!\n");
-        printf("VM: %02x, PROGRAM: %02x\n", VERSION, ninjaVmVer);
+        printf("VM: %02x, PROGRAM: %02x\n", VERSION, njvmVersion);
         return 1;
     }
     
-    /*Allocate memory to store the instructions of the Ninja-Program.*/
-    fread(&irCount, 1, sizeof(int), code);
-    programMemory = malloc(sizeof(int)*irCount);
+    /* Allocate memory to store the instructions of the Ninja-Program. */
+    fread(&instructionCount, 1, sizeof(int), code);
+    programMemory = malloc(sizeof(int)*instructionCount);
 
-    /*Allocate memory for the static data area.*/
-    fread(&staticVarCount, 1, sizeof(int), code);
-    /* Call sda initialization routine once the sda is implemented */
+    /* Allocate memory for the static data area. */
+    fread(&globalVariableCount, 1, sizeof(int), code);
+    initSda(globalVariableCount);
     
-    /*Read all remaining data (instructions) into programMemory.*/
-    fread(programMemory, 1, sizeof(int)*irCount, code);
+    /* Read all remaining data (instructions) into programMemory. */
+    fread(programMemory, 1, sizeof(int)*instructionCount, code);
     
-    /*Close the file.*/
+    /* Close the file.*/
     fclose(code);
 
     if (programMemory == NULL) {
@@ -97,7 +101,6 @@ int main(int argc, char* argv[]) {
 
     pc = 0;
     halt = FALSE;
-    initSda(staticVarCount);
     initStack(10000);
 
     printf("Ninja Virtual Machine started\n");

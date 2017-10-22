@@ -22,7 +22,7 @@ void initSda(unsigned int size) {
     sda = malloc(sizeof(int) * size);
     if (sda == NULL && size > 0) {
         printf(
-            "Error: Initialization of static data area for %d Bytes failed.\n",
+            "Error: Can't initialize sda with %lu Bytes of memory.\n",
             sizeof(int) * size
         );
         exit(1);
