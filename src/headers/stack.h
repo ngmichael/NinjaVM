@@ -5,7 +5,14 @@ extern unsigned int sp;
 extern unsigned int stackSize;
 
 void initStack(unsigned int size);
+
 void push(int value);
 int pop(void);
+
+void allocateStackFrame(unsigned int size);
+void releaseStackFrame(void);
+
+void popLocal(int position);
+void pushLocal(int position);
 
 #endif /* KSP_WS17_18_STACK_H */

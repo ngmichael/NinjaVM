@@ -75,6 +75,52 @@ int pop(void) {
 }
 
 /**
+ * Pushes a variable at the supplied position from the
+ * current stack frame onto the stack.
+ * 
+ * NOTE: If the position lies outside of the stack boundaries the
+ * function will display an error message and terminate the VM.
+ */
+void pushLocal(int position) {
+    int value;
+    int pos;
+
+    pos = fp + position;
+
+    if (pos < 0 || pos >= stackSize) {
+        printf("Error: Local variable outside of stack index range!\n");
+        printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
+        exit(1);
+    }
+
+    value = stack[pos];
+    push(value);
+}
+
+/**
+ * Pops the stack and stores the value at the supplied
+ * position in the current stack frame.
+ * 
+ * NOTE: If the position lies outside of the stack boundaries the
+ * function will display an error message and terminate the VM.
+ */
+void popLocal(int position) {
+    int value;
+    int pos;
+
+    pos = fp + position;
+
+    if (pos < 0 || pos >= stackSize) {
+        printf("Error: Local variable outside of stack index range!\n");
+        printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
+        exit(1);
+    }
+
+    value = pop();
+    stack[pos] = value;
+}
+
+/**
  * Creates a new stack frame on the stack.
  * The stack frames size is specifed with the functions 
  * first agrument.
