@@ -131,7 +131,12 @@ void popLocal(int position) {
  * 
  * @param size - The size of the new stack frame
  */
-void allocateStackFrame(unsigned int size) {
+void allocateStackFrame(int size) {
+
+    if (size < 0) {
+        printf("Error: Can't allocate stack frame with negative size!\n");
+        exit(1);
+    }
 
     if (sp + (size + 1) > stackSize) {
         printf(

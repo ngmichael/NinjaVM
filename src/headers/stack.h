@@ -9,7 +9,7 @@ void initStack(unsigned int size);
 void push(int value);
 int pop(void);
 
-void allocateStackFrame(unsigned int size);
+void allocateStackFrame(int size);
 void releaseStackFrame(void);
 
 void popLocal(int position);
