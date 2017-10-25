@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
 
     FILE* code;
     int args;
+    int fileClose;
     unsigned int formatIdentifier;
     unsigned int njvmVersion;
     unsigned int globalVariableCount;
@@ -92,10 +93,15 @@ int main(int argc, char* argv[]) {
     fread(programMemory, 1, sizeof(int)*instructionCount, code);
     
     /* Close the file.*/
-    fclose(code);
+    fileClose = fclose(code);
+    if (fileClose != 0) {
+        printf("Error: Could not close program file after reading:\n");
+        printf("%s\n", strerror(errno));
+        return errno;
+    }
 
     if (programMemory == NULL) {
-        printf("Error: No code file specified!\n");
+        printf("Error: No code file specified!\n"); 
         return 1;
     }
 
