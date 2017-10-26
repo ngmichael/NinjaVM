@@ -6,8 +6,8 @@
 #include "headers/sda.h"
 
 char* opcodes[] = {
-    "halt", "pushc", "add", "sub", "mul", "div", "mod", "rdint", "wrint",
-    "rdchr", "wrchr", "pushg", "popg", "asf", "rsf", "pushl", "popl",
+    "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",
+    "RDCHR", "WRCHR", "PUSHG", "POPG", "ASF", "RSF", "PUSHL", "POPL",
 };
 
 /**
