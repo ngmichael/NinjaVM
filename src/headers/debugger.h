@@ -4,6 +4,8 @@
 
 #define DEBUGGER "[Debugger]:"
 
+#define DEBUG_LIST "[Debugger/List]:"
+
 #define ERROR "[Debugger]: An error has occured:\n[Debugger]:"
 
 void debug(FILE* code);

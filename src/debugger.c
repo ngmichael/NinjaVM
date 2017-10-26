@@ -10,19 +10,82 @@
 
 int* programMemory;
 int quit;
-unsigned int pc;    
+unsigned int pc;
 
-char* getInput() {
-    /* TODO: Implement */
-    return "";
+unsigned int formatIdentifier;
+unsigned int njvmVersion;
+unsigned int instructionCount;
+unsigned int globalVariableCount;    
+
+char* getInput(void) {
+    int cleanUp;
+    char* input;
+    char* newLine;
+
+    cleanUp = 0;
+    newLine = NULL;
+    input = malloc(sizeof(unsigned char) * 12);
+    if (fgets(input, 12, stdin) == NULL) {
+
+        exit(1);
+    }
+
+    newLine = strchr(input, 10);
+    if (newLine != NULL) { 
+        *newLine = 0;
+    }
+    else {
+        /* flush stdin */
+        while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
+    }
+
+    return input;
+}
+
+int processCommand(char* command) {
+
+    if(strcmp("list", command) == 0) {
+        int oldPC;
+
+        oldPC = pc;
+        printf("%s Listing program memory:\n\n", DEBUG_LIST);
+
+        pc = 0;
+        while(pc < instructionCount) {
+            int instruction;
+            unsigned int opcode;
+            int operand;
+
+            instruction = programMemory[pc];
+            pc++;
+
+            opcode = instruction >> 24;
+            operand = SIGN_EXTEND(IMMEDIATE(instruction));
+
+            printf("[%06d]: %6s %d", pc-1, opcodes[opcode], operand);
+        }
+
+        pc = oldPC;
+        printf("%s End of program memory!\n", DEBUG_LIST);
+
+        return FALSE;
+    }
+    else if(strcmp("quit", command) == 0) {
+        exit(0);
+        return FALSE;
+    }
+    else if (strcmp("run", command) == 0) {
+        quit = TRUE;
+        return FALSE;
+    }
+    else if (strcmp("step", command) == 0) {
+        return TRUE;
+    }
+
+    return TRUE;
 }
 
 void debug(FILE* code) {
-
-    unsigned int formatIdentifier;
-    unsigned int njvmVersion;
-    unsigned int instructionCount;
-    unsigned int globalVariableCount;
 
     int fileClose;
 
@@ -85,7 +148,7 @@ void debug(FILE* code) {
     pc = 0;
     quit = FALSE;
 
-    printf("%s Initialization routine completed! Launching program...\n", DEBUGGER);
+    printf("%s Initialization routine completed! Launching program...\n\n", DEBUGGER);
 
     while(quit != TRUE) {
         int instruction;
@@ -101,13 +164,11 @@ void debug(FILE* code) {
         printf("[%08d]: %s %d\n", pc-1, opcodes[opcode], operand);
         printf("%s Commands: breakpoint, help, inspect, list, quit, run, step\n", DEBUGGER);
         inputCommand = getInput();
+
+        processCommand(inputCommand);
         
         /*TODO: Interpret input here*/
-
-
-        if (opcode == HALT) {
-            quit = TRUE;
-        }
+        free(inputCommand);
     }
 
     exit(0);
