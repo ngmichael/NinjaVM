@@ -17,6 +17,12 @@ unsigned int njvmVersion;
 unsigned int instructionCount;
 unsigned int globalVariableCount;    
 
+/**
+ * Reads one 'line' from stdin.
+ * NOTE: Only the first 12 characters are read, the rest is truncated.
+ * 
+ * @return User input from stdin with a max length of 12 characters.
+ */
 char* getInput(void) {
     int cleanUp;
     char* input;
@@ -26,7 +32,7 @@ char* getInput(void) {
     newLine = NULL;
     input = malloc(sizeof(unsigned char) * 12);
     if (fgets(input, 12, stdin) == NULL) {
-
+        printf("Something went wrong while taking user input!\n");
         exit(1);
     }
 
@@ -36,12 +42,19 @@ char* getInput(void) {
     }
     else {
         /* flush stdin */
+        printf("%s *WARNING* Truncated input after 12 characters!\n", DEBUGGER);
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
     }
 
     return input;
 }
 
+/**
+ * Interprets and executes commands for the debugger.
+ * 
+ * @param command - a char pointer pointing to a string representing a command
+ * @return 0 if the command advances the program counter, 1 if it doesn't
+ */
 int processCommand(char* command) {
 
     if(strcmp("list", command) == 0) {
@@ -85,6 +98,11 @@ int processCommand(char* command) {
     return TRUE;
 }
 
+/**
+ * Main entry point for debugger.
+ * 
+ * @param code - A FILE pointer pointing to an opened file for reading
+ */
 void debug(FILE* code) {
 
     int fileClose;
@@ -174,3 +192,34 @@ void debug(FILE* code) {
     exit(0);
 }
 
+/*
+ - inspect
+        * used for inspecting various elements of the vm including stack, sda, ret
+        * output could look something like this
+
+[Inspect]: What would you like to inspect:
+[Inspect]: 1: Stack
+[Inspect]: 2: Static data area
+[Inspect]: 3: Return value register
+[Inspect]: Choose one of the aforementioned or 0 to abort!
+[Inspect]:
+
+        * The out put for stack would look something like this:
+
+[Inpsect]: Listing content of stack:
+
+sp ----->   [0011]: NULL
+            [0010]: 231
+            [0009]: 245
+              .
+              .
+              .
+            [0004]: 10
+fp ----->   [0003]: 0
+            [0002]: 20
+            [0001]: 2367
+            [0000]: 1
+
+[Inspect]: Bottom of stack!
+
+*/
