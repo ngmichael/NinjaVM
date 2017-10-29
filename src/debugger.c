@@ -117,6 +117,19 @@ int processCommand(char* command) {
         return FALSE;
     }
     else if (strcmp("help", command) == 0) {
+        printf("\n");
+        changeTextColor("YELLOW");
+        printf("********** NinjaVM Debugger **********\n\n");
+        printf("Available commands:\n");
+        printf(" help       - Prints this info.\n");
+        printf(" breakpoint - Set a breakpoint in your assembler code at a specified instruction.\n");
+        printf(" inspect    - Print the content of one of the VMs many data-containing strcutures like the stack.\n");
+        printf(" list       - List the content of program memory, displayed as opcode | immediate.\n");
+        printf(" quit       - Stops the VM at the next instruction cycle.\n");
+        printf(" run        - Starts continuous execution of instrcutions until a HALT is executed or the breakpoint is reached.\n");
+        printf(" step       - Executes the current instrcution and advances the program counter by one.\n");
+        printf("**************************************\n\n");
+        changeTextColor("WHITE");
         return FALSE;
     }
     else if (strcmp("inspect", command) == 0) {
@@ -202,8 +215,11 @@ int processCommand(char* command) {
         return FALSE;
     }
     else if(strcmp("quit", command) == 0) {
+        printf("[Debugger/Quit]: ");
+        changeTextColor("YELLOW");
         printf("Halting NinjaVM...\n");
-        exit(0);
+        changeTextColor("WHITE");
+        quit = TRUE;
         return FALSE;
     }
     else if (strcmp("run", command) == 0) {
@@ -344,7 +360,7 @@ void debug(FILE* code) {
         else pc = pc - 1;
 
         /* Check if the halt instruction has been executed or not */
-        quit = halt;
+        if (halt == TRUE) quit = TRUE;
     }
 
     printf("Ninja Virtual Machine stopped\n");
