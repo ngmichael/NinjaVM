@@ -126,7 +126,7 @@ int processCommand(char* command) {
     else if (strcmp("help", command) == 0) {
         printf("\n");
         changeTextColor("YELLOW");
-        printf("********** NinjaVM Debugger **********\n\n");
+        printf("********************* NinjaVM Debugger *********************\n\n");
         printf("Available commands:\n");
         printf(" help       - Prints this info.\n");
         printf(" breakpoint - Set a breakpoint in your assembler code at a\n");
@@ -145,7 +145,7 @@ int processCommand(char* command) {
 
         printf(" step       - Executes the current instrcution and\n");
         printf("              advances the program counter by one.\n");
-        printf("**************************************\n\n");
+        printf("************************************************************\n\n");
         changeTextColor("WHITE");
         return FALSE;
     }
@@ -284,26 +284,33 @@ void debug(FILE* code) {
     printf("%s Checking if file is a NinjaVM program...", DEBUGGER);
     fread(&formatIdentifier, 1, sizeof(unsigned int), code);
     if (formatIdentifier != 0x46424a4e){
+        changeTextColor("RED");
         printf("ERROR\n%s Not a Ninja program!\n", DEBUGGER);
         exit(1);
     }
-    printf("OK\n");
+    changeTextColor("GREEN");
+    printf("[OK]\n");
+    changeTextColor("WHITE");
     
     /* Validate that the Ninja-Program is compiled for this version of the VM. */
     printf("%s Checking if program is compiled for this VM version...", DEBUGGER);
     fread(&njvmVersion, 1, sizeof(unsigned int), code);
     if (njvmVersion != VERSION){
+        changeTextColor("RED");
         printf("ERROR!\n");
         printf("%s VM: %02x, PROGRAM: %02x\n", DEBUGGER, VERSION, njvmVersion);
         exit(1);
     }
-    printf("OK!\n");
+    changeTextColor("GREEN");
+    printf("[OK]\n");
+    changeTextColor("WHITE");
     
     /* Allocate memory to store the instructions of the Ninja-Program. */
     printf("%s Reading instruction count and allocating program memory...", DEBUGGER);
     fread(&instructionCount, 1, sizeof(unsigned int), code);
     programMemory = malloc(sizeof(unsigned int)*instructionCount);
     if (programMemory == NULL) {
+        changeTextColor("RED");
         printf("ERROR!\n");
         printf(
             "%s System could not allocate %lu of memory for program\n",
@@ -312,22 +319,29 @@ void debug(FILE* code) {
         );
         exit(1);
     }
-    printf("OK!\n");
+    changeTextColor("GREEN");
+    printf("[OK]\n");
+    changeTextColor("WHITE");
 
     /* Allocate memory for the static data area. */
     printf("%s Allocating memory for the static data area...", DEBUGGER);
     fread(&globalVariableCount, 1, sizeof(int), code);
     initSda(globalVariableCount);
-    printf("OK!\n");
+    changeTextColor("GREEN");
+    printf("[OK]\n");
+    changeTextColor("WHITE");
     
     /* Read all remaining data (instructions) into programMemory. */
     printf("%s Loading instructions into program memory...", DEBUGGER);
     fread(programMemory, 1, sizeof(int)*instructionCount, code);
-    printf("OK\n");
+    changeTextColor("GREEN");
+    printf("[OK]\n");
+    changeTextColor("WHITE");
     
     /* Close the file.*/
     fileClose = fclose(code);
     if (fileClose != 0) {
+        changeTextColor("RED");
         printf("Error: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
         exit(1);
