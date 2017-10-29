@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
-            printf("Ninija Virtual Machine Version %u\n", VERSION);
+            printf("Ninja Virtual Machine Version %u (compiled %s, %s)\n", VERSION, __DATE__, __TIME__);
             return 0;
         }
         else if (strcmp("--debug", argv[args]) == 0) {

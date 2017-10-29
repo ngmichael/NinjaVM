@@ -31,7 +31,7 @@ char* getInput(void) {
     char* input;
     char* newLine;
 
-    cleanUp = 0;
+    cleanUp = 0;    
     newLine = NULL;
     input = malloc(sizeof(unsigned char) * 12);
     if (input == NULL) {
@@ -46,6 +46,9 @@ char* getInput(void) {
         printf("Something went wrong while taking user input!\n");
         changeTextColor("WHITE");
         exit(1);
+    }
+    if (strcmp("\n", input) == 0) {
+        return getInput();
     }
 
     newLine = strchr(input, 10);
