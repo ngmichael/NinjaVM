@@ -5,6 +5,7 @@
 #define DEBUGGER "[Debugger]:"
 
 #define DEBUG_LIST "[Debugger/List]:"
+#define DEBUG_INSPECT "[Debugger/Inspect]:"
 
 #define ERROR "[Debugger]: An error has occured:\n[Debugger]:"
 

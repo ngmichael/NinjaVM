@@ -49,6 +49,7 @@ char* getInput(void) {
     return input;
 }
 
+
 /**
  * Interprets and executes commands for the debugger.
  * 
@@ -57,7 +58,39 @@ char* getInput(void) {
  */
 int processCommand(char* command) {
 
-    if(strcmp("list", command) == 0) {
+    if (strcmp("inspect", command) == 0) {
+        unsigned int inspectNumber;
+
+        printf("%s What would you like to inspect:\n", DEBUG_INSPECT);
+        printf("%s 1: Stack\n", DEBUG_INSPECT);
+        printf("%s 2: Static data area\n", DEBUG_INSPECT);
+        printf("%s 3: Return value register\n", DEBUG_INSPECT);
+        printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_INSPECT);
+        printf("%s ", DEBUG_INSPECT);
+
+        if (scanf("%u", &inspectNumber) != 1) {
+            /* TODO implement error handling */
+        }
+
+        switch(inspectNumber) {
+            case 0: {
+                break;
+            }
+
+            case 1: {
+                printf("%s Listing contents of stack:\n\n", DEBUG_INSPECT);
+                printStack();
+                printf("\n");
+            }
+
+            default: {
+                /* TODO: Implement error handling */
+            }
+        }
+
+        return FALSE;
+    }
+    else if(strcmp("list", command) == 0) {
         int oldPC;
 
         oldPC = pc;
@@ -171,9 +204,11 @@ void debug(FILE* code) {
     while(quit != TRUE) {
         int instruction;
         int operand;
+        unsigned int doExecute;
         unsigned int opcode;
         char* inputCommand;
     
+        doExecute = FALSE;
         instruction = programMemory[pc];
         pc = pc + 1;
         opcode = instruction >> 24;
@@ -183,10 +218,13 @@ void debug(FILE* code) {
         printf("%s Commands: breakpoint, help, inspect, list, quit, run, step\n", DEBUGGER);
         inputCommand = getInput();
 
-        processCommand(inputCommand);
+        doExecute = processCommand(inputCommand);
         
         /*TODO: Interpret input here*/
         free(inputCommand);
+
+        if (doExecute) execute(opcode, operand);
+        else pc = pc - 1;
     }
 
     exit(0);

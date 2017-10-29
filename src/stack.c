@@ -174,32 +174,31 @@ void releaseStackFrame(void) {
  */
 void printStack(void) {
 
-    int oldSp;
+    int localSp;
 
-    oldSp = sp;
+    localSp = sp+1;
 
-    while (sp >= 0) {
-        if (sp == oldSP && sp == fp) {
-            printf("sp, fp\t\t--->\t[%04d]:\txxxx\n", sp);
+    do {
+        localSp--;
+        if (localSp == sp && localSp == fp) {
+            printf("sp, fp\t\t--->\t[%04d]:\txxxx\n", localSp);
         }
-        else if (sp == oldSp) {
-            printf("sp\t\t--->\t[%04d]:\txxxx\n", sp);
+        else if (localSp == sp) {
+            printf("sp\t\t--->\t[%04d]:\txxxx\n", localSp);
         }
-        else if (sp == fp) {
+        else if (localSp == fp) {
             int value;
 
-            value = stack[sp];
-            printf("fp\t\t--->\t[%04d]: %d\n", sp, value);
+            value = stack[localSp];
+            printf("fp\t\t--->\t[%04d]: %d\n", localSp, value);
         }
         else {
             int value;
 
-            value = stack[sp];
-            printf("\t\t\t\t[%04d]: %d\n", sp, value);
+            value = stack[localSp];
+            printf("\t\t\t\t[%04d]: %d\n", localSp, value);
         }
-        sp--;
-    }
+    } while (localSp > 0);
     
     printf("----- Bottom of stack -----\n");
-    sp = oldSp;
 }
