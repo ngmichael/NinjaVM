@@ -127,6 +127,74 @@ void execute(unsigned int opcode, int operand) {
             popLocal(operand);
             break;
         }
+        case EQ: {
+            int val1, val2, res;
+            
+            val1 = pop();
+            val2 = pop();
+            res = val1 == val2 ? TRUE : FALSE;
+            push(res);
+            break;
+        }
+        case NE: {
+            int val1, val2, res;
+            
+            val1 = pop();
+            val2 = pop();
+            res = val1 != val2 ? TRUE : FALSE;
+            push(res);
+            break;
+        }
+        case LT: {
+            int val1, val2, res;
+            
+            val2 = pop();
+            val1 = pop();
+            res = val1 < val2 ? TRUE : FALSE;
+            push(res);
+            break;
+        }
+        case LE: {
+            int val1, val2, res;
+            
+            val2 = pop();
+            val1 = pop();
+            res = val1 <= val2 ? TRUE : FALSE;
+            push(res);
+            break;
+        }
+        case GT: {
+            int val1, val2, res;
+            
+            val2 = pop();
+            val1 = pop();
+            res = val1 > val2 ? TRUE : FALSE;
+            push(res);
+            break;
+        }
+        case GE: {
+            int val1, val2, res;
+            
+            val2 = pop();
+            val1 = pop();
+            res = val1 >= val2 ? TRUE : FALSE;
+            push(res);
+            break;
+        }
+        case JMP: {
+            pc = operand;
+            break;
+        }
+        case BRF: {
+            int value = pop();
+            if (value == FALSE) pc = operand;
+            break;
+        }
+        case BRT: {
+            int value = pop();
+            if (value == TRUE) pc = operand;
+            break;
+        }
         default: {
             printf("Error: Illegal opcode: %u\n", opcode);
             exit(1);

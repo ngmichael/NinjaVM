@@ -9,7 +9,7 @@
 #include "headers/debugger.h"
 
 int halt;
-int pc;
+unsigned int pc;
 unsigned int* programMemory;
 
 /**

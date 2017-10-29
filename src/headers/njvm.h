@@ -10,5 +10,6 @@
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i)) 
 
 extern int halt;
+extern unsigned int pc;
 
 #endif /* KSP_WS17_18_MAIN_H */
