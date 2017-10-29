@@ -18,6 +18,15 @@
 #define RSF 14
 #define PUSHL 15
 #define POPL 16
+#define EQ 17
+#define NE 18
+#define LT 19
+#define LE 20
+#define GT 21
+#define GE 22
+#define JMP 23
+#define BRF 24
+#define BRT 25
 
 extern char* opcodes[];
 
