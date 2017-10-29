@@ -125,6 +125,7 @@ int processCommand(char* command) {
         }
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
 
+        changeTextColor("CYAN");
         switch(inspectNumber) {
             case 0: {
                 break;
@@ -136,11 +137,18 @@ int processCommand(char* command) {
                 printf("\n");
             }
 
+            case 2: {
+                printf("%s Listing contents of static data area:\n\n", DEBUG_INSPECT);
+                printStaticDataArea();
+                printf("\n");
+            }
+
             default: {
                 /* TODO: Implement error handling */
             }
         }
 
+        changeTextColor("WHITE");
         return FALSE;
     }
     else if(strcmp("list", command) == 0) {

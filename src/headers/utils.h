@@ -14,7 +14,7 @@ void changeTextColor(char* color);
  * RED: used for fatal errors, all errors that prevent further program execution
  * YELLOW: warings
  * GREEN: OPCODES, when displayed in debugger
- * 
+ * CYAN: INSPECT OUTPUT: When inspecting stack, sda, ect in debugger
  * BLUE: unused
  * WHITE: DEFAULT; Everything else
  */
