@@ -34,6 +34,13 @@ char* getInput(void) {
     cleanUp = 0;
     newLine = NULL;
     input = malloc(sizeof(unsigned char) * 12);
+    if (input == NULL) {
+        changeTextColor("RED");
+        printf("%s ", ERROR);
+        printf("System could not allocate 12 bytes of memory for debugger input.\n");
+        changeTextColor("WHITE");
+        exit(1);
+    }
     if (fgets(input, 12, stdin) == NULL) {
         changeTextColor("RED");
         printf("Something went wrong while taking user input!\n");
@@ -154,7 +161,17 @@ int processCommand(char* command) {
         printf("%s ", DEBUG_INSPECT);
 
         if (scanf("%u", &inspectNumber) != 1) {
-            /* TODO implement error handling */
+            changeTextColor("RED");
+            printf("%s ", ERROR);
+            if (inspectNumber == EOF) {
+                printf("Recived EOF from STDIN; Possible read error?\n");
+                printf("%s\n", strerror(errno));
+            }
+            else {
+                printf("Unknown error occured while reading inspect input.\n");
+            }
+            changeTextColor("WHITE");
+            exit(1);
         }
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
 
@@ -195,31 +212,29 @@ int processCommand(char* command) {
         return FALSE;
     }
     else if(strcmp("list", command) == 0) {
-        int oldPC;
+        int programCounter;
 
-        oldPC = pc;
         printf("%s Listing program memory:\n\n", DEBUG_LIST);
 
-        pc = 0;
-        while(pc < instructionCount) {
+        programCounter = 0;
+        while(programCounter < instructionCount) {
             int instruction;
             unsigned int opcode;
             int operand;
 
-            instruction = programMemory[pc];
-            pc++;
+            instruction = programMemory[programCounter];
+            programCounter++;
 
             opcode = instruction >> 24;
             operand = SIGN_EXTEND(IMMEDIATE(instruction));
 
-            printf("[%08d]: ", pc-1);
+            printf("[%08d]: ", programCounter-1);
             changeTextColor("GREEN");
             printf("%6s ", opcodes[opcode]);
             changeTextColor("WHITE");
             printf("%d\n", operand);
         }
 
-        pc = oldPC;
         printf("%s End of program memory!\n\n", DEBUG_LIST);
 
         return FALSE;
@@ -376,35 +391,3 @@ void debug(FILE* code) {
     printf("Ninja Virtual Machine stopped\n");
     exit(0);
 }
-
-/*
- - inspect
-        * used for inspecting various elements of the vm including stack, sda, ret
-        * output could look something like this
-
-[Inspect]: What would you like to inspect:
-[Inspect]: 1: Stack
-[Inspect]: 2: Static data area
-[Inspect]: 3: Return value register
-[Inspect]: Choose one of the aforementioned or 0 to abort!
-[Inspect]:
-
-        * The out put for stack would look something like this:
-
-[Inpsect]: Listing content of stack:
-
-sp ----->   [0011]: NULL
-            [0010]: 231
-            [0009]: 245
-              .
-              .
-              .
-            [0004]: 10
-fp ----->   [0003]: 0
-            [0002]: 20
-            [0001]: 2367
-            [0000]: 1
-
-[Inspect]: Bottom of stack!
-
-*/
