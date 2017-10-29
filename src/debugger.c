@@ -7,10 +7,13 @@
 #include "headers/instructions.h"
 #include "headers/sda.h"
 #include "headers/debugger.h"
+#include "headers/utils.h"
 
 int* programMemory;
-int quit;
+unsigned int quit;
+unsigned int run;
 unsigned int pc;
+unsigned int breakpoint;
 
 unsigned int formatIdentifier;
 unsigned int njvmVersion;
@@ -32,7 +35,9 @@ char* getInput(void) {
     newLine = NULL;
     input = malloc(sizeof(unsigned char) * 12);
     if (fgets(input, 12, stdin) == NULL) {
+        changeTextColor("RED");
         printf("Something went wrong while taking user input!\n");
+        changeTextColor("WHITE");
         exit(1);
     }
 
@@ -42,7 +47,13 @@ char* getInput(void) {
     }
     else {
         /* flush stdin */
-        printf("%s *WARNING* Truncated input after 12 characters!\n", DEBUGGER);
+        printf("%s ", DEBUGGER);
+        changeTextColor("YELLOW");
+
+        printf("*WARNING* ");
+        changeTextColor("WHITE");
+
+        printf("Truncated input after 12 characters!\n");
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
     }
 
@@ -58,8 +69,49 @@ char* getInput(void) {
  */
 int processCommand(char* command) {
 
-    if (strcmp("inspect", command) == 0) {
+    if (strcmp("breakpoint", command) == 0){
+        int newBreakpoint;
+        int cleanUp;
+
+        printf("%s Enter the number of the instruction,\n", DEBUG_BREAKPOINT);
+        printf("%s 0 to clear breakpint or -1 to abort!\n", DEBUG_BREAKPOINT);
+        printf("%s Set breakpoint to: ", DEBUG_BREAKPOINT);
+
+        if (scanf("%d", &newBreakpoint) != 1) {
+            /* TODO implement error handling */
+        }
+        while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
+
+        if (newBreakpoint < -1) {
+            printf("%s ", DEBUG_BREAKPOINT);
+            changeTextColor("YELLOW");
+            printf("Malformed input! Aborting...\n");
+        }
+        else if (newBreakpoint == -1) {
+            printf("%s Did not change breakpoint!\n", DEBUG_BREAKPOINT);
+        }
+        else if (newBreakpoint == 0) {
+            printf("%s Clearing breakpoint...\n", DEBUG_BREAKPOINT);
+            breakpoint = 0;
+        }
+        else {
+            printf(
+                "%s Setting breakpoint on instruction %d!\n",
+                DEBUG_BREAKPOINT,
+                newBreakpoint
+            );
+            breakpoint = newBreakpoint;
+        }
+
+        changeTextColor("WHITE");
+        return FALSE;
+    }
+    else if (strcmp("help", command) == 0) {
+
+    }
+    else if (strcmp("inspect", command) == 0) {
         unsigned int inspectNumber;
+        int cleanUp;
 
         printf("%s What would you like to inspect:\n", DEBUG_INSPECT);
         printf("%s 1: Stack\n", DEBUG_INSPECT);
@@ -71,6 +123,7 @@ int processCommand(char* command) {
         if (scanf("%u", &inspectNumber) != 1) {
             /* TODO implement error handling */
         }
+        while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
 
         switch(inspectNumber) {
             case 0: {
@@ -108,7 +161,11 @@ int processCommand(char* command) {
             opcode = instruction >> 24;
             operand = SIGN_EXTEND(IMMEDIATE(instruction));
 
-            printf("[%06d]: %6s %d", pc-1, opcodes[opcode], operand);
+            printf("[%08d]: ", pc-1);
+            changeTextColor("GREEN");
+            printf("%6s ", opcodes[opcode]);
+            changeTextColor("WHITE");
+            printf("%d\n", operand);
         }
 
         pc = oldPC;
@@ -117,11 +174,13 @@ int processCommand(char* command) {
         return FALSE;
     }
     else if(strcmp("quit", command) == 0) {
+        changeTextColor("MAGENTA");
+        printf("Halting NinjaVM...\n");
         exit(0);
         return FALSE;
     }
     else if (strcmp("run", command) == 0) {
-        quit = TRUE;
+        run = TRUE;
         return FALSE;
     }
     else if (strcmp("step", command) == 0) {
@@ -196,37 +255,59 @@ void debug(FILE* code) {
         exit(1);
     }
     
+    breakpoint = -1;
     pc = 0;
     quit = FALSE;
+    run = FALSE;
+    initStack(10000);
 
     printf("%s Initialization routine completed! Launching program...\n\n", DEBUGGER);
 
+    printf("Ninja Virtual Machine started\n");
     while(quit != TRUE) {
         int instruction;
         int operand;
         unsigned int doExecute;
         unsigned int opcode;
         char* inputCommand;
+
+        if (pc == breakpoint) {
+            run == FALSE;
+            printf("%s Reached breakpoint!\n", DEBUG_BREAKPOINT);
+            breakpoint = 0;
+        }
     
         doExecute = FALSE;
         instruction = programMemory[pc];
         pc = pc + 1;
         opcode = instruction >> 24;
         operand = SIGN_EXTEND(IMMEDIATE(instruction));
-    
-        printf("[%08d]: %s %d\n", pc-1, opcodes[opcode], operand);
-        printf("%s Commands: breakpoint, help, inspect, list, quit, run, step\n", DEBUGGER);
-        inputCommand = getInput();
-
-        doExecute = processCommand(inputCommand);
         
-        /*TODO: Interpret input here*/
-        free(inputCommand);
+        if (run == FALSE) {
+            printf("[%08d]: ", pc-1);
+
+            changeTextColor("GREEN");
+            printf("%6s ", opcodes[opcode]);
+            changeTextColor("WHITE");
+            printf("%d\n", operand);
+
+            printf("%s Commands: breakpoint, help, inspect, list, quit, run, step\n", DEBUGGER);
+    
+            inputCommand = getInput();
+            doExecute = processCommand(inputCommand);
+            free(inputCommand);
+        }
+        else doExecute = TRUE;
+        
 
         if (doExecute) execute(opcode, operand);
         else pc = pc - 1;
+
+        /* Check if the halt instruction has been executed or not */
+        quit = halt;
     }
 
+    printf("Ninja Virtual Machine stopped\n");
     exit(0);
 }
 

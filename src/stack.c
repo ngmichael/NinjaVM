@@ -196,7 +196,7 @@ void printStack(void) {
             int value;
 
             value = stack[localSp];
-            printf("\t\t\t\t[%04d]: %d\n", localSp, value);
+            printf("\t\t\t[%04d]: %d\n", localSp, value);
         }
     } while (localSp > 0);
     

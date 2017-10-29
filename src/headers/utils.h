@@ -7,3 +7,14 @@
 #define WHITE   "\x1b[0m"
 
 void changeTextColor(char* color);
+
+/*
+ * Color codes - and their meaning:
+ * 
+ * RED: used for fatal errors, all errors that prevent further program execution
+ * YELLOW: warings
+ * GREEN: OPCODES, when displayed in debugger
+ * 
+ * BLUE: unused
+ * WHITE: DEFAULT; Everything else
+ */
