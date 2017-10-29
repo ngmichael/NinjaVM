@@ -122,12 +122,22 @@ int processCommand(char* command) {
         printf("********** NinjaVM Debugger **********\n\n");
         printf("Available commands:\n");
         printf(" help       - Prints this info.\n");
-        printf(" breakpoint - Set a breakpoint in your assembler code at a specified instruction.\n");
-        printf(" inspect    - Print the content of one of the VMs many data-containing strcutures like the stack.\n");
-        printf(" list       - List the content of program memory, displayed as opcode | immediate.\n");
+        printf(" breakpoint - Set a breakpoint in your assembler code at a\n");
+        printf("              specified instruction.\n");
+
+        printf(" inspect    - Print the content of one of the VMs many\n");
+        printf("              data-containing strcutures like the stack.\n");
+
+        printf(" list       - List the content of program memory, displayed\n");
+        printf("              as opcode | immediate.\n");
+
         printf(" quit       - Stops the VM at the next instruction cycle.\n");
-        printf(" run        - Starts continuous execution of instrcutions until a HALT is executed or the breakpoint is reached.\n");
-        printf(" step       - Executes the current instrcution and advances the program counter by one.\n");
+        printf(" run        - Starts continuous execution of instrcutions\n");
+        printf("              until a HALT is executed or the breakpoint\n");
+        printf("              is reached.\n");
+
+        printf(" step       - Executes the current instrcution and\n");
+        printf("              advances the program counter by one.\n");
         printf("**************************************\n\n");
         changeTextColor("WHITE");
         return FALSE;
