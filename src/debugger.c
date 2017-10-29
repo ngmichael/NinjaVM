@@ -76,6 +76,7 @@ int processCommand(char* command) {
         printf("%s Enter the number of the instruction,\n", DEBUG_BREAKPOINT);
         printf("%s 0 to clear breakpint or -1 to abort!\n", DEBUG_BREAKPOINT);
         printf("%s Set breakpoint to: ", DEBUG_BREAKPOINT);
+        changeTextColor("MAGENTA");
 
         if (scanf("%d", &newBreakpoint) != 1) {
             /* TODO implement error handling */
@@ -83,23 +84,32 @@ int processCommand(char* command) {
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
 
         if (newBreakpoint < -1) {
+            changeTextColor("WHITE");
             printf("%s ", DEBUG_BREAKPOINT);
             changeTextColor("YELLOW");
             printf("Malformed input! Aborting...\n");
         }
         else if (newBreakpoint == -1) {
-            printf("%s Did not change breakpoint!\n", DEBUG_BREAKPOINT);
+            changeTextColor("WHITE");
+            printf("%s ", DEBUG_BREAKPOINT);
+            changeTextColor("MAGENTA");
+            printf("Did not change breakpoint!\n");
         }
         else if (newBreakpoint == 0) {
-            printf("%s Clearing breakpoint...\n", DEBUG_BREAKPOINT);
+            changeTextColor("WHITE");
+            printf("%s ", DEBUG_BREAKPOINT);
+            changeTextColor("MAGENTA");
+            printf("Clearing breakpoint...\n");
             breakpoint = 0;
         }
         else {
+            changeTextColor("WHITE");
             printf(
-                "%s Setting breakpoint on instruction %d!\n",
-                DEBUG_BREAKPOINT,
-                newBreakpoint
+                "%s Setting breakpoint on instruction ",
+                DEBUG_BREAKPOINT
             );
+            changeTextColor("MAGENTA");
+            printf("%d!\n", newBreakpoint);
             breakpoint = newBreakpoint;
         }
 
@@ -107,7 +117,7 @@ int processCommand(char* command) {
         return FALSE;
     }
     else if (strcmp("help", command) == 0) {
-
+        return FALSE;
     }
     else if (strcmp("inspect", command) == 0) {
         unsigned int inspectNumber;
@@ -135,6 +145,7 @@ int processCommand(char* command) {
                 changeTextColor("CYAN");
                 printStack();
                 printf("\n");
+                break;
             }
 
             case 2: {
@@ -142,10 +153,18 @@ int processCommand(char* command) {
                 changeTextColor("CYAN");
                 printStaticDataArea();
                 printf("\n");
+                break;
+            }
+
+            case 3: {
+                printf("%s Sorry, but this feature is not implemented in this version!\n", DEBUG_INSPECT);
+                break;
             }
 
             default: {
-                /* TODO: Implement error handling */
+                printf("%s ", DEBUG_INSPECT);
+                changeTextColor("YELLOW");
+                printf("There is no option with number '%u'...\n", inspectNumber);
             }
         }
 
@@ -183,7 +202,6 @@ int processCommand(char* command) {
         return FALSE;
     }
     else if(strcmp("quit", command) == 0) {
-        changeTextColor("MAGENTA");
         printf("Halting NinjaVM...\n");
         exit(0);
         return FALSE;
@@ -194,6 +212,16 @@ int processCommand(char* command) {
     }
     else if (strcmp("step", command) == 0) {
         return TRUE;
+    }
+    else if (strcmp("", command) == 0) {
+        return TRUE;
+    }
+    else {
+        printf("%s ", DEBUGGER);
+        changeTextColor("YELLOW");
+        printf("Unrecognized command: '%s'\n", command);
+        changeTextColor("WHITE");
+        return FALSE;
     }
 
     return TRUE;
@@ -281,8 +309,11 @@ void debug(FILE* code) {
         char* inputCommand;
 
         if (pc == breakpoint) {
-            run == FALSE;
-            printf("%s Reached breakpoint!\n", DEBUG_BREAKPOINT);
+            run = FALSE;
+            printf("%s ", DEBUG_BREAKPOINT);
+            changeTextColor("MAGENTA");
+            printf("Reached breakpoint!\n");
+            changeTextColor("WHITE");
             breakpoint = 0;
         }
     

@@ -15,6 +15,7 @@ void changeTextColor(char* color);
  * YELLOW: warings
  * GREEN: OPCODES, when displayed in debugger
  * CYAN: INSPECT OUTPUT: When inspecting stack, sda, ect in debugger
+ * MAGENTA: BREAKPOINTS
  * BLUE: unused
  * WHITE: DEFAULT; Everything else
  */
