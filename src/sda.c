@@ -78,3 +78,17 @@ void pushGlobal(unsigned int position) {
     value = sda[position];
     push(value);
 }
+
+/**
+ * Prints the contents of the static data are to stdout.
+ */
+void printStaticDataArea(void) {
+    unsigned int i;
+
+    printf("Static data area contains %u variables.\n", sdaSize);
+    for (i = 0; i < sdaSize; i++) {
+        printf("[%04u]: %d\n", i, sda[i]);
+    }
+
+    printf("----- End of static data area -----\n");
+}

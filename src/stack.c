@@ -168,3 +168,37 @@ void releaseStackFrame(void) {
     sp = fp;
     fp = pop();
 }
+
+/**
+ * Prints the current content of the stack from top to bottom
+ */
+void printStack(void) {
+
+    int localSp;
+
+    localSp = sp+1;
+
+    do {
+        localSp--;
+        if (localSp == sp && localSp == fp) {
+            printf("sp, fp\t\t--->\t[%04d]:\txxxx\n", localSp);
+        }
+        else if (localSp == sp) {
+            printf("sp\t\t--->\t[%04d]:\txxxx\n", localSp);
+        }
+        else if (localSp == fp) {
+            int value;
+
+            value = stack[localSp];
+            printf("fp\t\t--->\t[%04d]: %d\n", localSp, value);
+        }
+        else {
+            int value;
+
+            value = stack[localSp];
+            printf("\t\t\t[%04d]: %d\n", localSp, value);
+        }
+    } while (localSp > 0);
+    
+    printf("----- Bottom of stack -----\n");
+}

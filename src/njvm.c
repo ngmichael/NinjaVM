@@ -6,6 +6,7 @@
 #include "headers/stack.h"
 #include "headers/instructions.h"
 #include "headers/sda.h"
+#include "headers/debugger.h"
 
 int halt;
 int pc;
@@ -28,6 +29,9 @@ int main(int argc, char* argv[]) {
     unsigned int globalVariableCount;
     unsigned int instructionCount;
 
+    unsigned int runDebugger;
+
+    runDebugger = FALSE;
     programMemory = NULL;
 
     /*
@@ -45,6 +49,9 @@ int main(int argc, char* argv[]) {
         else if (strcmp("--version", argv[args]) == 0) {
             printf("Ninija Virtual Machine Version %u\n", VERSION);
             return 0;
+        }
+        else if (strcmp("--debug", argv[args]) == 0) {
+            runDebugger = TRUE;
         }
         /* 
          * If the argument does not start with a "--" it is
@@ -66,6 +73,10 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    if (runDebugger == TRUE) {
+        debug(code);
+    }
+
     /* Validate that the loaded file is a Ninja-Program */
     fread(&formatIdentifier, 1, sizeof(unsigned int), code);
     if (formatIdentifier != 0x46424a4e){
@@ -82,8 +93,15 @@ int main(int argc, char* argv[]) {
     }
     
     /* Allocate memory to store the instructions of the Ninja-Program. */
-    fread(&instructionCount, 1, sizeof(int), code);
-    programMemory = malloc(sizeof(int)*instructionCount);
+    fread(&instructionCount, 1, sizeof(unsigned int), code);
+    programMemory = malloc(sizeof(unsigned int)*instructionCount);
+    if (programMemory == NULL) {
+        printf(
+            "Error: System could not allocate %lu of memory for program\n",
+            sizeof(unsigned int) * instructionCount
+        );
+        return 1;
+    }
 
     /* Allocate memory for the static data area. */
     fread(&globalVariableCount, 1, sizeof(int), code);

@@ -15,4 +15,6 @@ void releaseStackFrame(void);
 void popLocal(int position);
 void pushLocal(int position);
 
+void printStack(void);
+
 #endif /* KSP_WS17_18_STACK_H */
