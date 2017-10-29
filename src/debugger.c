@@ -125,7 +125,6 @@ int processCommand(char* command) {
         }
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
 
-        changeTextColor("CYAN");
         switch(inspectNumber) {
             case 0: {
                 break;
@@ -133,12 +132,14 @@ int processCommand(char* command) {
 
             case 1: {
                 printf("%s Listing contents of stack:\n\n", DEBUG_INSPECT);
+                changeTextColor("CYAN");
                 printStack();
                 printf("\n");
             }
 
             case 2: {
                 printf("%s Listing contents of static data area:\n\n", DEBUG_INSPECT);
+                changeTextColor("CYAN");
                 printStaticDataArea();
                 printf("\n");
             }
@@ -177,7 +178,7 @@ int processCommand(char* command) {
         }
 
         pc = oldPC;
-        printf("%s End of program memory!\n", DEBUG_LIST);
+        printf("%s End of program memory!\n\n", DEBUG_LIST);
 
         return FALSE;
     }
