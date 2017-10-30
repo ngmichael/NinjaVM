@@ -16,5 +16,6 @@ void popLocal(int position);
 void pushLocal(int position);
 
 void printStack(void);
+int isAccessibleStackSlot(int n);
 
 #endif /* KSP_WS17_18_STACK_H */

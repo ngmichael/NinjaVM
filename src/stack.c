@@ -202,3 +202,13 @@ void printStack(void) {
     
     printf("----- Bottom of stack -----\n");
 }
+
+/**
+ * Checks if value n is within the stack boundaries
+ *
+ * @param n - the value to be checked
+ * @return TRUE if n lies within stack boundaries, FALSE otherwise
+ */
+int isAccessibleStackSlot(int n) {
+    return n >= 0 && < sp ? TRUE : FALSE;
+}
