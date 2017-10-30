@@ -7,6 +7,7 @@
 #include "headers/instructions.h"
 #include "headers/sda.h"
 #include "headers/debugger.h"
+#include "headers/utils.h"
 
 int halt;
 unsigned int pc;
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]) {
 
     runDebugger = FALSE;
     programMemory = NULL;
+    code = NULL;
 
     /*
      * Interpret command line arguments
@@ -71,6 +73,13 @@ int main(int argc, char* argv[]) {
             printf("Error: Unrecognized argument '%s'\n", argv[args]);
             return 1;
         }
+    }
+
+    if (code == NULL) {
+        changeTextColor("RED");
+        printf("Error: No code file specified!\n"); 
+        changeTextColor("WHITE");
+        return 1;
     }
 
     if (runDebugger == TRUE) {
@@ -116,11 +125,6 @@ int main(int argc, char* argv[]) {
         printf("Error: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
         return errno;
-    }
-
-    if (programMemory == NULL) {
-        printf("Error: No code file specified!\n"); 
-        return 1;
     }
 
     pc = 0;
