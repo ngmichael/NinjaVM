@@ -183,22 +183,22 @@ void printStack(void) {
     do {
         localSp--;
         if (localSp == sp && localSp == fp) {
-            printf("sp, fp\t\t--->\t[%04d]:\txxxx\n", localSp);
+            printf("sp, fp\t--->\t[%04d]:\txxxx\n", localSp);
         }
         else if (localSp == sp) {
-            printf("sp\t\t--->\t[%04d]:\txxxx\n", localSp);
+            printf("sp\t--->\t[%04d]:\txxxx\n", localSp);
         }
         else if (localSp == fp) {
             int value;
 
             value = stack[localSp];
-            printf("fp\t\t--->\t[%04d]: %d\n", localSp, value);
+            printf("fp\t--->\t[%04d]: %d\n", localSp, value);
         }
         else {
             int value;
 
             value = stack[localSp];
-            printf("\t\t\t[%04d]: %d\n", localSp, value);
+            printf("\t\t[%04d]: %d\n", localSp, value);
         }
     } while (localSp > 0);
     
