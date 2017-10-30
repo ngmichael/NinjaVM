@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "headers/njvm.h"
+#include "headers/stack.h"
 
 int* stack;
 unsigned int sp;
@@ -210,5 +212,19 @@ void printStack(void) {
  * @return TRUE if n lies within stack boundaries, FALSE otherwise
  */
 int isAccessibleStackSlot(int n) {
-    return n >= 0 && < sp ? TRUE : FALSE;
+    return n >= 0 && n < sp ? TRUE : FALSE;
+}
+
+
+/**
+ * Sets the specified value at the specified position in the stack.
+ * 
+ * @param slot - the slot that should be set
+ * @param value - the value to set
+ */
+void replaceStackSlotValue(unsigned int slot, int value) {
+    if (isAccessibleStackSlot(slot) == FALSE) {
+        printf("Warning: %u is not an accessible stack slot!\n", slot);
+    }
+    stack[slot] = value;
 }
