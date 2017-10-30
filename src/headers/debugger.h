@@ -7,6 +7,7 @@
 #define DEBUG_BREAKPOINT "[Debugger/Breakpoint]:"
 #define DEBUG_LIST "[Debugger/List]:"
 #define DEBUG_INSPECT "[Debugger/Inspect]:"
+#define DEBUG_EDIT "[Debugger/Editor]:"
 
 #define ERROR "[Debugger]: An error has occured:\n[Debugger]:"
 

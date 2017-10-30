@@ -77,9 +77,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (code == NULL) {
-        changeTextColor("RED");
         printf("Error: No code file specified!\n"); 
-        changeTextColor("WHITE");
         return 1;
     }
 
