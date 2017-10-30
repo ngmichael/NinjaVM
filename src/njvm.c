@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
             printf("Options:\n");
             printf("\t--help\t\tDisplays this help.\n");
             printf("\t--version\tDsiplays version number of the VM.\n");
+            printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
