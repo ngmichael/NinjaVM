@@ -7,4 +7,7 @@ void popGlobal(unsigned int size);
 
 void printStaticDataArea(void);
 
+int hasIndex(unsigned int n);
+int setVariable(unsigned int varnum, int value);
+
 #endif /* KSP_WS17_18_SDA_H */

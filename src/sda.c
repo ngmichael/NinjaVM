@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "headers/njvm.h"
 #include "headers/sda.h"
 #include "headers/stack.h"
 
@@ -91,4 +92,27 @@ void printStaticDataArea(void) {
     }
 
     printf("----- End of static data area -----\n");
+}
+
+/**
+ * Checks if the static data area has the specified index.
+ * 
+ * @param n the index to be checked
+ * @return TRUE if index is valid, FALSE otherwise
+ */
+int hasIndex(unsigned int n) {
+    return n < sdaSize ? TRUE : FALSE;
+}
+
+/**
+ * Directly alters the specified variable to the specified value.
+ * 
+ * @param variable - the index of the global variable
+ * @param value - the new value
+ * @return TRUE if variable exists, FALSE otherwise
+ */
+int setVariable(unsigned int varnum, int value) {
+    if (hasIndex(varnum) == FALSE) return FALSE;
+    sda[varnum] = value;
+    return TRUE;
 }
