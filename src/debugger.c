@@ -21,7 +21,15 @@ unsigned int instructionCount;
 unsigned int globalVariableCount;
 
 /**
+ * Dumps program memory, stack content and static data area
+ * content into the file specified by path.
+ * If the file does not exist, it will be created. If it does exist,
+ * its content will be DISCARDED!
  * 
+ * See man page for fopen with mode 'w+'
+ * $ man 3 fopen
+ * 
+ * @param path - the path of the file to dump memory to
  */
 void memoryDump(char* path) {
     FILE* out;
@@ -67,6 +75,8 @@ void memoryDump(char* path) {
 
 /**
  * Reads the next integer from stdin and truncates the rest.
+ * 
+ * @return the first number found in stdin as signed int
  */
 int getNumber(void) {
     int number;
@@ -669,7 +679,8 @@ void debug(FILE* code) {
             changeTextColor("WHITE");
             printf("%d\n", operand);
 
-            printf("%s Commands: breakpoint, dump, edit, help, inspect, list, quit, run, step\n", DEBUGGER);
+            printf("%s Enter a command or 'help' for a list of available commands.\n", DEBUGGER);
+            printf("%s ", DEBUGGER);
     
             inputCommand = getInput();
             doExecute = processCommand(inputCommand);
