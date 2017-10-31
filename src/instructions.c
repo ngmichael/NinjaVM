@@ -58,7 +58,7 @@ void execute(unsigned int opcode, int operand) {
             
             if (val1 == 0 || val2 == 0) {
                 printf("Error: Division by zero\n");
-                exit(1);
+                exit(E_ERR_DIV_BY_ZERO);
             }
 
             res = val1 / val2;
@@ -72,7 +72,7 @@ void execute(unsigned int opcode, int operand) {
             
             if (val1 == 0 || val2 == 0) {
                 printf("Error: Division by zero\n");
-                exit(1);
+                exit(E_ERR_DIV_BY_ZERO);
             }
 
             res = val1 % val2;
@@ -197,7 +197,7 @@ void execute(unsigned int opcode, int operand) {
         }
         default: {
             printf("Error: Illegal opcode: %u\n", opcode);
-            exit(1);
+            exit(E_ERR_OPCODE);
         }
     }
 }

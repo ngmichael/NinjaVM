@@ -24,7 +24,7 @@ void initStack(unsigned int size) {
     stack = (int*) malloc(sizeof(unsigned int) * size);
     if (stack == NULL) {
         printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
-        exit(1);
+        exit(E_ERR_SYS_MEM);
     }
 
     sp = 0;
@@ -47,7 +47,7 @@ void initStack(unsigned int size) {
 void push(int value) {
     if (sp >= stackSize) {
         printf("Error: Stack overflow\n");
-        exit(1);
+        exit(E_ERR_ST_OVER);
     }
 
     stack[sp] = value;
@@ -68,7 +68,7 @@ int pop(void) {
 
     if (sp == 0) {
         printf("Error: Stack underflow\n");
-        exit(1);
+        exit(E_ERR_ST_UNDER);
     }
 
     sp = sp - 1;
@@ -92,7 +92,7 @@ void pushLocal(int position) {
     if (pos < 0 || pos >= stackSize) {
         printf("Error: Local variable outside of stack index range!\n");
         printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
-        exit(1);
+        exit(E_ERR_STF_INDEX);
     }
 
     value = stack[pos];
@@ -115,7 +115,7 @@ void popLocal(int position) {
     if (pos < 0 || pos >= stackSize) {
         printf("Error: Local variable outside of stack index range!\n");
         printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
-        exit(1);
+        exit(E_ERR_STF_INDEX);
     }
 
     value = pop();
@@ -137,7 +137,7 @@ void allocateStackFrame(int size) {
 
     if (size < 0) {
         printf("Error: Can't allocate stack frame with negative size!\n");
-        exit(1);
+        exit(E_ERR_STF_ALLOC);
     }
 
     if (sp + (size + 1) > stackSize) {
@@ -145,7 +145,7 @@ void allocateStackFrame(int size) {
             "Error: Can't allocate stack frame with size %d: Stack overflow\n",
             size
         );
-        exit(1);
+        exit(E_ERR_STF_ALLOC);
     }
 
     push(fp);
@@ -164,7 +164,7 @@ void allocateStackFrame(int size) {
 void releaseStackFrame(void) {
     if (fp == 0) {
         printf("Error: Can't release stack frame that doesn't exist!\n");
-        exit(1);
+        exit(E_ERR_STF_FREE);
     }
 
     sp = fp;

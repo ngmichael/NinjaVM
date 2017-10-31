@@ -66,19 +66,19 @@ int main(int argc, char* argv[]) {
             /* Check if the file has been opened successfully... */
             if (code == NULL){
                 printf("Could not open %s: %s\n", argv[args], strerror(errno));
-                return errno;
+                return E_ERR_IO_FILE;
             }
         }
         else {
             /* Catch any unknown arguments and terminate */
             printf("Error: Unrecognized argument '%s'\n", argv[args]);
-            return 1;
+            return E_ERR_CLI;
         }
     }
 
     if (code == NULL) {
         printf("Error: No code file specified!\n"); 
-        return 1;
+        return E_ERR_NO_PROGF;
     }
 
     if (runDebugger == TRUE) {
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
     fread(&formatIdentifier, 1, sizeof(unsigned int), code);
     if (formatIdentifier != 0x46424a4e){
         printf("Not a Ninja program!\n");
-        return 1;
+        return E_ERR_NO_NJPROG;
     }
     
     /* Validate that the Ninja-Program is compiled for this version of the VM. */
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
     if (njvmVersion != VERSION){
         printf("Wrong VM version!\n");
         printf("VM: %02x, PROGRAM: %02x\n", VERSION, njvmVersion);
-        return 1;
+        return E_ERR_VM_VER;
     }
     
     /* Allocate memory to store the instructions of the Ninja-Program. */
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
             "Error: System could not allocate %lu of memory for program\n",
             sizeof(unsigned int) * instructionCount
         );
-        return 1;
+        return E_ERR_SYS_MEM;
     }
 
     /* Allocate memory for the static data area. */
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
     if (fileClose != 0) {
         printf("Error: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
-        return errno;
+        return E_ERR_IO_FILE;
     }
 
     pc = 0;
@@ -150,5 +150,5 @@ int main(int argc, char* argv[]) {
     }
     printf("Ninja Virtual Machine stopped\n");
 
-    return 0;
+    return E_EXECOK;
 }

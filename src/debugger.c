@@ -30,12 +30,12 @@ void memoryDump(char* path) {
     printf("[Debug/MemoryDump]: Performing memory dump...\n");
     if (path == NULL) {
         printf("[Debug/MemoryDump]: ERROR: PATH IS NULL!\n");
-        exit(1);
+        exit(E_ERR_IO_SHELL);
     }
     out = fopen(path, "w+");
     if (out == NULL) {
         printf("[Debug/MemoryDump]: Could not open %s: %s\n", path, strerror(errno));
-        exit(1);
+        exit(E_ERR_IO_FILE);
     }
 
     fprintf(out, "NinjaVM Memory Dump\n");
@@ -83,7 +83,7 @@ int getNumber(void) {
             printf("Unknown error occured while reading input.\n");
         }
         changeTextColor("WHITE");
-        exit(1);
+        exit(E_ERR_IO_SHELL);
     }
     while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
 
@@ -109,13 +109,13 @@ char* getInput(void) {
         printf("%s ", ERROR);
         printf("System could not allocate 12 bytes of memory for debugger input.\n");
         changeTextColor("WHITE");
-        exit(1);
+        exit(E_ERR_IO_SHELL);
     }
     if (fgets(input, 12, stdin) == NULL) {
         changeTextColor("RED");
         printf("Something went wrong while taking user input!\n");
         changeTextColor("WHITE");
-        exit(1);
+        exit(E_ERR_IO_SHELL);
     }
     if (strcmp("\n", input) == 0) {
         return getInput();
@@ -478,7 +478,7 @@ int processCommand(char* command) {
                 printf("Unknown error occured while reading inspect input.\n");
             }
             changeTextColor("WHITE");
-            exit(1);
+            exit(E_ERR_IO_SHELL);
         }
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
 
@@ -569,7 +569,7 @@ void debug(FILE* code) {
     if (formatIdentifier != 0x46424a4e){
         changeTextColor("RED");
         printf("ERROR\n%s Not a Ninja program!\n", DEBUGGER);
-        exit(1);
+        exit(E_ERR_NO_NJPROG);
     }
     changeTextColor("GREEN");
     printf("[OK]\n");
@@ -582,7 +582,7 @@ void debug(FILE* code) {
         changeTextColor("RED");
         printf("ERROR!\n");
         printf("%s VM: %02x, PROGRAM: %02x\n", DEBUGGER, VERSION, njvmVersion);
-        exit(1);
+        exit(E_ERR_VM_VER);
     }
     changeTextColor("GREEN");
     printf("[OK]\n");
@@ -600,7 +600,7 @@ void debug(FILE* code) {
             DEBUGGER, 
             sizeof(unsigned int) * instructionCount
         );
-        exit(1);
+        exit(E_ERR_SYS_MEM);
     }
     changeTextColor("GREEN");
     printf("[OK]\n");
@@ -627,7 +627,7 @@ void debug(FILE* code) {
         changeTextColor("RED");
         printf("Error: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
-        exit(1);
+        exit(E_ERR_IO_FILE);
     }
     
     breakpoint = -1;
@@ -687,5 +687,5 @@ void debug(FILE* code) {
 
     printf("Ninja Virtual Machine stopped\n");
 
-    exit(0);
+    exit(E_EXECOK);
 }

@@ -26,7 +26,7 @@ void initSda(unsigned int size) {
             "Error: Can't initialize sda with %lu Bytes of memory.\n",
             sizeof(int) * size
         );
-        exit(1);
+        exit(E_ERR_SYS_MEM);
     }
 }
 
@@ -48,7 +48,7 @@ void popGlobal(unsigned int position) {
             "Error: Can't save global variable '%d'! Index out of bounds!\n",
             position
         );
-        exit(1);
+        exit(E_ERR_SDA_INDEX);
     }
     
     value = pop();
@@ -73,7 +73,7 @@ void pushGlobal(unsigned int position) {
             "Error: Can't read global variable '%d'! Index out of bounds!\n",
             position
         );
-        exit(1);
+        exit(E_ERR_SDA_INDEX);
     }
 
     value = sda[position];
