@@ -27,7 +27,7 @@ Inhaltsverzeichnis:
 --------------------
 0. [VM0](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe0/index.html): Hauptprogramm, Strings, Kommandozeilenargumente, Ausgabe, fertig bis 17.10.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/v0.0.0)
 1. [VM1](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe1/index.html): Arithmetische Ausdruecke, Stackmaschinen, Instruktionen, fertig bis 24.10.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/V1.0.0)
-2. [VM2](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe2/index.html): Globale Variablen, Lokale Variablen, Stack-Frames, Laden einer Datei, fertig bis 07.11.2017
+2. [VM2](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe2/index.html): Globale Variablen, Lokale Variablen, Stack-Frames, Laden einer Datei, fertig bis 07.11.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/V2.0.0)
 3. [VM3](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe3/index.html): Kontrollstrukturen, Vergleiche, Spruenge, Debugger, fertig bis 14.11.2017
 4. [VM4](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe4/index.html): Call/Return, Argumente, Rueckgabewert, Boole'sche Ausdruecke, fertig bis 28.11.2017
 5. [VM5](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe5/index.html): Rechenobjekte auf dem Heap, fertig bis 05.12.2017
