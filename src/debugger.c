@@ -45,7 +45,8 @@ void memoryDump(char* path) {
     fprintf(out, "[%08d]: %s %d\n\n", pc-1, opcodes[programMemory[pc-1] >> 24], programMemory[pc-1] & 0x00FFFFFF);
 
     fprintf(out, "The stack at dump time:\n\n");
-    /* TODO: Call dump stack */
+    printStackTo(out);
+    fprintf(out, "\n");
 
     fprintf(out, "The static data area at dump time:\n\n");
     /* TODO: Call dump sda*/

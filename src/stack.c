@@ -171,38 +171,41 @@ void releaseStackFrame(void) {
     fp = pop();
 }
 
+void printStackTo(FILE* stream) {
+    int localSp;
+    
+        localSp = sp+1;
+    
+        do {
+            localSp--;
+            if (localSp == sp && localSp == fp) {
+                fprintf(stream, "sp, fp\t--->\t[%04d]:\txxxx\n", localSp);
+            }
+            else if (localSp == sp) {
+                fprintf(stream, "sp\t--->\t[%04d]:\txxxx\n", localSp);
+            }
+            else if (localSp == fp) {
+                int value;
+    
+                value = stack[localSp];
+                fprintf(stream, "fp\t--->\t[%04d]: %d\n", localSp, value);
+            }
+            else {
+                int value;
+    
+                value = stack[localSp];
+                fprintf(stream, "\t\t[%04d]: %d\n", localSp, value);
+            }
+        } while (localSp > 0);
+        
+        fprintf(stream, "----- Bottom of stack -----\n");
+}
+
 /**
  * Prints the current content of the stack from top to bottom
  */
 void printStack(void) {
-
-    int localSp;
-
-    localSp = sp+1;
-
-    do {
-        localSp--;
-        if (localSp == sp && localSp == fp) {
-            printf("sp, fp\t--->\t[%04d]:\txxxx\n", localSp);
-        }
-        else if (localSp == sp) {
-            printf("sp\t--->\t[%04d]:\txxxx\n", localSp);
-        }
-        else if (localSp == fp) {
-            int value;
-
-            value = stack[localSp];
-            printf("fp\t--->\t[%04d]: %d\n", localSp, value);
-        }
-        else {
-            int value;
-
-            value = stack[localSp];
-            printf("\t\t[%04d]: %d\n", localSp, value);
-        }
-    } while (localSp > 0);
-    
-    printf("----- Bottom of stack -----\n");
+    printStackTo(stdout);
 }
 
 /**

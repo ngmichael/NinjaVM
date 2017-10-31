@@ -15,6 +15,7 @@ void releaseStackFrame(void);
 void popLocal(int position);
 void pushLocal(int position);
 
+void printStackTo(FILE* stream);
 void printStack(void);
 
 int isAccessibleStackSlot(int n);
