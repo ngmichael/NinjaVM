@@ -49,7 +49,7 @@ void memoryDump(char* path) {
     fprintf(out, "\n");
 
     fprintf(out, "The static data area at dump time:\n\n");
-    /* TODO: Call dump sda*/
+    printStaticDataAreaTo(out);
 
     /* TODO: Dump ret*/
 
