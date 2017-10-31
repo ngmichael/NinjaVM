@@ -21,6 +21,48 @@ unsigned int instructionCount;
 unsigned int globalVariableCount;
 
 /**
+ * 
+ */
+void memoryDump(char* path) {
+    FILE* out;
+    unsigned int i;
+
+    printf("[Debug/MemoryDump]: Performing memory dump...\n");
+    if (path == NULL) {
+        printf("[Debug/MemoryDump]: ERROR: PATH IS NULL!\n");
+        exit(1);
+    }
+    out = fopen(path, "w+");
+    if (out == NULL) {
+        printf("[Debug/MemoryDump]: Could not open %s: %s\n", path, strerror(errno));
+        exit(1);
+    }
+
+    fprintf(out, "NinjaVM Memory Dump\n");
+    fprintf(out, "Exact timestamp: %s, %s\n", __DATE__, __TIME__);
+    fprintf(out, "VM Version: %u\n", VERSION);
+    fprintf(out, "The instruction this dump was called on:\n");
+    fprintf(out, "[%08d]: %s %d\n\n", pc-1, opcodes[programMemory[pc-1] >> 24], programMemory[pc-1] & 0x00FFFFFF);
+
+    fprintf(out, "The stack at dump time:\n\n");
+    /* TODO: Call dump stack */
+
+    fprintf(out, "The static data area at dump time:\n\n");
+    /* TODO: Call dump sda*/
+
+    /* TODO: Dump ret*/
+
+    fprintf(out, "Content of program memory:\n\n");
+    for (i = 0; i < instructionCount; i++) {
+        fprintf(out, "[%08d]: %6s %d\n", i, opcodes[programMemory[i] >> 24], programMemory[i] & 0x00FFFFFF);
+    }
+    fprintf(out, "** End of program memory **\n");
+
+    fprintf(out, "----- End of dump -----\n");
+    fclose(out);
+}
+
+/**
  * Reads the next integer from stdin and truncates the rest.
  */
 int getNumber(void) {
@@ -615,5 +657,8 @@ void debug(FILE* code) {
     }
 
     printf("Ninja Virtual Machine stopped\n");
+
+    memoryDump("test.txt");
+
     exit(0);
 }
