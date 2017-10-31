@@ -8,6 +8,7 @@
 #define DEBUG_LIST "[Debugger/List]:"
 #define DEBUG_INSPECT "[Debugger/Inspect]:"
 #define DEBUG_EDIT "[Debugger/Editor]:"
+#define DEBUG_DUMP "[Debugger/MemoryDump]:"
 
 #define ERROR "[Debugger]: An error has occured:\n[Debugger]:"
 

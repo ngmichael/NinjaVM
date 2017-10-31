@@ -41,7 +41,7 @@ void memoryDump(char* path) {
     fprintf(out, "NinjaVM Memory Dump\n");
     fprintf(out, "Exact timestamp: %s, %s\n", __DATE__, __TIME__);
     fprintf(out, "VM Version: %u\n", VERSION);
-    fprintf(out, "The instruction this dump was called on:\n");
+    fprintf(out, "The most recently executed instruction:\n");
     fprintf(out, "[%08d]: %s %d\n\n", pc-1, opcodes[programMemory[pc-1] >> 24], programMemory[pc-1] & 0x00FFFFFF);
 
     fprintf(out, "The stack at dump time:\n\n");
@@ -50,6 +50,7 @@ void memoryDump(char* path) {
 
     fprintf(out, "The static data area at dump time:\n\n");
     printStaticDataAreaTo(out);
+    fprintf(out, "\n");
 
     /* TODO: Dump ret*/
 
@@ -58,6 +59,7 @@ void memoryDump(char* path) {
         fprintf(out, "[%08d]: %6s %d\n", i, opcodes[programMemory[i] >> 24], programMemory[i] & 0x00FFFFFF);
     }
     fprintf(out, "** End of program memory **\n");
+    fprintf(out, "\n");
 
     fprintf(out, "----- End of dump -----\n");
     fclose(out);
@@ -222,6 +224,31 @@ int processCommand(char* command) {
         }
 
         changeTextColor("WHITE");
+        return FALSE;
+    }
+    else if (strcmp("dump", command) == 0) {
+        char* path;
+        int i;
+
+        printf("%s Please specify a file path to dump memory to.\n", DEBUG_DUMP);
+        printf("%s ", DEBUG_DUMP);
+        changeTextColor("YELLOW");
+        printf("*WARNING* ");
+        changeTextColor("WHITE");
+        printf("Input will be truncated after 128 characters!\n");
+        printf("%s ", DEBUG_DUMP);
+
+        path = (char*) malloc(sizeof(char) * 128);
+        fgets(path, 128, stdin);
+        for (i = 0; i < 128; i++) {
+            if (path[i] == '\n') {
+                path[i] = 0;
+                break;
+            }
+        }
+
+        memoryDump(path);
+        free(path);
         return FALSE;
     }
     else if (strcmp("edit", command) == 0){
@@ -408,6 +435,7 @@ int processCommand(char* command) {
         printf(" breakpoint - Set a breakpoint in your assembler code at a\n");
         printf("              specified instruction.\n");
 
+        printf(" dump       - Dumps memory to the specified file.\n");
         printf(" edit       - Starts a small editor for editing program\n");
         printf("              memory, the stack, ect.\n");
 
@@ -641,7 +669,7 @@ void debug(FILE* code) {
             changeTextColor("WHITE");
             printf("%d\n", operand);
 
-            printf("%s Commands: breakpoint, edit, help, inspect, list, quit, run, step\n", DEBUGGER);
+            printf("%s Commands: breakpoint, dump, edit, help, inspect, list, quit, run, step\n", DEBUGGER);
     
             inputCommand = getInput();
             doExecute = processCommand(inputCommand);
@@ -658,8 +686,6 @@ void debug(FILE* code) {
     }
 
     printf("Ninja Virtual Machine stopped\n");
-
-    memoryDump("test.txt");
 
     exit(0);
 }
