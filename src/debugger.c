@@ -584,6 +584,7 @@ void debug(FILE* code) {
     if (formatIdentifier != 0x46424a4e){
         changeTextColor("RED");
         printf("ERROR\n%s Not a Ninja program!\n", DEBUGGER);
+        changeTextColor("WHITE");
         exit(E_ERR_NO_NJPROG);
     }
     changeTextColor("GREEN");
