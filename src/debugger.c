@@ -35,14 +35,14 @@ void memoryDump(char* path) {
     FILE* out;
     unsigned int i;
 
-    printf("[Debug/MemoryDump]: Performing memory dump...\n");
+    printf("%s Performing memory dump...\n", DEBUG_DUMP);
     if (path == NULL) {
-        printf("[Debug/MemoryDump]: ERROR: PATH IS NULL!\n");
+        printf("%s [Debug/MemoryDump]: ERROR: PATH IS NULL!\n", DEBUG_DUMP);
         exit(E_ERR_IO_SHELL);
     }
     out = fopen(path, "w+");
     if (out == NULL) {
-        printf("[Debug/MemoryDump]: Could not open %s: %s\n", path, strerror(errno));
+        printf("%s Could not open %s: %s\n", DEBUG_DUMP, path, strerror(errno));
         exit(E_ERR_IO_FILE);
     }
 
@@ -241,6 +241,11 @@ int processCommand(char* command) {
         int i;
 
         printf("%s Please specify a file path to dump memory to.\n", DEBUG_DUMP);
+        printf("%s ", DEBUG_DUMP);
+        changeTextColor("YELLOW");
+        printf("*WARNING* ");
+        printf("IF THE FILE EXISTS IT WILL BE OVERWRITTEN!\n");
+        changeTextColor("WHITE");
         printf("%s ", DEBUG_DUMP);
         changeTextColor("YELLOW");
         printf("*WARNING* ");
