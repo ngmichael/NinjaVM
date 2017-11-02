@@ -597,6 +597,7 @@ void debug(FILE* code) {
     if (njvmVersion != VERSION){
         changeTextColor("RED");
         printf("ERROR!\n");
+        changeTextColor("WHITE");
         printf("%s VM: %02x, PROGRAM: %02x\n", DEBUGGER, VERSION, njvmVersion);
         exit(E_ERR_VM_VER);
     }
@@ -611,6 +612,7 @@ void debug(FILE* code) {
     if (programMemory == NULL) {
         changeTextColor("RED");
         printf("ERROR!\n");
+        changeTextColor("WHITE");
         printf(
             "%s System could not allocate %lu of memory for program\n",
             DEBUGGER, 
@@ -643,6 +645,7 @@ void debug(FILE* code) {
         changeTextColor("RED");
         printf("Error: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
+        changeTextColor("WHITE");
         exit(E_ERR_IO_FILE);
     }
     
