@@ -1,0 +1,24 @@
+V 3.0
+
+ - Added a live built-in debugger
+ - Added support for numerical comparison
+ - Added support for conditional and unconditional jumps in code
+
+V 2.0
+
+ - Added support for global varaibles
+ - Added supprot for local variables
+ - Added the ability to load binary program files
+
+V 1.0
+    
+ - Added a stack for performing arethmetic operations
+ - Added instrcution for pushing values onto the stack
+ - Added addition, subtraction, mulitplication, division and modulo operations
+ - Added instructions for reading and writing values from and to the shell
+
+V 0.0
+
+ - Added command line options:
+    - --help -> Prints help output
+    - --version -> Prints the version
