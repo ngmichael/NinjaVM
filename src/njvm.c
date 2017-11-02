@@ -1,11 +1,16 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "headers/instructions.h"
+#include "headers/sda.h"
+#include "headers/debugger.h"
+#include "headers/utils.h"
 
-int halt, pc;
+int halt;
+unsigned int pc;
 unsigned int* programMemory;
 
 /**
@@ -17,12 +22,19 @@ unsigned int* programMemory;
  */
 int main(int argc, char* argv[]) {
 
+    FILE* code;
     int args;
+    int fileClose;
+    unsigned int formatIdentifier;
+    unsigned int njvmVersion;
+    unsigned int globalVariableCount;
+    unsigned int instructionCount;
 
-    pc = 0;
+    unsigned int runDebugger;
+
+    runDebugger = FALSE;
     programMemory = NULL;
-    halt = FALSE;
-    initStack(10000);
+    code = NULL;
 
     /*
      * Interpret command line arguments
@@ -30,80 +42,93 @@ int main(int argc, char* argv[]) {
      */
     for (args = 1; args < argc; args++){
         if (strcmp("--help", argv[args]) == 0) {
-            printf("\nusage: ./njvm [options]\n");
+            printf("\nusage: ./njvm [options] codefile\n");
             printf("Options:\n");
             printf("\t--help\t\tDisplays this help.\n");
             printf("\t--version\tDsiplays version number of the VM.\n");
-            printf("\t--prog1\t\tRun program 1.\n");
+            printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
-            printf("Ninija Virtual Machine Version %u\n", VERSION);
+            printf("Ninja Virtual Machine Version %u (compiled %s, %s)\n", VERSION, __DATE__, __TIME__);
             return 0;
         }
-        else if (strcmp("--prog1", argv[args]) == 0) {
-            const unsigned int prog1[11] = {
-                PUSHC   << 24 | IMMEDIATE(3),
-                PUSHC   << 24 | IMMEDIATE(4),
-                ADD     << 24,
-                PUSHC   << 24 | IMMEDIATE(10),
-                PUSHC   << 24 | IMMEDIATE(6),
-                SUB     << 24,
-                MUL     << 24,
-                WRINT   << 24,
-                PUSHC   << 24 | IMMEDIATE(10),
-                WRCHR   << 24,
-                HALT    << 24
-            };
-            programMemory = malloc(sizeof(unsigned int) * 11);
-            memcpy(programMemory, prog1, sizeof(unsigned int) * 11);
+        else if (strcmp("--debug", argv[args]) == 0) {
+            runDebugger = TRUE;
         }
-        else if (strcmp("--prog2", argv[args]) == 0) {
-            const unsigned int prog1[9] = {
-                PUSHC   << 24 | IMMEDIATE(-2),
-                RDINT   << 24,
-                MUL     << 24,
-                PUSHC   << 24 | IMMEDIATE(3),
-                ADD     << 24,
-                WRINT   << 24,
-                PUSHC   << 24 | IMMEDIATE(10),
-                WRCHR   << 24,
-                HALT    << 24
-            };
-            programMemory = malloc(sizeof(unsigned int) * 9);
-            memcpy(programMemory, prog1, sizeof(unsigned int) * 9);
-        }
-        else if (strcmp("--prog3", argv[args]) == 0) {
-            const unsigned int prog1[5] = {
-                RDCHR   << 24,
-                WRINT   << 24,
-                PUSHC   << 24 | IMMEDIATE(10),
-                WRCHR   << 24,
-                HALT    << 24
-            };
-            programMemory = malloc(sizeof(unsigned int) * 5);
-            memcpy(programMemory, prog1, sizeof(unsigned int) * 5);
+        /* 
+         * If the argument does not start with a "--" it is
+         * the path to the program file
+         */
+        else if (strstr(argv[args], "--") == NULL) {
+            /* Try to load the file */
+            code = fopen(argv[args], "r");
+            /* Check if the file has been opened successfully... */
+            if (code == NULL){
+                printf("Could not open %s: %s\n", argv[args], strerror(errno));
+                return E_ERR_IO_FILE;
+            }
         }
         else {
             /* Catch any unknown arguments and terminate */
             printf("Error: Unrecognized argument '%s'\n", argv[args]);
-            return 1;
+            return E_ERR_CLI;
         }
     }
 
-    if (programMemory == NULL) {
-        printf("Error: No code file specified!\n");
-        return 1;
+    if (code == NULL) {
+        printf("Error: No code file specified!\n"); 
+        return E_ERR_NO_PROGF;
     }
 
-    printf("Listing contents of program memory:\n");
-    do {
-        printf("[%04d]:%6s %d\n", pc, opcodes[programMemory[pc] >> 24], SIGN_EXTEND(IMMEDIATE(programMemory[pc])));
-        pc = pc + 1;
-    } while (programMemory[pc] >> 24 != HALT);
+    if (runDebugger == TRUE) {
+        debug(code);
+    }
 
-    printf("[%04d]:%6s %d\n", pc, opcodes[programMemory[pc] >> 24], SIGN_EXTEND(IMMEDIATE(programMemory[pc])));
+    /* Validate that the loaded file is a Ninja-Program */
+    fread(&formatIdentifier, 1, sizeof(unsigned int), code);
+    if (formatIdentifier != 0x46424a4e){
+        printf("Not a Ninja program!\n");
+        return E_ERR_NO_NJPROG;
+    }
+    
+    /* Validate that the Ninja-Program is compiled for this version of the VM. */
+    fread(&njvmVersion, 1, sizeof(unsigned int), code);
+    if (njvmVersion != VERSION){
+        printf("Wrong VM version!\n");
+        printf("VM: %02x, PROGRAM: %02x\n", VERSION, njvmVersion);
+        return E_ERR_VM_VER;
+    }
+    
+    /* Allocate memory to store the instructions of the Ninja-Program. */
+    fread(&instructionCount, 1, sizeof(unsigned int), code);
+    programMemory = malloc(sizeof(unsigned int)*instructionCount);
+    if (programMemory == NULL) {
+        printf(
+            "Error: System could not allocate %lu of memory for program\n",
+            sizeof(unsigned int) * instructionCount
+        );
+        return E_ERR_SYS_MEM;
+    }
+
+    /* Allocate memory for the static data area. */
+    fread(&globalVariableCount, 1, sizeof(int), code);
+    initSda(globalVariableCount);
+    
+    /* Read all remaining data (instructions) into programMemory. */
+    fread(programMemory, 1, sizeof(int)*instructionCount, code);
+    
+    /* Close the file.*/
+    fileClose = fclose(code);
+    if (fileClose != 0) {
+        printf("Error: Could not close program file after reading:\n");
+        printf("%s\n", strerror(errno));
+        return E_ERR_IO_FILE;
+    }
+
     pc = 0;
+    halt = FALSE;
+    initStack(10000);
 
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {
@@ -119,11 +144,11 @@ int main(int argc, char* argv[]) {
         /* Decode instruction into opcode and immediate value */
         opcode = instruction >> 24;
         operand = SIGN_EXTEND(IMMEDIATE(instruction));
-        
+
         /* Execute instruction */
         execute(opcode, operand);
     }
     printf("Ninja Virtual Machine stopped\n");
 
-    return 0;
+    return E_EXECOK;
 }
