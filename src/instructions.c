@@ -8,7 +8,8 @@
 char* opcodes[] = {
     "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",
     "RDCHR", "WRCHR", "PUSHG", "POPG", "ASF", "RSF", "PUSHL", "POPL", "EQ",
-    "NE", "LT", "LE", "GT", "GE", "JMP", "BRF", "BRT",
+    "NE", "LT", "LE", "GT", "GE", "JMP", "BRF", "BRT", "CALL", "RET", "DROP",
+    "PUSHR", "POPR", "DUP",
 };
 
 /**
