@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    /* Check if a codefile has been specified */
     if (code == NULL) {
         printf("Error: No code file specified!\n"); 
         return E_ERR_NO_PROGF;
@@ -83,6 +84,9 @@ int main(int argc, char* argv[]) {
 
     if (runDebugger == TRUE) {
         debug(code);
+        /* We should NEVER reach this part of the function.
+           If we do, there is a bug in the debugger.*/
+        exit(E_ERR_KILL_DEBUG);
     }
 
     /* Validate that the loaded file is a Ninja-Program */
@@ -116,7 +120,7 @@ int main(int argc, char* argv[]) {
     initSda(globalVariableCount);
     
     /* Read all remaining data (instructions) into programMemory. */
-    fread(programMemory, 1, sizeof(int)*instructionCount, code);
+    fread(programMemory, instructionCount, sizeof(unsigned int), code);
     
     /* Close the file.*/
     fileClose = fclose(code);

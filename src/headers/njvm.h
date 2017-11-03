@@ -33,6 +33,7 @@
 #define E_ERR_STF_ALLOC     23 /* Stackframe allocation causes stack overflow error */
 #define E_ERR_STF_FREE      24 /* Stackrame release error */
 #define E_ERR_SDA_INDEX     25 /* Static data area variable index out of bounds */
+#define E_ERR_KILL_DEBUG    26 /* Debugger has exited in a non-standard way */
 
 extern int halt;
 extern unsigned int pc;
