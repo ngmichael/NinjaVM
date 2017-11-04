@@ -1,7 +1,7 @@
 #ifndef KSP_WS17_18_MAIN_H
 #define KSP_WS17_18_MAIN_H
 
-#define VERSION 3
+#define VERSION 4
 
 #define FALSE 0
 #define TRUE 1
