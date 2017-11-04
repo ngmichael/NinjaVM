@@ -13,7 +13,7 @@ int* sda;
  * n integer values.
  * 
  * NOTE: If the system can not supply the requested
- * ammount of memory the function will display an error
+ * amount of memory the function will display an error
  * message and terminate the VM.
  * 
  * @param size - number of "slots" for the sda
@@ -34,10 +34,10 @@ void initSda(unsigned int size) {
  * Used for pushing values into the static data area.
  * This function pops the top most value from the stack
  * and stores it in the global variable at the supplied
- * postition in the static data area.
+ * position in the static data area.
  * 
  * NOTE: If the supplied position value is greater than the
- * the total ammount of global variables the function will
+ * the total amount of global variables the function will
  * dsiplay an error message and terminate the VM.
  */
 void popGlobal(unsigned int position) {
@@ -62,7 +62,7 @@ void popGlobal(unsigned int position) {
  * It will then push that value onto the stack.
  * 
  * NOTE: If the supplied position value is greater than the
- * the total ammount of global variables the function will
+ * the total amount of global variables the function will
  * dsiplay an error message and terminate the VM.
  */
 void pushGlobal(unsigned int position) {

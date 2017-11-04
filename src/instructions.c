@@ -13,7 +13,7 @@ char* opcodes[] = {
 };
 
 /**
- * Executes an insturction with its operand.
+ * Executes an instruction with its operand.
  * 
  * @param opcode - the instruction to be executed
  * @param operand - the instructions immediate value 

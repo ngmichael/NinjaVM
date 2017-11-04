@@ -10,7 +10,7 @@
 #define DEBUG_EDIT "[Debugger/Editor]:"
 #define DEBUG_DUMP "[Debugger/MemoryDump]:"
 
-#define ERROR "[Debugger]: An error has occured:\n[Debugger]:"
+#define ERROR "[Debugger]: An error has occurred:\n[Debugger]:"
 
 void debug(FILE* code);
 

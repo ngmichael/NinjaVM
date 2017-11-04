@@ -1,7 +1,7 @@
 **Konzepte systemnaher Programmierung WS 17/18**
 =================================
 
-Repo zur Verwaltung von Sorucecode aus dem KSP-Praktikum.
+Repo zur Verwaltung von Sourcecode aus dem KSP-Praktikum.
 Lernmaterialien und Modulinformationen gibt's [hier](https://homepages.thm.de/~hg53/ksp-ws1718/index.html).
 
 Was findet man hier?

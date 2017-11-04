@@ -13,7 +13,7 @@ unsigned int fp;
  * Allocates size * 4 Bytes of memory for the stack
  * and sets the stack pointer to point at byte no. 0.
  * NOTE: If te system can not supply the requested
- * ammount of ram the function will display an error
+ * amount of ram the function will display an error
  * message and terminate the VM.
  * 
  * @param size - the number slots for the stack
@@ -125,7 +125,7 @@ void popLocal(int position) {
 /**
  * Creates a new stack frame on the stack.
  * The stack frames size is specifed with the functions 
- * first agrument.
+ * first argument.
  * 
  * NOTE: If the newly created stack frame is larger than the
  * remaining space on the stack the function will display an

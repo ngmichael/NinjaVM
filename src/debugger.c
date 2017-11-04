@@ -86,11 +86,11 @@ int getNumber(void) {
         changeTextColor("RED");
         printf("%s ", ERROR);
         if (number == EOF) {
-            printf("Recived EOF from STDIN; Possible read error?\n");
+            printf("Received EOF from STDIN; Possible read error?\n");
             printf("%s\n", strerror(errno));
         }
         else {
-            printf("Unknown error occured while reading input.\n");
+            printf("Unknown error occurred while reading input.\n");
         }
         changeTextColor("WHITE");
         exit(E_ERR_IO_SHELL);
@@ -315,7 +315,7 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
-                printf("%s Now enter the new value for this satck slot:\n", DEBUG_EDIT);
+                printf("%s Now enter the new value for this stack slot:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
                 value = getNumber();
@@ -455,7 +455,7 @@ int processCommand(char* command) {
         printf("              memory, the stack, ect.\n");
 
         printf(" inspect    - Print the content of one of the VMs many\n");
-        printf("              data-containing strcutures like the stack.\n");
+        printf("              data-containing structures like the stack.\n");
 
         printf(" list       - List the content of program memory, displayed\n");
         printf("              as opcode | immediate.\n");
@@ -487,11 +487,11 @@ int processCommand(char* command) {
             changeTextColor("RED");
             printf("%s ", ERROR);
             if (inspectNumber == EOF) {
-                printf("Recived EOF from STDIN; Possible read error?\n");
+                printf("Received EOF from STDIN; Possible read error?\n");
                 printf("%s\n", strerror(errno));
             }
             else {
-                printf("Unknown error occured while reading inspect input.\n");
+                printf("Unknown error occurred while reading inspect input.\n");
             }
             changeTextColor("WHITE");
             exit(E_ERR_IO_SHELL);
