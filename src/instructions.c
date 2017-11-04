@@ -196,6 +196,35 @@ void execute(unsigned int opcode, int operand) {
             if (value == TRUE) pc = operand;
             break;
         }
+        case CALL: {
+            push(pc);
+            pc = operand;
+            break;
+        }
+        case RET: {
+            pc = pop();
+            break;
+        }
+        case DROP: {
+            sp = sp - operand;
+            break;
+        }
+        case PUSHR: {
+            push(returnValueRegister);
+            break;
+        }
+        case POPR: {
+            returnValueRegister = pop();
+            break;
+        }
+        case DUP: {
+            int value;
+
+            value = pop();
+            push(value);
+            push(value);
+            break;
+        }
         default: {
             printf("Error: Illegal opcode: %u\n", opcode);
             exit(E_ERR_OPCODE);
