@@ -38,4 +38,6 @@
 extern int halt;
 extern unsigned int pc;
 
+extern int returnValueRegister;
+
 #endif /* KSP_WS17_18_MAIN_H */

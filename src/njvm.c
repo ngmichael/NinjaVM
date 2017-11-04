@@ -13,6 +13,8 @@ int halt;
 unsigned int pc;
 unsigned int* programMemory;
 
+int returnValueRegister;
+
 /**
  * Main entry point - called at program launch
  *
@@ -133,6 +135,7 @@ int main(int argc, char* argv[]) {
     pc = 0;
     halt = FALSE;
     initStack(10000);
+    returnValueRegister = 0;
 
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {

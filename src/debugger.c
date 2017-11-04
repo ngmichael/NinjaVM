@@ -468,7 +468,7 @@ int processCommand(char* command) {
         printf(" step       - Executes the current instrcution and\n");
         printf("              advances the program counter by one.\n");
         printf("************************************************************\n\n");
-        printf("%s Consult the debugger documentation for further information.\n", DEBUGGER)
+        printf("%s Consult the debugger documentation for further information.\n", DEBUGGER);
         changeTextColor("WHITE");
         return FALSE;
     }
@@ -655,6 +655,7 @@ void debug(FILE* code) {
     quit = FALSE;
     run = FALSE;
     initStack(10000);
+    returnValueRegister = 0;
 
     printf("%s Initialization routine completed! Launching program...\n\n", DEBUGGER);
 
