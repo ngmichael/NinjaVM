@@ -468,6 +468,7 @@ int processCommand(char* command) {
         printf(" step       - Executes the current instrcution and\n");
         printf("              advances the program counter by one.\n");
         printf("************************************************************\n\n");
+        printf("%s Consult the debugger documentation for further information.\n", DEBUGGER)
         changeTextColor("WHITE");
         return FALSE;
     }

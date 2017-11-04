@@ -1,0 +1,75 @@
+Debugger Documentation for NinjaVM Version 3
+
+To activate the debugger, launch the VM with the command
+line parameter --debug:
+
+    $ ./njvm --debug programFile.bin
+
+The debugger will load the program file and initialize the VM.
+If an error occurs during this process, it will be displayed
+to you and the VM will terminate. Once the initialization
+process has finished, the debugger will prompt you with the
+first instruction of the program and wait for a command.
+The following commands are available and explained in detail
+further below:
+
+breakpoint, dump, edit, help, inspect, list, quit, run, step
+
+breakpoint:
+
+With this command you can set a breakpoint at a desired instruction.
+This can be used in combination with the run command, because it is
+the only way the programmer has to stop continuous program execution
+once the run command has been given. 
+
+++++++++++ dump ++++++++++
+
+This command allows you to perform a "memory dump" of the VM.
+It writes important information into a file of your choosing.
+This information is comprised of the following:
+
+- VM Version
+- Exact Timestamp
+- The most recently executed instruction
+- A stack dump
+- Current values from the static data area
+- Dump of program memory
+
++++++++++ edit ++++++++++
+
+Edit allows you to edit one of the following parts of the VM:
+
+- The stack
+- The static data area
+- The program memory
+
+++++++++++ inspect ++++++++++
+
+With this command, you can look at the several parts of the VM.
+You can inspect the current stack or look at the values in the static
+data area.
+
+++++++++++ list ++++++++++
+
+Lists the content of program memory. (The loaded program)
+
+++++++++++ quit ++++++++++
+
+Use this command to exit out of the debugger and the VM entirely.
+It will cause the VM to skip the current instruction and exit the
+execution loop afterwards. An exit message is displayed and the 
+VM is terminated.
+
+++++++++++ run ++++++++++
+
+Starts continuous execution of the loaded program. The current
+and all following instructions will be executed. Execution only
+stops if either a breakpoint is hit, the VM encounters an error or
+a executed HALT instruction terminates the VM.
+
+++++++++++ step ++++++++++
+
+Executes the currently displayed instruction and loads the next instruction
+from program memory.
+
+
