@@ -60,7 +60,8 @@ void memoryDump(char* path) {
     printStaticDataAreaTo(out);
     fprintf(out, "\n");
 
-    /* TODO: Dump ret*/
+    fprintf(out, "The content of the return value register: %d\n", returnValueRegister);
+    fprintf(out, "\n");
 
     fprintf(out, "Content of program memory:\n\n");
     for (i = 0; i < instructionCount; i++) {
@@ -369,7 +370,18 @@ int processCommand(char* command) {
             }
 
             case 3: {
-                printf("%s Sorry, but this feature is not implemented in this version!\n", DEBUG_EDIT);
+                int value;
+
+                printf("%s ", DEBUG_EDIT);
+                changeTextColor("CYAN");
+                printf("The current value of the return value register is: ");
+                printf("%d\n", returnValueRegister);
+                changeTextColor("WHITE");
+                printf("%s Now enter a new value for the return value register: ", DEBUG_EDIT);
+                changeTextColor("CYAN");
+                value = getNumber();
+                changeTextColor("WHITE");
+                returnValueRegister = value;
                 break;
             }
 
@@ -520,7 +532,11 @@ int processCommand(char* command) {
             }
 
             case 3: {
-                printf("%s Sorry, but this feature is not implemented in this version!\n", DEBUG_INSPECT);
+                printf("%s ", DEBUG_INSPECT);
+                changeTextColor("CYAN");
+                printf("The current value of the return value register is: ");
+                printf("%d\n", returnValueRegister);
+                changeTextColor("WHITE");
                 break;
             }
 
