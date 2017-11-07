@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
             printf("\nusage: ./njvm [options] codefile\n");
             printf("Options:\n");
             printf("\t--help\t\tDisplays this help.\n");
-            printf("\t--version\tDsiplays version number of the VM.\n");
+            printf("\t--version\tDisplays version number of the VM.\n");
             printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
             return 0;
         }
