@@ -1,32 +1,4 @@
 //
-// An assembler example for calculating values of the ackerman function
-//
-
-// Integer ack(Integer m, Integer n) {
-//     if (m == 0){
-//         return n+1;
-//     }
-//     else if((m > 0) && (n == 0)){
-//         return ack(m-1, 1);
-//     }
-//     else if((m > 0) && (n > 0)){
-//         return ack(m-1, ack(m, n-1));
-//     }
-// }
-// 
-// void main() {
-//     local Integer m;
-//     local Integer n;
-//     local Integer result;
-// 
-//     m = readInteger();
-//     n = readInteger();
-//     result = ack(m, m);
-//     writeInteger(result);
-//     writeCharacter('\n');
-// }
-
-//
 // version
 //
         .vers   4
@@ -125,16 +97,9 @@ _ack:
         jmp     __0
         jmp     __2
 __1:
-        pushl   -4
-        pushc   0
-        gt
-        dup
-        brf     __5
-        drop    1
         pushl   -3
         pushc   0
         eq
-__5:
         brf     __3
         pushl   -4
         pushc   1
@@ -148,17 +113,6 @@ __5:
         jmp     __4
 __3:
         pushl   -4
-        pushc   0
-        gt
-        dup
-        brf     __7
-        drop    1
-        pushl   -3
-        pushc   0
-        gt
-__7:
-        brf     __6
-        pushl   -4
         pushc   1
         sub
         pushl   -4
@@ -173,7 +127,6 @@ __7:
         pushr
         popr
         jmp     __0
-__6:
 __4:
 __2:
 __0:
@@ -203,7 +156,7 @@ _main:
         pushc   10
         call    _writeCharacter
         drop    1
-__8:
+__5:
         rsf
         ret
         
