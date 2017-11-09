@@ -37,7 +37,7 @@ void memoryDump(char* path) {
 
     printf("%s Performing memory dump...\n", DEBUG_DUMP);
     if (path == NULL) {
-        printf("%s [Debug/MemoryDump]: ERROR: PATH IS NULL!\n", DEBUG_DUMP);
+        printf("%s ERROR: PATH IS NULL!\n", DEBUG_DUMP);
         exit(E_ERR_IO_SHELL);
     }
     out = fopen(path, "w+");
