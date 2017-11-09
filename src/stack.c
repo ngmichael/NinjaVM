@@ -172,33 +172,29 @@ void releaseStackFrame(void) {
 }
 
 void printStackTo(FILE* stream) {
-    int localSp;
+    int i;
+    for (i = sp; i >= 0; i--) {
+        if (i == sp && i == fp) {
+            fprintf(stream, "sp, fp\t--->\t[%04d]:\txxxx\n", i);
+        }
+        else if (i == sp) {
+            fprintf(stream, "sp\t--->\t[%04d]:\txxxx\n", i);
+        }
+        else if (i == fp) {
+            int value;
     
-        localSp = sp+1;
+            value = stack[i];
+            fprintf(stream, "fp\t--->\t[%04d]: %d\n", i, value);
+        }
+        else {
+            int value;
     
-        do {
-            localSp--;
-            if (localSp == sp && localSp == fp) {
-                fprintf(stream, "sp, fp\t--->\t[%04d]:\txxxx\n", localSp);
-            }
-            else if (localSp == sp) {
-                fprintf(stream, "sp\t--->\t[%04d]:\txxxx\n", localSp);
-            }
-            else if (localSp == fp) {
-                int value;
-    
-                value = stack[localSp];
-                fprintf(stream, "fp\t--->\t[%04d]: %d\n", localSp, value);
-            }
-            else {
-                int value;
-    
-                value = stack[localSp];
-                fprintf(stream, "\t\t[%04d]: %d\n", localSp, value);
-            }
-        } while (localSp > 0);
+            value = stack[i];
+            fprintf(stream, "\t\t\t[%04d]: %d\n", i, value);
+        }
+    }
         
-        fprintf(stream, "----- Bottom of stack -----\n");
+    fprintf(stream, "----- Bottom of stack -----\n");
 }
 
 /**
