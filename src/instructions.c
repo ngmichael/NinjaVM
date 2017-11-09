@@ -57,7 +57,7 @@ void execute(unsigned int opcode, int operand) {
             val2 = pop();
             val1 = pop();
             
-            if (val1 == 0 || val2 == 0) {
+            if (val2 == 0) {
                 printf("Error: Division by zero\n");
                 exit(E_ERR_DIV_BY_ZERO);
             }
@@ -71,7 +71,7 @@ void execute(unsigned int opcode, int operand) {
             val2 = pop();
             val1 = pop();
             
-            if (val1 == 0 || val2 == 0) {
+            if (val2 == 0) {
                 printf("Error: Division by zero\n");
                 exit(E_ERR_DIV_BY_ZERO);
             }
