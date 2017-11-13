@@ -26,3 +26,4 @@ NinjaVM Exit code documentation
 23 (E_ERR_STF_ALLOC)    = Stackframe allocation causes stack overflow error
 24 (E_ERR_STF_FREE)     = Stackframe release error
 25 (E_ERR_SDA_INDEX)    = Static data area variable index out of bounds
+26 (E_ERR_KILL_DEBUG)   = Debugger has exited in a non-standard way
