@@ -12,6 +12,6 @@
 
 #define ERROR "[Debugger]: An error has occurred:\n[Debugger]:"
 
-void debug(FILE* code);
+void debug(void);
 
 #endif

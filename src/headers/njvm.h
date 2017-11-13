@@ -37,6 +37,8 @@
 
 extern int halt;
 extern unsigned int pc;
+extern unsigned int* programMemory;
+extern unsigned int instructionCount;
 
 extern int returnValueRegister;
 

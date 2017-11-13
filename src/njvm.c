@@ -12,6 +12,7 @@
 int halt;
 unsigned int pc;
 unsigned int* programMemory;
+unsigned int instructionCount;
 
 int returnValueRegister;
 
@@ -30,7 +31,6 @@ int main(int argc, char* argv[]) {
     unsigned int formatIdentifier;
     unsigned int njvmVersion;
     unsigned int globalVariableCount;
-    unsigned int instructionCount;
 
     unsigned int runDebugger;
 
@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
         }
         else if (strcmp("--debug", argv[args]) == 0) {
             runDebugger = TRUE;
+            printf("%s Launching NinjaVM in debug mode...\n", DEBUGGER);
         }
         /* 
          * If the argument does not start with a "--" it is
@@ -82,13 +83,6 @@ int main(int argc, char* argv[]) {
     if (code == NULL) {
         printf("Error: No code file specified!\n"); 
         return E_ERR_NO_PROGF;
-    }
-
-    if (runDebugger == TRUE) {
-        debug(code);
-        /* We should NEVER reach this part of the function.
-           If we do, there is a bug in the debugger.*/
-        exit(E_ERR_KILL_DEBUG);
     }
 
     /* Validate that the loaded file is a Ninja-Program */
@@ -136,6 +130,15 @@ int main(int argc, char* argv[]) {
     halt = FALSE;
     initStack(10000);
     returnValueRegister = 0;
+
+    if (runDebugger == TRUE) {
+        printf("%s Loaded program successfully: %d instructions | %d global variables\n",
+            DEBUGGER, instructionCount, globalVariableCount);
+        debug();
+        /* We should NEVER reach this part of the function.
+           If we do, there is a bug in the debugger.*/
+        exit(E_ERR_KILL_DEBUG);
+    }
 
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {
