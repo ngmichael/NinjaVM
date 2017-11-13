@@ -81,8 +81,12 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case RDINT: {
-            int read;
-            scanf("%d", &read);
+            int read, result;
+            result = scanf("%d", &read);
+            if (result == 0 || result == EOF) {
+                printf("Error: Something went wrong while taking user input!\n");
+                exit(E_ERR_IO_SHELL);
+            }
             push(read);
             break;
         }
@@ -94,7 +98,13 @@ void execute(unsigned int opcode, int operand) {
         }
         case RDCHR: {
             char read;
-            scanf("%c", &read);
+            int result;
+
+            result = scanf("%c", &read);
+            if (result == 0 || result == EOF) {
+                printf("Error: Something went wrong while taking user input!\n");
+                exit(E_ERR_IO_SHELL);
+            }
             push((int) read);
             break;
         }
