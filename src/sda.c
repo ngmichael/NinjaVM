@@ -20,7 +20,7 @@ int* sda;
  */
 void initSda(unsigned int size) {
     sdaSize = size;
-    sda = malloc(sizeof(int) * size);
+    sda = calloc(size, sizeof(int));
     if (sda == NULL && size > 0) {
         printf(
             "Error: Can't initialize sda with %lu Bytes of memory.\n",

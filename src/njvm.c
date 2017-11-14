@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
     
     /* Allocate memory to store the instructions of the Ninja-Program. */
     fread(&instructionCount, 1, sizeof(unsigned int), code);
-    programMemory = malloc(sizeof(unsigned int)*instructionCount);
+    programMemory = calloc(instructionCount, sizeof(unsigned int));
     if (programMemory == NULL) {
         printf(
             "Error: System could not allocate %lu of memory for program\n",

@@ -107,7 +107,7 @@ char* getInput(void) {
 
     cleanUp = 0;    
     newLine = NULL;
-    input = malloc(sizeof(unsigned char) * 12);
+    input = calloc(12, sizeof(unsigned char));
     if (input == NULL) {
         changeTextColor("RED");
         printf("%s ", ERROR);
@@ -247,7 +247,7 @@ int processCommand(char* command) {
         printf("Input will be truncated after 128 characters!\n");
         printf("%s ", DEBUG_DUMP);
 
-        path = (char*) malloc(sizeof(char) * 128);
+        path = (char*) calloc(128, sizeof(char));
         fgets(path, 128, stdin);
         for (i = 0; i < 128; i++) {
             if (path[i] == '\n') {

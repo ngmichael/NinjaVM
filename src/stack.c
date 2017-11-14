@@ -19,9 +19,7 @@ unsigned int fp;
  * @param size - the number slots for the stack
  */
 void initStack(unsigned int size) {
-    unsigned int i;
-
-    stack = (int*) malloc(sizeof(unsigned int) * size);
+    stack = (int*) calloc(size, sizeof(unsigned int));
     if (stack == NULL) {
         printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
         exit(E_ERR_SYS_MEM);
@@ -30,10 +28,6 @@ void initStack(unsigned int size) {
     sp = 0;
     fp = 0;
     stackSize = size;
-
-    for (i = 0; i < stackSize; i++) {
-        stack[i] = 0;
-    }
 }
 
 /**
@@ -190,7 +184,7 @@ void printStackTo(FILE* stream) {
             int value;
     
             value = stack[i];
-            fprintf(stream, "\t\t\t[%04d]: %d\n", i, value);
+            fprintf(stream, "\t\t[%04d]: %d\n", i, value);
         }
     }
         
