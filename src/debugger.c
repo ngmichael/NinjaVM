@@ -84,7 +84,7 @@ int getNumber(void) {
             printf("%s\n", strerror(errno));
         }
         else {
-            printf("Unknown error occurred while reading input.\n");
+            printf("Read unexpected string from STDIN!\n");
         }
         changeTextColor("WHITE");
         exit(E_ERR_IO_SHELL);
@@ -185,17 +185,13 @@ int processCommand(char* command) {
 
     if (strcmp("breakpoint", command) == 0){
         int newBreakpoint;
-        int cleanUp;
 
         printf("%s Enter the number of the instruction,\n", DEBUG_BREAKPOINT);
         printf("%s 0 to clear breakpint or -1 to abort!\n", DEBUG_BREAKPOINT);
         printf("%s Set breakpoint to: ", DEBUG_BREAKPOINT);
         changeTextColor("MAGENTA");
 
-        if (scanf("%d", &newBreakpoint) != 1) {
-            /* TODO implement error handling */
-        }
-        while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
+        newBreakpoint = getNumber();
 
         if (newBreakpoint < -1) {
             changeTextColor("WHITE");
@@ -223,7 +219,9 @@ int processCommand(char* command) {
                 DEBUG_BREAKPOINT
             );
             changeTextColor("MAGENTA");
-            printf("%d!\n", newBreakpoint);
+            printf("%d", newBreakpoint);
+            changeTextColor("WHITE");
+            printf("!\n");
             breakpoint = newBreakpoint;
         }
 
@@ -479,7 +477,6 @@ int processCommand(char* command) {
     }
     else if (strcmp("inspect", command) == 0) {
         unsigned int inspectNumber;
-        int cleanUp;
 
         printf("%s What would you like to inspect:\n", DEBUG_INSPECT);
         printf("%s 1: Stack\n", DEBUG_INSPECT);
@@ -488,20 +485,7 @@ int processCommand(char* command) {
         printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_INSPECT);
         printf("%s ", DEBUG_INSPECT);
 
-        if (scanf("%u", &inspectNumber) != 1) {
-            changeTextColor("RED");
-            printf("%s ", ERROR);
-            if (inspectNumber == EOF) {
-                printf("Received EOF from STDIN; Possible read error?\n");
-                printf("%s\n", strerror(errno));
-            }
-            else {
-                printf("Unknown error occurred while reading inspect input.\n");
-            }
-            changeTextColor("WHITE");
-            exit(E_ERR_IO_SHELL);
-        }
-        while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
+        inspectNumber = getNumber();
 
         switch(inspectNumber) {
             case 0: {
@@ -600,7 +584,7 @@ void debug(void) {
         unsigned int opcode;
         char* inputCommand;
 
-        if (pc == breakpoint) {
+        if (pc == breakpoint && breakpoint != 0) {
             run = FALSE;
             printf("%s ", DEBUG_BREAKPOINT);
             changeTextColor("MAGENTA");
