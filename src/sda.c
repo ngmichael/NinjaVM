@@ -88,7 +88,8 @@ void printStaticDataAreaTo(FILE* stream) {
         fprintf(stream, "[%04u]: %d\n", i, sda[i]);
     }
 
-    fprintf(stream, "----- End of static data area -----\n");
+    if (sdaSize > 0)
+        fprintf(stream, "----- End of static data area -----\n");
 }
 
 /**
