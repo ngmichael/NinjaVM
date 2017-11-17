@@ -3,7 +3,7 @@
 # Expects to be above the source folder.
 # Generates an archive with sources, documentation and a compile script
 
-rm -rf out/ngmh83
+rm -r out/ngmh83
 mkdir out/ngmh83
 cp src out/ngmh83/src -r
 cp docs/DebuggerDocumentation.txt out/ngmh83/debug.txt
@@ -18,3 +18,4 @@ chmod +x out/ngmh83/mknjvm
 cd out
 tar -cvf ngmh83.tar ngmh83
 gzip ngmh83.tar
+rm ngmh83 -r
