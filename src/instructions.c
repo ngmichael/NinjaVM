@@ -216,6 +216,10 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case DROP: {
+            if (((int)sp - operand) < 0) {
+                printf("Error: Stack underflow!\n");
+                exit(E_ERR_ST_UNDER);
+            }
             sp = sp - operand;
             break;
         }
