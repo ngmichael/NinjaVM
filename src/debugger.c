@@ -268,17 +268,20 @@ int processCommand(char* command) {
         printf("%s 2: Static data area\n", DEBUG_EDIT);
         printf("%s 3: Return value register\n", DEBUG_EDIT);
         printf("%s 4: Program memory\n", DEBUG_EDIT);
+        printf("%s 5: Program Counter\n", DEBUG_EDIT);
+        printf("%s 6: Stack Pointer\n", DEBUG_EDIT);
+        printf("%s 7: Stack-Frame Pointer\n", DEBUG_EDIT);
         printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_EDIT);
         printf("%s ", DEBUG_EDIT);
 
         editNumber = getNumber();
 
         switch(editNumber) {
-            case 0: {
+            case 0: { /* Abort */
                 break;
             }
 
-            case 1: {
+            case 1: { /* Stack */
                 int slot;
                 int value;
 
@@ -320,7 +323,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 2: {
+            case 2: { /* Static data area*/
                 int slot;
                 int value;
 
@@ -362,7 +365,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 3: {
+            case 3: { /* Return value register */
                 int value;
 
                 printf("%s ", DEBUG_EDIT);
@@ -378,7 +381,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 4: {
+            case 4: { /* Program Memory*/
                 int instructionNumber;
                 int instruction;
                 unsigned int opcode;
@@ -433,6 +436,63 @@ int processCommand(char* command) {
 
                 instruction = opcode << 24 | IMMEDIATE(immediate);
                 programMemory[instructionNumber] = instruction;
+                break;
+            }
+
+            case 5: { /* Program Counter */
+                int newPC;
+
+                printf("%s Enter a new value for the program counter:\n", DEBUG_EDIT);
+                printf("%s ", DEBUG_EDIT);
+                newPC = getNumber();
+                printf("\n%s ", DEBUG_EDIT);
+
+                if (newPC < 0 || newPC >= instructionCount) {
+                    changeTextColor("YELLOW");
+                    printf("Error: %d lies outside of program memory!\n", newPC);
+                    changeTextColor("WHITE");
+                } else {
+                    pc = (unsigned int) newPC + 1;
+                    printf("Changed program counter to %d.\n", newPC);
+                }
+                break;
+            }
+
+            case 6: { /* Stack Pointer*/
+                int newSP;
+
+                printf("%s Enter a new value for the stack pointer:\n", DEBUG_EDIT);
+                printf("%s ", DEBUG_EDIT);
+                newSP = getNumber();
+                printf("\n%s ", DEBUG_EDIT);
+
+                if (newSP < 0 || newSP >= stackSize) {
+                    changeTextColor("YELLOW");
+                    printf("Error: %d lies outside of stack boundaries!\n", newSP);
+                    changeTextColor("WHITE");
+                } else {
+                    sp = (unsigned int) newSP;
+                    printf("Changed stack pointer to %d.\n", newSP);
+                }
+                break;
+            }
+
+            case 7: { /* Frame Pointer*/
+                int newFP;
+
+                printf("%s Enter a new value for the current frame pointer:\n", DEBUG_EDIT);
+                printf("%s ", DEBUG_EDIT);
+                newFP = getNumber();
+                printf("\n%s ", DEBUG_EDIT);
+
+                if (newFP < 0 || newFP > sp) {
+                    changeTextColor("YELLOW");
+                    printf("Error: Frame pointer can't be above stack pointer!\n", newFP);
+                    changeTextColor("WHITE");
+                } else {
+                    fp = (unsigned int) newFP;
+                    printf("Changed frame pointer to %d.\n", newFP);
+                }
                 break;
             }
             
