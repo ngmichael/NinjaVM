@@ -13,6 +13,7 @@
 unsigned int run;
 unsigned int breakpoint;
 unsigned int quit;
+unsigned int verbose;
 
 /**
  * Dumps program memory, stack content and static data area
@@ -578,6 +579,7 @@ int processCommand(char* command) {
         printf(" skip\t\t- Skips the current instruction.\n");
         printf(" step\t\t- Executes the current instrcution and\n");
         printf(" \t\t  advances the program counter by one.\n");
+        printf(" verbose\t- Toggles output mode for run command.\n");
         printf("************************************************************\n\n");
         printf("%s Consult the debugger documentation for further information.\n", DEBUGGER);
         changeTextColor("WHITE");
@@ -674,8 +676,9 @@ int processCommand(char* command) {
     else if (strcmp("step", command) == 0) {
         return TRUE;
     }
-    else if (strcmp("", command) == 0) {
-        return TRUE;
+    else if (strcmp("verbose", command) == 0) {
+        verbose = verbose == TRUE ? FALSE : TRUE;
+        return FALSE;
     }
     else {
         printf("%s ", DEBUGGER);
@@ -695,6 +698,7 @@ int processCommand(char* command) {
  */
 void debug(void) {
     
+    verbose = FALSE;
     breakpoint = -1;
     pc = 0;
     quit = FALSE;
@@ -745,8 +749,19 @@ void debug(void) {
         else doExecute = TRUE;
         
 
-        if (doExecute) execute(opcode, operand);
-        else pc = pc - 1;
+        if (doExecute) {
+            if (run == TRUE && verbose == TRUE) {
+                printf("[%08d]: ", pc-1);
+
+                changeTextColor("GREEN");
+                printf("%6s ", opcodes[opcode]);
+                changeTextColor("WHITE");
+                printf("%d\n", operand);
+            }
+            execute(opcode, operand);
+        }
+        else
+            pc = pc - 1;
 
         /* Check if the halt instruction has been executed or not */
         if (halt == TRUE) quit = TRUE;
