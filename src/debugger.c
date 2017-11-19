@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <strings.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "headers/instructions.h"
@@ -561,28 +562,29 @@ int processCommand(char* command) {
         changeTextColor("YELLOW");
         printf("********************* NinjaVM Debugger *********************\n\n");
         printf("Available commands:\n");
-        printf(" help       - Prints this info.\n");
-        printf(" breakpoint - Set a breakpoint in your assembler code at a\n");
-        printf("              specified instruction.\n");
+        printf(" help\t\t- Prints this info.\n");
+        printf(" breakpoint\t- Set a breakpoint in your assembler code at a\n");
+        printf(" \t\t  specified instruction.\n");
 
-        printf(" dump       - Dumps memory to the specified file.\n");
-        printf(" edit       - Starts a small editor for editing program\n");
-        printf("              memory, the stack, ect.\n");
+        printf(" dump\t\t- Dumps memory to the specified file.\n");
+        printf(" edit\t\t- Starts a small editor for editing program\n");
+        printf(" \t\t  memory, the stack, ect.\n");
 
-        printf(" exectue    - Executes an instruction\n");
-        printf(" inspect    - Print the content of one of the VMs many\n");
-        printf("              data-containing structures like the stack.\n");
+        printf(" exectue\t- Executes an instruction\n");
+        printf(" inspect\t- Print the content of one of the VMs many\n");
+        printf(" \t\t  data-containing structures like the stack.\n");
 
-        printf(" list       - List the content of program memory, displayed\n");
-        printf("              as opcode | immediate.\n");
+        printf(" list\t\t- List the content of program memory, displayed\n");
+        printf(" \t\t  as opcode | immediate.\n");
 
-        printf(" quit       - Stops the VM at the next instruction cycle.\n");
-        printf(" run        - Starts continuous execution of instrcutions\n");
-        printf("              until a HALT is executed or the breakpoint\n");
-        printf("              is reached.\n");
+        printf(" quit\t\t- Stops the VM at the next instruction cycle.\n");
+        printf(" run\t\t- Starts continuous execution of instrcutions\n");
+        printf(" \t\t  until a HALT is executed or the breakpoint\n");
+        printf(" \t\t  is reached.\n");
 
-        printf(" step       - Executes the current instrcution and\n");
-        printf("              advances the program counter by one.\n");
+        printf(" skip\t\t- Skips the current instruction.\n");
+        printf(" step\t\t- Executes the current instrcution and\n");
+        printf(" \t\t  advances the program counter by one.\n");
         printf("************************************************************\n\n");
         printf("%s Consult the debugger documentation for further information.\n", DEBUGGER);
         changeTextColor("WHITE");
@@ -668,6 +670,10 @@ int processCommand(char* command) {
     }
     else if (strcmp("run", command) == 0) {
         run = TRUE;
+        return FALSE;
+    }
+    else if (strcmp("skip", command) == 0) {
+        pc = pc + 1;
         return FALSE;
     }
     else if (strcmp("step", command) == 0) {
