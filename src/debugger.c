@@ -151,7 +151,7 @@ char* getInput(void) {
 void listProgramMemory(void) {
     int programCounter;
     
-    printf("%s Listing program memory:\n\n", DEBUG_LIST);
+    printf("%s Listing program memory:\n\n", DEBUG_INSPECT);
     
     programCounter = 0;
     while(programCounter < instructionCount) {
@@ -172,31 +172,27 @@ void listProgramMemory(void) {
         printf("%d\n", operand);
     }
     
-    printf("%s End of program memory!\n\n", DEBUG_LIST);
+    printf("%s End of program memory!\n\n", DEBUG_INSPECT);
 }
 
 
 /**
  * Interprets and executes commands for the debugger.
  * 
- * @param command - a char pointer pointing to a string representing a command
+ * @param command - the command as a string
  * @return 0 if the command advances the program counter, 1 if it doesn't
  */
 int processCommand(char* command) {
 
     if (strcmp("breakpoint", command) == 0){
         int newBreakpoint;
-        int cleanUp;
 
         printf("%s Enter the number of the instruction,\n", DEBUG_BREAKPOINT);
         printf("%s 0 to clear breakpint or -1 to abort!\n", DEBUG_BREAKPOINT);
         printf("%s Set breakpoint to: ", DEBUG_BREAKPOINT);
         changeTextColor("MAGENTA");
 
-        if (scanf("%d", &newBreakpoint) != 1) {
-            /* TODO implement error handling */
-        }
-        while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
+        newBreakpoint = getNumber();
 
         if (newBreakpoint < -1) {
             changeTextColor("WHITE");
@@ -574,9 +570,6 @@ int processCommand(char* command) {
         printf(" inspect\t- Print the content of one of the VMs many\n");
         printf(" \t\t  data-containing structures like the stack.\n");
 
-        printf(" list\t\t- List the content of program memory, displayed\n");
-        printf(" \t\t  as opcode | immediate.\n");
-
         printf(" quit\t\t- Stops the VM at the next instruction cycle.\n");
         printf(" run\t\t- Starts continuous execution of instrcutions\n");
         printf(" \t\t  until a HALT is executed or the breakpoint\n");
@@ -598,6 +591,7 @@ int processCommand(char* command) {
         printf("%s 1: Stack\n", DEBUG_INSPECT);
         printf("%s 2: Static data area\n", DEBUG_INSPECT);
         printf("%s 3: Return value register\n", DEBUG_INSPECT);
+        printf("%s 4: Program Memory\n", DEBUG_INSPECT);
         printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_INSPECT);
         printf("%s ", DEBUG_INSPECT);
 
@@ -645,6 +639,11 @@ int processCommand(char* command) {
                 changeTextColor("WHITE");
                 break;
             }
+            
+            case 4: {
+                listProgramMemory();
+                break;
+            }
 
             default: {
                 printf("%s ", DEBUG_INSPECT);
@@ -654,10 +653,6 @@ int processCommand(char* command) {
         }
 
         changeTextColor("WHITE");
-        return FALSE;
-    }
-    else if(strcmp("list", command) == 0) {
-        listProgramMemory();
         return FALSE;
     }
     else if(strcmp("quit", command) == 0) {

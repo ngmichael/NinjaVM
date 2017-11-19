@@ -5,7 +5,6 @@
 #define DEBUGGER "[Debugger]:"
 
 #define DEBUG_BREAKPOINT "[Debugger/Breakpoint]:"
-#define DEBUG_LIST "[Debugger/List]:"
 #define DEBUG_INSPECT "[Debugger/Inspect]:"
 #define DEBUG_EDIT "[Debugger/Editor]:"
 #define DEBUG_DUMP "[Debugger/MemoryDump]:"
