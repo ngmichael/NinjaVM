@@ -487,7 +487,7 @@ int processCommand(char* command) {
 
                 if (newFP < 0 || newFP > sp) {
                     changeTextColor("YELLOW");
-                    printf("Error: Frame pointer can't be above stack pointer!\n", newFP);
+                    printf("Error: Frame pointer can't be above stack pointer!\n");
                     changeTextColor("WHITE");
                 } else {
                     fp = (unsigned int) newFP;
@@ -506,6 +506,56 @@ int processCommand(char* command) {
         changeTextColor("WHITE");
         return FALSE;
     }
+    else if (strcmp("execute", command) == 0) {
+        char* asmInstr;
+
+        unsigned int opcode;
+        int operand;
+                
+        printf("%s Enter the the instruction you would\n", DEBUG_EXEC);
+        printf("%s like to execute or 'ABORT' to abort.\n", DEBUG_EXEC);
+
+        printf("%s ", DEBUG_EXEC);
+        changeTextColor("GREEN");
+        asmInstr = getInput();
+        changeTextColor("WHITE");
+
+        if (strcasecmp(asmInstr, "ABORT") == 0) {
+            printf("%s Aborting...\n", DEBUG_EXEC);
+                return FALSE;
+        }
+
+        opcode = 0;
+        while(opcode < 32) {
+            if (strcasecmp(asmInstr, opcodes[opcode]) == 0) {
+                break;
+            }
+            opcode = opcode + 1;
+        }
+
+        printf("%s ", asmInstr);
+        printf("%u\n", opcode);
+
+        if (opcode == 32) {
+            printf("%s ", DEBUG_EXEC);
+            changeTextColor("YELLOW");
+            printf("*WARNING* ");
+            changeTextColor("WHITE");
+            printf("%s is an invalid opcode! Aborting...\n", asmInstr);
+            return FALSE;
+        }
+
+        printf("%s Now enter the immediate value for this instruction:\n", DEBUG_EXEC);
+        printf("%s (In decimal, as a 24 bit signed integer)\n", DEBUG_EXEC);
+        printf("%s ", DEBUG_EXEC);
+        operand = getNumber();
+        
+        printf("%s Executing instruction...\n", DEBUG_EXEC);
+        execute(opcode, operand);
+        printf("%s Done!\n", DEBUG_EXEC);
+        free(asmInstr);
+        return FALSE;
+    }
     else if (strcmp("help", command) == 0) {
         printf("\n");
         changeTextColor("YELLOW");
@@ -519,6 +569,7 @@ int processCommand(char* command) {
         printf(" edit       - Starts a small editor for editing program\n");
         printf("              memory, the stack, ect.\n");
 
+        printf(" exectue    - Executes an instruction\n");
         printf(" inspect    - Print the content of one of the VMs many\n");
         printf("              data-containing structures like the stack.\n");
 
