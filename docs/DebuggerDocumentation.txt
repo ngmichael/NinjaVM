@@ -13,7 +13,7 @@ first instruction of the program and wait for a command.
 The following commands are available and explained in detail
 further below:
 
-breakpoint, dump, edit, help, inspect, list, quit, run, step
+breakpoint, dump, edit, execute, help, list, quit, run, step, verbose
 
 ++++++++++ breakpoint ++++++++++
 
@@ -44,16 +44,26 @@ Edit allows you to edit one of the following parts of the VM:
 - The static data area
 - The return value register
 - The program memory
+- The program counter
+- The stack pointer
+- The frame pointer
+
+++++++++++ execute ++++++++++
+
+This command allows you to execute one arbitrary instruction that you
+enter during runtime of the program. The execution of the instruction
+can take effect on everything except for program memory 
+and the program counter.
 
 ++++++++++ inspect ++++++++++
 
 With this command, you can look at the several parts of the VM.
-You can inspect the current stack or look at the values in the static
-data area.
+You can inspect the following things: 
 
-++++++++++ list ++++++++++
-
-Lists the content of program memory. (The loaded program)
+- The stack
+- The static data area
+- The return value register
+- The program memory
 
 ++++++++++ quit ++++++++++
 
@@ -74,4 +84,8 @@ a executed HALT instruction terminates the VM.
 Executes the currently displayed instruction and loads the next instruction
 from program memory.
 
+++++++++++ verbose ++++++++++
 
+Toggles the output of the debugger once the run command has been issued.
+If verbose is off, run will only output things from the vm.
+If verbose is on, every instruction will be printed before execution as well.
