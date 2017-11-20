@@ -1,3 +1,8 @@
+V 4.0
+
+- Added support for procedure calls
+- Added more debugging features
+
 V 3.0
 
  - Added a live built-in debugger
