@@ -2,6 +2,7 @@
 #define KSP_WS17_18_STACK_H
 
 extern unsigned int sp;
+extern unsigned int fp;
 extern unsigned int stackSize;
 
 void initStack(unsigned int size);

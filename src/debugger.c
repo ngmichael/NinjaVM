@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <strings.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "headers/instructions.h"
@@ -12,6 +13,7 @@
 unsigned int run;
 unsigned int breakpoint;
 unsigned int quit;
+unsigned int verbose;
 
 /**
  * Dumps program memory, stack content and static data area
@@ -150,7 +152,7 @@ char* getInput(void) {
 void listProgramMemory(void) {
     int programCounter;
     
-    printf("%s Listing program memory:\n\n", DEBUG_LIST);
+    printf("%s Listing program memory:\n\n", DEBUG_INSPECT);
     
     programCounter = 0;
     while(programCounter < instructionCount) {
@@ -171,14 +173,14 @@ void listProgramMemory(void) {
         printf("%d\n", operand);
     }
     
-    printf("%s End of program memory!\n\n", DEBUG_LIST);
+    printf("%s End of program memory!\n\n", DEBUG_INSPECT);
 }
 
 
 /**
  * Interprets and executes commands for the debugger.
  * 
- * @param command - a char pointer pointing to a string representing a command
+ * @param command - the command as a string
  * @return 0 if the command advances the program counter, 1 if it doesn't
  */
 int processCommand(char* command) {
@@ -266,17 +268,20 @@ int processCommand(char* command) {
         printf("%s 2: Static data area\n", DEBUG_EDIT);
         printf("%s 3: Return value register\n", DEBUG_EDIT);
         printf("%s 4: Program memory\n", DEBUG_EDIT);
+        printf("%s 5: Program Counter\n", DEBUG_EDIT);
+        printf("%s 6: Stack Pointer\n", DEBUG_EDIT);
+        printf("%s 7: Stack-Frame Pointer\n", DEBUG_EDIT);
         printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_EDIT);
         printf("%s ", DEBUG_EDIT);
 
         editNumber = getNumber();
 
         switch(editNumber) {
-            case 0: {
+            case 0: { /* Abort */
                 break;
             }
 
-            case 1: {
+            case 1: { /* Stack */
                 int slot;
                 int value;
 
@@ -318,7 +323,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 2: {
+            case 2: { /* Static data area*/
                 int slot;
                 int value;
 
@@ -360,7 +365,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 3: {
+            case 3: { /* Return value register */
                 int value;
 
                 printf("%s ", DEBUG_EDIT);
@@ -376,7 +381,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 4: {
+            case 4: { /* Program Memory*/
                 int instructionNumber;
                 int instruction;
                 unsigned int opcode;
@@ -433,6 +438,63 @@ int processCommand(char* command) {
                 programMemory[instructionNumber] = instruction;
                 break;
             }
+
+            case 5: { /* Program Counter */
+                int newPC;
+
+                printf("%s Enter a new value for the program counter:\n", DEBUG_EDIT);
+                printf("%s ", DEBUG_EDIT);
+                newPC = getNumber();
+                printf("\n%s ", DEBUG_EDIT);
+
+                if (newPC < 0 || newPC >= instructionCount) {
+                    changeTextColor("YELLOW");
+                    printf("Error: %d lies outside of program memory!\n", newPC);
+                    changeTextColor("WHITE");
+                } else {
+                    pc = (unsigned int) newPC + 1;
+                    printf("Changed program counter to %d.\n", newPC);
+                }
+                break;
+            }
+
+            case 6: { /* Stack Pointer*/
+                int newSP;
+
+                printf("%s Enter a new value for the stack pointer:\n", DEBUG_EDIT);
+                printf("%s ", DEBUG_EDIT);
+                newSP = getNumber();
+                printf("\n%s ", DEBUG_EDIT);
+
+                if (newSP < 0 || newSP >= stackSize) {
+                    changeTextColor("YELLOW");
+                    printf("Error: %d lies outside of stack boundaries!\n", newSP);
+                    changeTextColor("WHITE");
+                } else {
+                    sp = (unsigned int) newSP;
+                    printf("Changed stack pointer to %d.\n", newSP);
+                }
+                break;
+            }
+
+            case 7: { /* Frame Pointer*/
+                int newFP;
+
+                printf("%s Enter a new value for the current frame pointer:\n", DEBUG_EDIT);
+                printf("%s ", DEBUG_EDIT);
+                newFP = getNumber();
+                printf("\n%s ", DEBUG_EDIT);
+
+                if (newFP < 0 || newFP > sp) {
+                    changeTextColor("YELLOW");
+                    printf("Error: Frame pointer can't be above stack pointer!\n");
+                    changeTextColor("WHITE");
+                } else {
+                    fp = (unsigned int) newFP;
+                    printf("Changed frame pointer to %d.\n", newFP);
+                }
+                break;
+            }
             
             default: {
                 printf("%s ", DEBUG_EDIT);
@@ -444,32 +506,82 @@ int processCommand(char* command) {
         changeTextColor("WHITE");
         return FALSE;
     }
+    else if (strcmp("execute", command) == 0) {
+        char* asmInstr;
+
+        unsigned int opcode;
+        int operand;
+                
+        printf("%s Enter the the instruction you would\n", DEBUG_EXEC);
+        printf("%s like to execute or 'ABORT' to abort.\n", DEBUG_EXEC);
+
+        printf("%s ", DEBUG_EXEC);
+        changeTextColor("GREEN");
+        asmInstr = getInput();
+        changeTextColor("WHITE");
+
+        if (strcasecmp(asmInstr, "ABORT") == 0) {
+            printf("%s Aborting...\n", DEBUG_EXEC);
+                return FALSE;
+        }
+
+        opcode = 0;
+        while(opcode < 32) {
+            if (strcasecmp(asmInstr, opcodes[opcode]) == 0) {
+                break;
+            }
+            opcode = opcode + 1;
+        }
+
+        printf("%s ", asmInstr);
+        printf("%u\n", opcode);
+
+        if (opcode == 32) {
+            printf("%s ", DEBUG_EXEC);
+            changeTextColor("YELLOW");
+            printf("*WARNING* ");
+            changeTextColor("WHITE");
+            printf("%s is an invalid opcode! Aborting...\n", asmInstr);
+            return FALSE;
+        }
+
+        printf("%s Now enter the immediate value for this instruction:\n", DEBUG_EXEC);
+        printf("%s (In decimal, as a 24 bit signed integer)\n", DEBUG_EXEC);
+        printf("%s ", DEBUG_EXEC);
+        operand = getNumber();
+        
+        printf("%s Executing instruction...\n", DEBUG_EXEC);
+        execute(opcode, operand);
+        printf("%s Done!\n", DEBUG_EXEC);
+        free(asmInstr);
+        return FALSE;
+    }
     else if (strcmp("help", command) == 0) {
         printf("\n");
         changeTextColor("YELLOW");
         printf("********************* NinjaVM Debugger *********************\n\n");
         printf("Available commands:\n");
-        printf(" help       - Prints this info.\n");
-        printf(" breakpoint - Set a breakpoint in your assembler code at a\n");
-        printf("              specified instruction.\n");
+        printf(" help\t\t- Prints this info.\n");
+        printf(" breakpoint\t- Set a breakpoint in your assembler code at a\n");
+        printf(" \t\t  specified instruction.\n");
 
-        printf(" dump       - Dumps memory to the specified file.\n");
-        printf(" edit       - Starts a small editor for editing program\n");
-        printf("              memory, the stack, ect.\n");
+        printf(" dump\t\t- Dumps memory to the specified file.\n");
+        printf(" edit\t\t- Starts a small editor for editing program\n");
+        printf(" \t\t  memory, the stack, ect.\n");
 
-        printf(" inspect    - Print the content of one of the VMs many\n");
-        printf("              data-containing structures like the stack.\n");
+        printf(" exectue\t- Executes an instruction\n");
+        printf(" inspect\t- Print the content of one of the VMs many\n");
+        printf(" \t\t  data-containing structures like the stack.\n");
 
-        printf(" list       - List the content of program memory, displayed\n");
-        printf("              as opcode | immediate.\n");
+        printf(" quit\t\t- Stops the VM at the next instruction cycle.\n");
+        printf(" run\t\t- Starts continuous execution of instrcutions\n");
+        printf(" \t\t  until a HALT is executed or the breakpoint\n");
+        printf(" \t\t  is reached.\n");
 
-        printf(" quit       - Stops the VM at the next instruction cycle.\n");
-        printf(" run        - Starts continuous execution of instrcutions\n");
-        printf("              until a HALT is executed or the breakpoint\n");
-        printf("              is reached.\n");
-
-        printf(" step       - Executes the current instrcution and\n");
-        printf("              advances the program counter by one.\n");
+        printf(" skip\t\t- Skips the current instruction.\n");
+        printf(" step\t\t- Executes the current instrcution and\n");
+        printf(" \t\t  advances the program counter by one.\n");
+        printf(" verbose\t- Toggles output mode for run command.\n");
         printf("************************************************************\n\n");
         printf("%s Consult the debugger documentation for further information.\n", DEBUGGER);
         changeTextColor("WHITE");
@@ -482,6 +594,7 @@ int processCommand(char* command) {
         printf("%s 1: Stack\n", DEBUG_INSPECT);
         printf("%s 2: Static data area\n", DEBUG_INSPECT);
         printf("%s 3: Return value register\n", DEBUG_INSPECT);
+        printf("%s 4: Program Memory\n", DEBUG_INSPECT);
         printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_INSPECT);
         printf("%s ", DEBUG_INSPECT);
 
@@ -516,6 +629,11 @@ int processCommand(char* command) {
                 changeTextColor("WHITE");
                 break;
             }
+            
+            case 4: {
+                listProgramMemory();
+                break;
+            }
 
             default: {
                 printf("%s ", DEBUG_INSPECT);
@@ -525,10 +643,6 @@ int processCommand(char* command) {
         }
 
         changeTextColor("WHITE");
-        return FALSE;
-    }
-    else if(strcmp("list", command) == 0) {
-        listProgramMemory();
         return FALSE;
     }
     else if(strcmp("quit", command) == 0) {
@@ -543,11 +657,16 @@ int processCommand(char* command) {
         run = TRUE;
         return FALSE;
     }
+    else if (strcmp("skip", command) == 0) {
+        pc = pc + 1;
+        return FALSE;
+    }
     else if (strcmp("step", command) == 0) {
         return TRUE;
     }
-    else if (strcmp("", command) == 0) {
-        return TRUE;
+    else if (strcmp("verbose", command) == 0) {
+        verbose = verbose == TRUE ? FALSE : TRUE;
+        return FALSE;
     }
     else {
         printf("%s ", DEBUGGER);
@@ -567,6 +686,7 @@ int processCommand(char* command) {
  */
 void debug(void) {
     
+    verbose = FALSE;
     breakpoint = -1;
     pc = 0;
     quit = FALSE;
@@ -617,8 +737,19 @@ void debug(void) {
         else doExecute = TRUE;
         
 
-        if (doExecute) execute(opcode, operand);
-        else pc = pc - 1;
+        if (doExecute) {
+            if (run == TRUE && verbose == TRUE) {
+                printf("[%08d]: ", pc-1);
+
+                changeTextColor("GREEN");
+                printf("%6s ", opcodes[opcode]);
+                changeTextColor("WHITE");
+                printf("%d\n", operand);
+            }
+            execute(opcode, operand);
+        }
+        else
+            pc = pc - 1;
 
         /* Check if the halt instruction has been executed or not */
         if (halt == TRUE) quit = TRUE;
