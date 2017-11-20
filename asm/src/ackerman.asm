@@ -47,4 +47,5 @@ __main:
         wrint
         pushc 10
         wrchr
+        rsf
         halt
