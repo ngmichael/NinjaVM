@@ -666,6 +666,10 @@ int processCommand(char* command) {
     }
     else if (strcmp("verbose", command) == 0) {
         verbose = verbose == TRUE ? FALSE : TRUE;
+        printf("%s ", DEBUGGER);
+        changeTextColor("GREEN");
+        printf("Toggled verbose run output: %s\n", verbose == TRUE ? "TRUE" : "FALSE");
+        changeTextColor("WHITE");
         return FALSE;
     }
     else {
