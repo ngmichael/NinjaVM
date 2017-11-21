@@ -13,7 +13,7 @@ first instruction of the program and wait for a command.
 The following commands are available and explained in detail
 further below:
 
-breakpoint, dump, edit, execute, help, list, quit, run, step, verbose
+breakpoint, dump, edit, execute, help, quit, run, step, verbose
 
 ++++++++++ breakpoint ++++++++++
 
@@ -78,6 +78,10 @@ Starts continuous execution of the loaded program. The current
 and all following instructions will be executed. Execution only
 stops if either a breakpoint is hit, the VM encounters an error or
 a executed HALT instruction terminates the VM.
+
+++++++++++ skip ++++++++++
+
+Skips the current instruction and advances the program counter by one.
 
 ++++++++++ step ++++++++++
 
