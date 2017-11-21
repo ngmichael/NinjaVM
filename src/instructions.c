@@ -8,11 +8,12 @@
 char* opcodes[] = {
     "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",
     "RDCHR", "WRCHR", "PUSHG", "POPG", "ASF", "RSF", "PUSHL", "POPL", "EQ",
-    "NE", "LT", "LE", "GT", "GE", "JMP", "BRF", "BRT",
+    "NE", "LT", "LE", "GT", "GE", "JMP", "BRF", "BRT", "CALL", "RET", "DROP",
+    "PUSHR", "POPR", "DUP",
 };
 
 /**
- * Executes an insturction with its operand.
+ * Executes an instruction with its operand.
  * 
  * @param opcode - the instruction to be executed
  * @param operand - the instructions immediate value 
@@ -56,7 +57,7 @@ void execute(unsigned int opcode, int operand) {
             val2 = pop();
             val1 = pop();
             
-            if (val1 == 0 || val2 == 0) {
+            if (val2 == 0) {
                 printf("Error: Division by zero\n");
                 exit(E_ERR_DIV_BY_ZERO);
             }
@@ -70,7 +71,7 @@ void execute(unsigned int opcode, int operand) {
             val2 = pop();
             val1 = pop();
             
-            if (val1 == 0 || val2 == 0) {
+            if (val2 == 0) {
                 printf("Error: Division by zero\n");
                 exit(E_ERR_DIV_BY_ZERO);
             }
@@ -80,8 +81,12 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case RDINT: {
-            int read;
-            scanf("%d", &read);
+            int read, result;
+            result = scanf("%d", &read);
+            if (result == 0 || result == EOF) {
+                printf("Error: Something went wrong while taking user input!\n");
+                exit(E_ERR_IO_SHELL);
+            }
             push(read);
             break;
         }
@@ -93,7 +98,13 @@ void execute(unsigned int opcode, int operand) {
         }
         case RDCHR: {
             char read;
-            scanf("%c", &read);
+            int result;
+
+            result = scanf("%c", &read);
+            if (result == 0 || result == EOF) {
+                printf("Error: Something went wrong while taking user input!\n");
+                exit(E_ERR_IO_SHELL);
+            }
             push((int) read);
             break;
         }
@@ -193,6 +204,39 @@ void execute(unsigned int opcode, int operand) {
         case BRT: {
             int value = pop();
             if (value == TRUE) pc = operand;
+            break;
+        }
+        case CALL: {
+            push(pc);
+            pc = operand;
+            break;
+        }
+        case RET: {
+            pc = pop();
+            break;
+        }
+        case DROP: {
+            if (((int)sp - operand) < 0) {
+                printf("Error: Stack underflow!\n");
+                exit(E_ERR_ST_UNDER);
+            }
+            sp = sp - operand;
+            break;
+        }
+        case PUSHR: {
+            push(returnValueRegister);
+            break;
+        }
+        case POPR: {
+            returnValueRegister = pop();
+            break;
+        }
+        case DUP: {
+            int value;
+
+            value = pop();
+            push(value);
+            push(value);
             break;
         }
         default: {

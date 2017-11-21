@@ -12,6 +12,9 @@
 int halt;
 unsigned int pc;
 unsigned int* programMemory;
+unsigned int instructionCount;
+
+int returnValueRegister;
 
 /**
  * Main entry point - called at program launch
@@ -28,7 +31,6 @@ int main(int argc, char* argv[]) {
     unsigned int formatIdentifier;
     unsigned int njvmVersion;
     unsigned int globalVariableCount;
-    unsigned int instructionCount;
 
     unsigned int runDebugger;
 
@@ -45,7 +47,7 @@ int main(int argc, char* argv[]) {
             printf("\nusage: ./njvm [options] codefile\n");
             printf("Options:\n");
             printf("\t--help\t\tDisplays this help.\n");
-            printf("\t--version\tDsiplays version number of the VM.\n");
+            printf("\t--version\tDisplays version number of the VM.\n");
             printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
             return 0;
         }
@@ -55,6 +57,7 @@ int main(int argc, char* argv[]) {
         }
         else if (strcmp("--debug", argv[args]) == 0) {
             runDebugger = TRUE;
+            printf("%s Launching NinjaVM in debug mode...\n", DEBUGGER);
         }
         /* 
          * If the argument does not start with a "--" it is
@@ -82,13 +85,6 @@ int main(int argc, char* argv[]) {
         return E_ERR_NO_PROGF;
     }
 
-    if (runDebugger == TRUE) {
-        debug(code);
-        /* We should NEVER reach this part of the function.
-           If we do, there is a bug in the debugger.*/
-        exit(E_ERR_KILL_DEBUG);
-    }
-
     /* Validate that the loaded file is a Ninja-Program */
     fread(&formatIdentifier, 1, sizeof(unsigned int), code);
     if (formatIdentifier != 0x46424a4e){
@@ -106,7 +102,7 @@ int main(int argc, char* argv[]) {
     
     /* Allocate memory to store the instructions of the Ninja-Program. */
     fread(&instructionCount, 1, sizeof(unsigned int), code);
-    programMemory = malloc(sizeof(unsigned int)*instructionCount);
+    programMemory = calloc(instructionCount, sizeof(unsigned int));
     if (programMemory == NULL) {
         printf(
             "Error: System could not allocate %lu of memory for program\n",
@@ -133,6 +129,16 @@ int main(int argc, char* argv[]) {
     pc = 0;
     halt = FALSE;
     initStack(10000);
+    returnValueRegister = 0;
+
+    if (runDebugger == TRUE) {
+        printf("%s Loaded program successfully: %d instructions | %d global variables\n",
+            DEBUGGER, instructionCount, globalVariableCount);
+        debug();
+        /* We should NEVER reach this part of the function.
+           If we do, there is a bug in the debugger.*/
+        exit(E_ERR_KILL_DEBUG);
+    }
 
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {

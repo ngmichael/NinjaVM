@@ -1,7 +1,7 @@
 #ifndef KSP_WS17_18_MAIN_H
 #define KSP_WS17_18_MAIN_H
 
-#define VERSION 3
+#define VERSION 4
 
 #define FALSE 0
 #define TRUE 1
@@ -31,11 +31,15 @@
 #define E_ERR_ST_UNDER      21 /* Stack underflow error */
 #define E_ERR_STF_INDEX     22 /* Stackframe access out of bounds error */
 #define E_ERR_STF_ALLOC     23 /* Stackframe allocation causes stack overflow error */
-#define E_ERR_STF_FREE      24 /* Stackrame release error */
+#define E_ERR_STF_FREE      24 /* Stackframe release error */
 #define E_ERR_SDA_INDEX     25 /* Static data area variable index out of bounds */
 #define E_ERR_KILL_DEBUG    26 /* Debugger has exited in a non-standard way */
 
 extern int halt;
 extern unsigned int pc;
+extern unsigned int* programMemory;
+extern unsigned int instructionCount;
+
+extern int returnValueRegister;
 
 #endif /* KSP_WS17_18_MAIN_H */

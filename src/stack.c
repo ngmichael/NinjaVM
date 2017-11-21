@@ -13,15 +13,13 @@ unsigned int fp;
  * Allocates size * 4 Bytes of memory for the stack
  * and sets the stack pointer to point at byte no. 0.
  * NOTE: If te system can not supply the requested
- * ammount of ram the function will display an error
+ * amount of ram the function will display an error
  * message and terminate the VM.
  * 
  * @param size - the number slots for the stack
  */
 void initStack(unsigned int size) {
-    unsigned int i;
-
-    stack = (int*) malloc(sizeof(unsigned int) * size);
+    stack = (int*) calloc(size, sizeof(unsigned int));
     if (stack == NULL) {
         printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
         exit(E_ERR_SYS_MEM);
@@ -30,10 +28,6 @@ void initStack(unsigned int size) {
     sp = 0;
     fp = 0;
     stackSize = size;
-
-    for (i = 0; i < stackSize; i++) {
-        stack[i] = 0;
-    }
 }
 
 /**
@@ -125,7 +119,7 @@ void popLocal(int position) {
 /**
  * Creates a new stack frame on the stack.
  * The stack frames size is specifed with the functions 
- * first agrument.
+ * first argument.
  * 
  * NOTE: If the newly created stack frame is larger than the
  * remaining space on the stack the function will display an
@@ -172,33 +166,29 @@ void releaseStackFrame(void) {
 }
 
 void printStackTo(FILE* stream) {
-    int localSp;
+    int i;
+    for (i = sp; i >= 0; i--) {
+        if (i == sp && i == fp) {
+            fprintf(stream, "sp, fp ---> [%04d]:\txxxx\n", i);
+        }
+        else if (i == sp) {
+            fprintf(stream, "sp     ---> [%04d]:\txxxx\n", i);
+        }
+        else if (i == fp) {
+            int value;
     
-        localSp = sp+1;
+            value = stack[i];
+            fprintf(stream, "fp     ---> [%04d]: %d\n", i, value);
+        }
+        else {
+            int value;
     
-        do {
-            localSp--;
-            if (localSp == sp && localSp == fp) {
-                fprintf(stream, "sp, fp\t--->\t[%04d]:\txxxx\n", localSp);
-            }
-            else if (localSp == sp) {
-                fprintf(stream, "sp\t--->\t[%04d]:\txxxx\n", localSp);
-            }
-            else if (localSp == fp) {
-                int value;
-    
-                value = stack[localSp];
-                fprintf(stream, "fp\t--->\t[%04d]: %d\n", localSp, value);
-            }
-            else {
-                int value;
-    
-                value = stack[localSp];
-                fprintf(stream, "\t\t[%04d]: %d\n", localSp, value);
-            }
-        } while (localSp > 0);
+            value = stack[i];
+            fprintf(stream, "            [%04d]: %d\n", i, value);
+        }
+    }
         
-        fprintf(stream, "----- Bottom of stack -----\n");
+    fprintf(stream, "----- Bottom of stack -----\n");
 }
 
 /**

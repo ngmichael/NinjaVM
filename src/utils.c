@@ -3,7 +3,7 @@
 #include "headers/utils.h"
 
 /**
- * Cahges the text color of the terminal to the
+ * Changes the text color of the terminal to the
  * specified color. The following colors are available:
  * 
  * RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN or WHITE
