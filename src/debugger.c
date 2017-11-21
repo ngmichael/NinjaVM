@@ -562,7 +562,7 @@ int processCommand(char* command) {
         printf("********************* NinjaVM Debugger *********************\n\n");
         printf("Available commands:\n");
         printf(" help\t\t- Prints this info.\n");
-        printf(" breakpoint\t- Set a breakpoint in your assembler code at a\n");
+        printf(" breakpoint\t- Set a breakpoint in the program at a\n");
         printf(" \t\t  specified instruction.\n");
 
         printf(" dump\t\t- Dumps memory to the specified file.\n");
