@@ -1,6 +1,7 @@
 V 4.0
 
 - Added support for procedure calls
+- Added support for code flow control
 - Added more debugging features
 
 V 3.0
