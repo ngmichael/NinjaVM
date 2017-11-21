@@ -169,22 +169,22 @@ void printStackTo(FILE* stream) {
     int i;
     for (i = sp; i >= 0; i--) {
         if (i == sp && i == fp) {
-            fprintf(stream, "sp, fp\t--->\t[%04d]:\txxxx\n", i);
+            fprintf(stream, "sp, fp ---> [%04d]:\txxxx\n", i);
         }
         else if (i == sp) {
-            fprintf(stream, "sp\t--->\t[%04d]:\txxxx\n", i);
+            fprintf(stream, "sp     ---> [%04d]:\txxxx\n", i);
         }
         else if (i == fp) {
             int value;
     
             value = stack[i];
-            fprintf(stream, "fp\t--->\t[%04d]: %d\n", i, value);
+            fprintf(stream, "fp     ---> [%04d]: %d\n", i, value);
         }
         else {
             int value;
     
             value = stack[i];
-            fprintf(stream, "\t\t[%04d]: %d\n", i, value);
+            fprintf(stream, "            [%04d]: %d\n", i, value);
         }
     }
         
