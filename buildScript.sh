@@ -4,6 +4,7 @@
 # Generates an archive with sources, documentation and a compile script
 
 rm -r out/ngmh83
+mkdir out
 mkdir out/ngmh83
 cp src out/ngmh83/src -r
 cp docs/DebuggerDocumentation.txt out/ngmh83/debug.txt
