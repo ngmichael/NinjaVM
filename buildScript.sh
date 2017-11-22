@@ -3,7 +3,9 @@
 # Expects to be above the source folder.
 # Generates an archive with sources, documentation and a compile script
 
-rm -r out/ngmh83
+if [ -d "out" ]; then
+    rm -r out
+fi
 mkdir out
 mkdir out/ngmh83
 cp src out/ngmh83/src -r
