@@ -60,7 +60,7 @@ void memoryDump(char* path) {
 
     fprintf(out, "Content of program memory:\n\n");
     for (i = 0; i < instructionCount; i++) {
-        fprintf(out, "[%08d]: %6s %d\n", i, opcodes[programMemory[i] >> 24], programMemory[i] & 0x00FFFFFF);
+        fprintf(out, "[%08d]: %6s %d\n", i, opcodes[programMemory[i] >> 24], SIGN_EXTEND(IMMEDIATE(programMemory[i])));
     }
     fprintf(out, "** End of program memory **\n");
     fprintf(out, "\n");
