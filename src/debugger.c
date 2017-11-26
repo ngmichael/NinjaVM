@@ -487,7 +487,7 @@ int processCommand(char* command) {
 
                 if (newFP < 0 || newFP > sp) {
                     changeTextColor("YELLOW");
-                    printf("Error: Frame pointer can't be above stack pointer!\n");
+                    printf("Error: Illegal frame pointer value!\n");
                     changeTextColor("WHITE");
                 } else {
                     fp = (unsigned int) newFP;
@@ -532,9 +532,6 @@ int processCommand(char* command) {
             }
             opcode = opcode + 1;
         }
-
-        printf("%s ", asmInstr);
-        printf("%u\n", opcode);
 
         if (opcode == 32) {
             printf("%s ", DEBUG_EXEC);
