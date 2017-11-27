@@ -82,7 +82,7 @@ void execute(unsigned int opcode, int operand) {
         }
         case RDINT: {
             int read, result;
-            result = scanf("%d", &read);
+            result = scanf(" %d", &read);
             if (result == 0 || result == EOF) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
@@ -100,7 +100,7 @@ void execute(unsigned int opcode, int operand) {
             char read;
             int result;
 
-            result = scanf("%c", &read);
+            result = scanf(" %c", &read);
             if (result == 0 || result == EOF) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
