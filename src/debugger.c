@@ -689,11 +689,8 @@ void debug(void) {
     
     verbose = FALSE;
     breakpoint = -1;
-    pc = 0;
     quit = FALSE;
     run = FALSE;
-    initStack(10000);
-    returnValueRegister = 0;
 
     printf("%s Initialization routine completed! Launching program...\n\n", DEBUGGER);
 
