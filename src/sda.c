@@ -3,9 +3,10 @@
 #include "headers/njvm.h"
 #include "headers/sda.h"
 #include "headers/stack.h"
+#include "headers/heap.h"
 
 unsigned int sdaSize;
-int* sda;
+ObjRef* sda;
 
 /**
  * Initializes the static data area.
@@ -19,14 +20,20 @@ int* sda;
  * @param size - number of "slots" for the sda
  */
 void initSda(unsigned int size) {
+    int i;
+
     sdaSize = size;
-    sda = calloc(size, sizeof(int));
+    sda = calloc(size, sizeof(ObjRef));
     if (sda == NULL && size > 0) {
         printf(
             "Error: Can't initialize sda with %lu Bytes of memory.\n",
             sizeof(int) * size
         );
         exit(E_ERR_SYS_MEM);
+    }
+    
+    for (i = 0; i < sdaSize; i++) {
+        sda[i] = allocate(sizeof(int));
     }
 }
 
@@ -52,7 +59,7 @@ void popGlobal(unsigned int position) {
     }
     
     value = pop();
-    sda[position] = value;
+    *(int* )sda[position]->data = value;
 }
 
 /**
@@ -76,7 +83,7 @@ void pushGlobal(unsigned int position) {
         exit(E_ERR_SDA_INDEX);
     }
 
-    value = sda[position];
+    value = *(int* )sda[position]->data;
     push(value);
 }
 
@@ -85,7 +92,7 @@ void printStaticDataAreaTo(FILE* stream) {
 
     fprintf(stream, "Static data area contains %u variables.\n", sdaSize);
     for (i = 0; i < sdaSize; i++) {
-        fprintf(stream, "[%04u]: %d\n", i, sda[i]);
+        fprintf(stream, "[%04u]: %d\n", i, *(int* )sda[i]->data);
     }
 
     if (sdaSize > 0)
@@ -118,6 +125,6 @@ int hasIndex(unsigned int n) {
  */
 int setVariable(unsigned int varnum, int value) {
     if (hasIndex(varnum) == FALSE) return FALSE;
-    sda[varnum] = value;
+    *(int* )sda[varnum]->data = value;
     return TRUE;
 }
