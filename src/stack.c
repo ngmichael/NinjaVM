@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "headers/heap.h"
 #include "headers/njvm.h"
 #include "headers/stack.h"
 
-int* stack;
+StackSlot* stack;
 unsigned int sp;
 unsigned int stackSize;
 
@@ -19,7 +20,7 @@ unsigned int fp;
  * @param size - the number slots for the stack
  */
 void initStack(unsigned int size) {
-    stack = (int*) calloc(size, sizeof(unsigned int));
+    stack = (StackSlot*) calloc(size, sizeof(StackSlot));
     if (stack == NULL) {
         printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
         exit(E_ERR_SYS_MEM);
@@ -31,12 +32,12 @@ void initStack(unsigned int size) {
 }
 
 /**
- * Pushes a value onto the stack.
+ * Pushes the supplied value as a number onto the stack
  * NOTE: Trying to push a value while
  * the stack is full will result in a stack
  * overflow error.
  *  
- * @param value - the value to push on the stack
+ * @param value - the value to be pushed onto the stack
  */
 void push(int value) {
     if (sp >= stackSize) {
@@ -44,7 +45,29 @@ void push(int value) {
         exit(E_ERR_ST_OVER);
     }
 
-    stack[sp] = value;
+    stack[sp].isObjRef = FALSE;
+    stack[sp].u.number = value;
+    sp = sp + 1;
+}
+
+/**
+ * Pushes the supplied value as an Object onto the stack.
+ * NOTE: Trying to push a value while
+ * the stack is full will result in a stack
+ * overflow error.
+ *  
+ * @param value - the value to be pushed onto the stack
+ */
+void pushObjRef(int value) {
+
+    if (sp >= stackSize) {
+        printf("Error: Stack overflow\n");
+        exit(E_ERR_ST_OVER);
+    }
+
+    stack[sp].isObjRef = TRUE;
+    *(int *)stack[sp].u.objRef->data = value;
+
     sp = sp + 1;
 }
 
@@ -58,7 +81,7 @@ void push(int value) {
  */
 int pop(void) {
 
-    int value;
+    StackSlot value;
 
     if (sp == 0) {
         printf("Error: Stack underflow\n");
@@ -67,7 +90,38 @@ int pop(void) {
 
     sp = sp - 1;
     value = stack[sp];
-    return value;
+
+    if (value.isObjRef == TRUE) {
+        printf("ERROR: Tried to access stackslot as number, but it contains object!\n");
+        exit(E_ERR_ST_NO_NUM);
+    }
+
+    return value.u.number;
+}
+
+/**
+ * Pops a value from the stack and returns it as an Object reference.
+ * NOTE: Popping an empty stack will cause a stack underflow error.
+ * 
+ * @return an object reference
+ */
+int popObjRef(void) {
+    StackSlot value;
+
+    if (sp == 0) {
+        printf("Error: Stack underflow\n");
+        exit(E_ERR_ST_UNDER);
+    }
+
+    sp = sp - 1;
+    value = stack[sp];
+    
+    if (value.isObjRef == FALSE) {
+        printf("ERROR: Tried to access stackslot as object, but it contains a number!\n");
+        exit(E_ERR_ST_NO_OBJ);
+    }
+
+    return *(int *)value.u.objRef->data;
 }
 
 /**
@@ -78,7 +132,6 @@ int pop(void) {
  * function will display an error message and terminate the VM.
  */
 void pushLocal(int position) {
-    int value;
     int pos;
 
     pos = fp + position;
@@ -89,8 +142,7 @@ void pushLocal(int position) {
         exit(E_ERR_STF_INDEX);
     }
 
-    value = stack[pos];
-    push(value);
+    pushObjRef(*(int *)stack[sp].u.objRef->data);
 }
 
 /**
@@ -101,7 +153,6 @@ void pushLocal(int position) {
  * function will display an error message and terminate the VM.
  */
 void popLocal(int position) {
-    int value;
     int pos;
 
     pos = fp + position;
@@ -112,8 +163,7 @@ void popLocal(int position) {
         exit(E_ERR_STF_INDEX);
     }
 
-    value = pop();
-    stack[pos] = value;
+    *(int *)stack[pos].u.objRef->data = popObjRef();
 }
 
 /**
@@ -168,6 +218,35 @@ void releaseStackFrame(void) {
 void printStackTo(FILE* stream) {
     int i;
     for (i = sp; i >= 0; i--) {
+        StackSlot slot;
+        int value;
+        char* type;
+
+        /* Determine type of the stack slot */
+        if (i < sp) {
+            slot = stack[i];
+            switch(slot.isObjRef) {
+                case TRUE: {
+                    type = calloc(7, sizeof(char));
+                    type = "OBJREF\0";
+                    value = *(int *)slot.u.objRef->data;
+                    break;
+                }
+                case FALSE: {
+                    type = calloc(7, sizeof(char));
+                    type = "NUMBER\0";
+                    value = slot.u.number;
+                    break;
+                }
+                default: {
+                    type = calloc(10, sizeof(char));
+                    type = "UNDEFINED\0";
+                    value = 0;
+                    break;
+                }
+            }
+        }
+
         if (i == sp && i == fp) {
             fprintf(stream, "sp, fp ---> [%04d]:\txxxx\n", i);
         }
@@ -175,17 +254,12 @@ void printStackTo(FILE* stream) {
             fprintf(stream, "sp     ---> [%04d]:\txxxx\n", i);
         }
         else if (i == fp) {
-            int value;
-    
-            value = stack[i];
-            fprintf(stream, "fp     ---> [%04d]: %d\n", i, value);
+            fprintf(stream, "fp     ---> [%04d]: Type: %10s, Value: %d\n", i, type, value);
         }
         else {
-            int value;
-    
-            value = stack[i];
-            fprintf(stream, "            [%04d]: %d\n", i, value);
+            fprintf(stream, "            [%04d]: Type: %10s, Value: %d\n", i, type, value);
         }
+        free(type);
     }
         
     fprintf(stream, "----- Bottom of stack -----\n");
@@ -215,9 +289,21 @@ int isAccessibleStackSlot(int n) {
  * @param slot - the slot that should be set
  * @param value - the value to set
  */
-void replaceStackSlotValue(unsigned int slot, int value) {
+void replaceStackSlotValue(unsigned int slot, int isObjRef, int value) {
     if (isAccessibleStackSlot(slot) == FALSE) {
         printf("Warning: %u is not an accessible stack slot!\n", slot);
     }
-    stack[slot] = value;
+
+    if (isObjRef == TRUE) {
+        stack[slot].isObjRef = TRUE;
+        stack[slot].u.objRef->size = sizeof(int);
+        *(int *)stack[slot].u.objRef->data = value;
+    }
+    else if (isObjRef == FALSE) {
+        stack[slot].isObjRef = FALSE;
+        stack[slot].u.number = value;
+    }
+    else {
+        stack[slot].isObjRef = -1;
+    }
 }

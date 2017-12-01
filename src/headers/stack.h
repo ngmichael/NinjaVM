@@ -8,7 +8,10 @@ extern unsigned int stackSize;
 void initStack(unsigned int size);
 
 void push(int value);
+void pushObjRef(int value);
+
 int pop(void);
+int popObjRef(void);
 
 void allocateStackFrame(int size);
 void releaseStackFrame(void);
@@ -20,6 +23,6 @@ void printStackTo(FILE* stream);
 void printStack(void);
 
 int isAccessibleStackSlot(int n);
-void replaceStackSlotValue(unsigned int slot, int value);
+void replaceStackSlotValue(unsigned int slot, int isObjRef, int value);
 
 #endif /* KSP_WS17_18_STACK_H */
