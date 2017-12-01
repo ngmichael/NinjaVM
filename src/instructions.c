@@ -25,37 +25,37 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case PUSHC: {
-            push(operand);
+            pushObjRef(operand);
             break;
         }
         case ADD: {
             int val1, val2, res;
-            val1 = pop();
-            val2 = pop();
+            val1 = popObjRef();
+            val2 = popObjRef();
             res = val1 + val2;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case SUB: {
             int val1, val2, res;
-            val2 = pop();
-            val1 = pop();
+            val2 = popObjRef();
+            val1 = popObjRef();
             res = val1 - val2;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case MUL: {
             int val1, val2, res;
-            val1 = pop();
-            val2 = pop();
+            val1 = popObjRef();
+            val2 = popObjRef();
             res = val1 * val2;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case DIV: {
             int val1, val2, res;
-            val2 = pop();
-            val1 = pop();
+            val2 = popObjRef();
+            val1 = popObjRef();
             
             if (val2 == 0) {
                 printf("Error: Division by zero\n");
@@ -63,13 +63,13 @@ void execute(unsigned int opcode, int operand) {
             }
 
             res = val1 / val2;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case MOD: {
             int val1, val2, res;
-            val2 = pop();
-            val1 = pop();
+            val2 = popObjRef();
+            val1 = popObjRef();
             
             if (val2 == 0) {
                 printf("Error: Division by zero\n");
@@ -77,7 +77,7 @@ void execute(unsigned int opcode, int operand) {
             }
 
             res = val1 % val2;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case RDINT: {
@@ -87,12 +87,12 @@ void execute(unsigned int opcode, int operand) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            push(read);
+            pushObjRef(read);
             break;
         }
         case WRINT: {
             int val;
-            val = pop();
+            val = popObjRef();
             printf("%d", val);
             break;
         }
@@ -105,12 +105,12 @@ void execute(unsigned int opcode, int operand) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            push((int) read);
+            pushObjRef((int) read);
             break;
         }
         case WRCHR: {
             char val;
-            val = (char) pop();
+            val = (char) popObjRef();
             printf("%c", val);
             break;
         }
@@ -141,55 +141,55 @@ void execute(unsigned int opcode, int operand) {
         case EQ: {
             int val1, val2, res;
             
-            val1 = pop();
-            val2 = pop();
+            val1 = popObjRef();
+            val2 = popObjRef();
             res = val1 == val2 ? TRUE : FALSE;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case NE: {
             int val1, val2, res;
             
-            val1 = pop();
-            val2 = pop();
+            val1 = popObjRef();
+            val2 = popObjRef();
             res = val1 != val2 ? TRUE : FALSE;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case LT: {
             int val1, val2, res;
             
-            val2 = pop();
-            val1 = pop();
+            val2 = popObjRef();
+            val1 = popObjRef();
             res = val1 < val2 ? TRUE : FALSE;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case LE: {
             int val1, val2, res;
             
-            val2 = pop();
-            val1 = pop();
+            val2 = popObjRef();
+            val1 = popObjRef();
             res = val1 <= val2 ? TRUE : FALSE;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case GT: {
             int val1, val2, res;
             
-            val2 = pop();
-            val1 = pop();
+            val2 = popObjRef();
+            val1 = popObjRef();
             res = val1 > val2 ? TRUE : FALSE;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case GE: {
             int val1, val2, res;
             
-            val2 = pop();
-            val1 = pop();
+            val2 = popObjRef();
+            val1 = popObjRef();
             res = val1 >= val2 ? TRUE : FALSE;
-            push(res);
+            pushObjRef(res);
             break;
         }
         case JMP: {
@@ -197,12 +197,12 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case BRF: {
-            int value = pop();
+            int value = popObjRef();
             if (value == FALSE) pc = operand;
             break;
         }
         case BRT: {
-            int value = pop();
+            int value = popObjRef();
             if (value == TRUE) pc = operand;
             break;
         }
@@ -224,19 +224,19 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case PUSHR: {
-            push(returnValueRegister);
+            pushObjRef(returnValueRegister);
             break;
         }
         case POPR: {
-            returnValueRegister = pop();
+            returnValueRegister = popObjRef();
             break;
         }
         case DUP: {
             int value;
 
             value = pop();
-            push(value);
-            push(value);
+            pushObjRef(value);
+            pushObjRef(value);
             break;
         }
         default: {
