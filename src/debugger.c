@@ -9,6 +9,7 @@
 #include "headers/sda.h"
 #include "headers/debugger.h"
 #include "headers/utils.h"
+#include "headers/heap.h"
 
 unsigned int run;
 unsigned int breakpoint;
@@ -55,8 +56,14 @@ void memoryDump(char* path) {
     printStaticDataAreaTo(out);
     fprintf(out, "\n");
 
-    fprintf(out, "The content of the return value register: %d\n", returnValueRegister);
-    fprintf(out, "\n");
+    fprintf(out, "The content of the return value register:\n");
+    if (returnValueRegister == NULL) {
+        fprintf(out, "The register is empty! (NULL-Reference)\n");
+    }
+    else {
+        fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
+        fprintf(out, "Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+    }
 
     fprintf(out, "Content of program memory:\n\n");
     for (i = 0; i < instructionCount; i++) {
@@ -318,14 +325,14 @@ int processCommand(char* command) {
                 value = getNumber();
                 changeTextColor("WHITE");
 
-                replaceStackSlotValue(slot, value);
+                replaceStackSlotValue(slot, TRUE, value);
 
                 break;
             }
 
             case 2: { /* Static data area*/
                 int slot;
-                int value;
+                ObjRef value;
 
                 printf("%s Listing contents of static data area:\n\n", DEBUG_EDIT);
                 changeTextColor("CYAN");
@@ -355,10 +362,12 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
+                value = allocate(sizeof(int));
+
                 printf("%s Now enter the new value for this global variable:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                value = getNumber();
+                *(int *)value->data = getNumber();
                 changeTextColor("WHITE");
 
                 setVariable(slot, value);
@@ -366,18 +375,26 @@ int processCommand(char* command) {
             }
 
             case 3: { /* Return value register */
-                int value;
+                ObjRef obj;
 
+                obj = allocate(sizeof(int));
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                printf("The current value of the return value register is: ");
-                printf("%d\n", returnValueRegister);
+                printf("The current value of the return value register is:\n");
+                if (returnValueRegister == NULL) {
+                    printf("Return value register contains NULL-Reference!\n");
+                }
+                else {
+                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
+                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                }
+                
                 changeTextColor("WHITE");
                 printf("%s Now enter a new value for the return value register: ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                value = getNumber();
+                *(int *)obj->data = getNumber();
                 changeTextColor("WHITE");
-                returnValueRegister = value;
+                returnValueRegister = obj;
                 break;
             }
 
@@ -620,9 +637,14 @@ int processCommand(char* command) {
 
             case 3: {
                 printf("%s ", DEBUG_INSPECT);
-                changeTextColor("CYAN");
-                printf("The current value of the return value register is: ");
-                printf("%d\n", returnValueRegister);
+                printf("The current value of the return value register is:\n");
+                if (returnValueRegister == NULL) {
+                    printf("Return value register contains NULL-Reference!\n");
+                }
+                else {
+                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
+                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                }
                 changeTextColor("WHITE");
                 break;
             }
