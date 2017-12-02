@@ -58,7 +58,7 @@ void popGlobal(unsigned int position) {
         exit(E_ERR_SDA_INDEX);
     }
     
-    value = pop();
+    value = popObjRef();
     *(int* )sda[position]->data = value;
 }
 
@@ -84,7 +84,7 @@ void pushGlobal(unsigned int position) {
     }
 
     value = *(int* )sda[position]->data;
-    push(value);
+    pushObjRef(value);
 }
 
 void printStaticDataAreaTo(FILE* stream) {
