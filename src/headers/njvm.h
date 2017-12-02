@@ -1,6 +1,8 @@
 #ifndef KSP_WS17_18_MAIN_H
 #define KSP_WS17_18_MAIN_H
 
+#include "heap.h"
+
 #define VERSION 4
 
 #define FALSE 0
@@ -42,6 +44,6 @@ extern unsigned int pc;
 extern unsigned int* programMemory;
 extern unsigned int instructionCount;
 
-extern int returnValueRegister;
+extern ObjRef returnValueRegister;
 
 #endif /* KSP_WS17_18_MAIN_H */

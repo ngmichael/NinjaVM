@@ -1,6 +1,8 @@
 #ifndef KSP_WS17_18_STACK_H
 #define KSP_WS17_18_STACK_H
 
+#include "heap.h"
+
 extern unsigned int sp;
 extern unsigned int fp;
 extern unsigned int stackSize;
@@ -8,10 +10,10 @@ extern unsigned int stackSize;
 void initStack(unsigned int size);
 
 void push(int value);
-void pushObjRef(int value);
+void pushObjRef(ObjRef value);
 
 int pop(void);
-int popObjRef(void);
+ObjRef popObjRef(void);
 
 void allocateStackFrame(int size);
 void releaseStackFrame(void);

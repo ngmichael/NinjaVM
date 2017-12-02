@@ -3,6 +3,7 @@
 # Expects to be above the source folder.
 # Creates one file called njvm in folder out
 
+clear
 if [ ! -d "out" ]; then
     mkdir out
 fi

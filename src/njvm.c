@@ -8,13 +8,14 @@
 #include "headers/sda.h"
 #include "headers/debugger.h"
 #include "headers/utils.h"
+#include "headers/heap.h"
 
 int halt;
 unsigned int pc;
 unsigned int* programMemory;
 unsigned int instructionCount;
 
-int returnValueRegister;
+ObjRef returnValueRegister;
 
 /**
  * Main entry point - called at program launch
@@ -129,7 +130,7 @@ int main(int argc, char* argv[]) {
     pc = 0;
     halt = FALSE;
     initStack(10000);
-    returnValueRegister = 0;
+    returnValueRegister = NULL;
 
     if (runDebugger == TRUE) {
         printf("%s Loaded program successfully: %d instructions | %d global variables\n",

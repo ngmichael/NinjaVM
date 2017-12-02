@@ -58,7 +58,7 @@ void push(int value) {
  *  
  * @param value - the value to be pushed onto the stack
  */
-void pushObjRef(int value) {
+void pushObjRef(ObjRef obj) {
 
     if (sp >= stackSize) {
         printf("Error: Stack overflow\n");
@@ -66,7 +66,7 @@ void pushObjRef(int value) {
     }
 
     stack[sp].isObjRef = TRUE;
-    *(int *)stack[sp].u.objRef->data = value;
+    stack[sp].u.objRef = obj;
 
     sp = sp + 1;
 }
@@ -105,7 +105,7 @@ int pop(void) {
  * 
  * @return an object reference
  */
-int popObjRef(void) {
+ObjRef popObjRef(void) {
     StackSlot value;
 
     if (sp == 0) {
@@ -121,7 +121,7 @@ int popObjRef(void) {
         exit(E_ERR_ST_NO_OBJ);
     }
 
-    return *(int *)value.u.objRef->data;
+    return value.u.objRef;
 }
 
 /**
@@ -142,7 +142,7 @@ void pushLocal(int position) {
         exit(E_ERR_STF_INDEX);
     }
 
-    pushObjRef(*(int *)stack[sp].u.objRef->data);
+    pushObjRef(stack[sp].u.objRef);
 }
 
 /**
@@ -163,7 +163,7 @@ void popLocal(int position) {
         exit(E_ERR_STF_INDEX);
     }
 
-    *(int *)stack[pos].u.objRef->data = popObjRef();
+    stack[pos].u.objRef = popObjRef();
 }
 
 /**
@@ -295,9 +295,14 @@ void replaceStackSlotValue(unsigned int slot, int isObjRef, int value) {
     }
 
     if (isObjRef == TRUE) {
+        ObjRef obj;
+
+        obj = allocate(sizeof(int));
+        obj->size = sizeof(int);
+        *(int *)obj->data = value;
+
         stack[slot].isObjRef = TRUE;
-        stack[slot].u.objRef->size = sizeof(int);
-        *(int *)stack[slot].u.objRef->data = value;
+        stack[slot].u.objRef = obj;
     }
     else if (isObjRef == FALSE) {
         stack[slot].isObjRef = FALSE;
