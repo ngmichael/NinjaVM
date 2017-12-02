@@ -20,8 +20,6 @@ ObjRef* sda;
  * @param size - number of "slots" for the sda
  */
 void initSda(unsigned int size) {
-    int i;
-
     sdaSize = size;
     sda = calloc(size, sizeof(ObjRef));
     if (sda == NULL && size > 0) {
@@ -30,10 +28,6 @@ void initSda(unsigned int size) {
             sizeof(int) * size
         );
         exit(E_ERR_SYS_MEM);
-    }
-    
-    for (i = 0; i < sdaSize; i++) {
-        sda[i] = allocate(sizeof(int));
     }
 }
 
@@ -48,7 +42,7 @@ void initSda(unsigned int size) {
  * dsiplay an error message and terminate the VM.
  */
 void popGlobal(unsigned int position) {
-    int value;
+    ObjRef value;
 
     if (position >= sdaSize) {
         printf(
@@ -59,7 +53,7 @@ void popGlobal(unsigned int position) {
     }
     
     value = popObjRef();
-    *(int* )sda[position]->data = value;
+    sda[position] = value;
 }
 
 /**
@@ -73,7 +67,7 @@ void popGlobal(unsigned int position) {
  * dsiplay an error message and terminate the VM.
  */
 void pushGlobal(unsigned int position) {
-    int value;
+    ObjRef value;
 
     if (position >= sdaSize) {
         printf(
@@ -83,7 +77,7 @@ void pushGlobal(unsigned int position) {
         exit(E_ERR_SDA_INDEX);
     }
 
-    value = *(int* )sda[position]->data;
+    value = sda[position];
     pushObjRef(value);
 }
 
@@ -123,8 +117,10 @@ int hasIndex(unsigned int n) {
  * @param value - the new value
  * @return TRUE if variable exists, FALSE otherwise
  */
-int setVariable(unsigned int varnum, int value) {
+int setVariable(unsigned int varnum, ObjRef value) {
+
     if (hasIndex(varnum) == FALSE) return FALSE;
-    *(int* )sda[varnum]->data = value;
+
+    sda[varnum] = value;
     return TRUE;
 }
