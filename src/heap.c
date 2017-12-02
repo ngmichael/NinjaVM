@@ -3,6 +3,15 @@
 #include "headers/heap.h"
 #include "headers/njvm.h"
 
+/**
+ * Creates a new object instance on the heap
+ * and returns a pointer to the first byte of 
+ * that object. The size component of the object is
+ * set aswell.
+ * 
+ * @param size - the amount of bytes that the object shall hold
+ * @return A pointer to the first byte of this Object on the heap
+ */
 ObjRef allocate(unsigned int size) {
     ObjRef object = calloc(size + sizeof(unsigned int), sizeof(unsigned int));
     if (object == NULL) {
