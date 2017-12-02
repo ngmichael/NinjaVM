@@ -4,6 +4,7 @@
 #include "headers/stack.h"
 #include "headers/njvm.h"
 #include "headers/sda.h"
+#include "headers/heap.h"
 
 char* opcodes[] = {
     "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",
@@ -25,93 +26,108 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case PUSHC: {
-            pushObjRef(operand);
+            ObjRef object;
+
+            object = allocate(sizeof(int));
+            *(int *)object->data = operand;
+
+            pushObjRef(object);
             break;
         }
         case ADD: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             val1 = popObjRef();
             val2 = popObjRef();
-            res = val1 + val2;
+            res = allocate(sizeof(int));
+            *(int*)res->data = *(int*)val1->data + *(int*)val2->data;
             pushObjRef(res);
             break;
         }
         case SUB: {
-            int val1, val2, res;
-            val2 = popObjRef();
+            ObjRef val1, val2, res;
             val1 = popObjRef();
-            res = val1 - val2;
+            val2 = popObjRef();
+            res = allocate(sizeof(int));
+            *(int*)res->data = *(int*)val1->data - *(int*)val2->data;
             pushObjRef(res);
             break;
         }
         case MUL: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             val1 = popObjRef();
             val2 = popObjRef();
-            res = val1 * val2;
+            res = allocate(sizeof(int));
+            *(int*)res->data = *(int*)val1->data * *(int*)val2->data;
             pushObjRef(res);
             break;
         }
         case DIV: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             val2 = popObjRef();
             val1 = popObjRef();
             
-            if (val2 == 0) {
+            if (*(int *)val2->data == 0) {
                 printf("Error: Division by zero\n");
                 exit(E_ERR_DIV_BY_ZERO);
             }
 
-            res = val1 / val2;
+            res = allocate(sizeof(int));
+            *(int*)res->data = *(int*)val1->data / *(int*)val2->data;
             pushObjRef(res);
             break;
         }
         case MOD: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             val2 = popObjRef();
             val1 = popObjRef();
             
-            if (val2 == 0) {
+            if (*(int *)val2->data == 0) {
                 printf("Error: Division by zero\n");
                 exit(E_ERR_DIV_BY_ZERO);
             }
 
-            res = val1 % val2;
+            res = allocate(sizeof(int));
+            *(int*)res->data = *(int*)val1->data % *(int*)val2->data;
             pushObjRef(res);
             break;
         }
         case RDINT: {
+            ObjRef object;
             int read, result;
             result = scanf(" %d", &read);
             if (result == 0 || result == EOF) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            pushObjRef(read);
+            object = allocate(sizeof(int));
+            *(int *)object->data = read;
+            pushObjRef(object);
             break;
         }
         case WRINT: {
-            int val;
+            ObjRef val;
             val = popObjRef();
-            printf("%d", val);
+            printf("%d", *(int *)val->data);
             break;
         }
         case RDCHR: {
+            ObjRef object;
             char read;
             int result;
-
             result = scanf(" %c", &read);
             if (result == 0 || result == EOF) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            pushObjRef((int) read);
+            object = allocate(sizeof(int));
+            *(int *)object->data = (int)read;
+            pushObjRef(object);
             break;
         }
         case WRCHR: {
-            char val;
-            val = (char) popObjRef();
-            printf("%c", val);
+            ObjRef val;
+            val = popObjRef();
+            printf("%d", *val->data);
             break;
         }
         case PUSHG: {
@@ -139,56 +155,62 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case EQ: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             
             val1 = popObjRef();
             val2 = popObjRef();
-            res = val1 == val2 ? TRUE : FALSE;
+            res = allocate(sizeof(int));
+            *(int *)res->data = *(int *)val1->data == *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
         }
         case NE: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             
             val1 = popObjRef();
             val2 = popObjRef();
-            res = val1 != val2 ? TRUE : FALSE;
+            res = allocate(sizeof(int));
+            *(int *)res->data = *(int *)val1->data != *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
         }
         case LT: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             
-            val2 = popObjRef();
             val1 = popObjRef();
-            res = val1 < val2 ? TRUE : FALSE;
+            val2 = popObjRef();
+            res = allocate(sizeof(int));
+            *(int *)res->data = *(int *)val1->data < *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
         }
         case LE: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             
-            val2 = popObjRef();
             val1 = popObjRef();
-            res = val1 <= val2 ? TRUE : FALSE;
+            val2 = popObjRef();
+            res = allocate(sizeof(int));
+            *(int *)res->data = *(int *)val1->data <= *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
         }
         case GT: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             
-            val2 = popObjRef();
             val1 = popObjRef();
-            res = val1 > val2 ? TRUE : FALSE;
+            val2 = popObjRef();
+            res = allocate(sizeof(int));
+            *(int *)res->data = *(int *)val1->data > *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
         }
         case GE: {
-            int val1, val2, res;
+            ObjRef val1, val2, res;
             
-            val2 = popObjRef();
             val1 = popObjRef();
-            res = val1 >= val2 ? TRUE : FALSE;
+            val2 = popObjRef();
+            res = allocate(sizeof(int));
+            *(int *)res->data = *(int *)val1->data >= *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
         }
@@ -197,13 +219,13 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case BRF: {
-            int value = popObjRef();
-            if (value == FALSE) pc = operand;
+            ObjRef value = popObjRef();
+            if (*(int *)value->data == FALSE) pc = operand;
             break;
         }
         case BRT: {
-            int value = popObjRef();
-            if (value == TRUE) pc = operand;
+            ObjRef value = popObjRef();
+            if (*(int *)value->data == TRUE) pc = operand;
             break;
         }
         case CALL: {
@@ -232,9 +254,9 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case DUP: {
-            int value;
+            ObjRef value;
 
-            value = pop();
+            value = popObjRef();
             pushObjRef(value);
             pushObjRef(value);
             break;
