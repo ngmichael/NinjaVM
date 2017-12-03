@@ -116,15 +116,15 @@ char* getInput(void) {
 
     cleanUp = 0;    
     newLine = NULL;
-    input = calloc(12, sizeof(unsigned char));
+    input = calloc(14, sizeof(unsigned char));
     if (input == NULL) {
         changeTextColor("RED");
         printf("%s ", ERROR);
-        printf("System could not allocate 12 bytes of memory for debugger input.\n");
+        printf("System could not allocate 14 bytes of memory for debugger input.\n");
         changeTextColor("WHITE");
         exit(E_ERR_IO_SHELL);
     }
-    if (fgets(input, 12, stdin) == NULL) {
+    if (fgets(input, 14, stdin) == NULL) {
         changeTextColor("RED");
         printf("Something went wrong while taking user input!\n");
         changeTextColor("WHITE");
@@ -146,7 +146,7 @@ char* getInput(void) {
         printf("*WARNING* ");
         changeTextColor("WHITE");
 
-        printf("Truncated input after 12 characters!\n");
+        printf("Truncated input after 14 characters!\n");
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
     }
 
@@ -609,6 +609,7 @@ int processCommand(char* command) {
         printf("%s 2: Static data area\n", DEBUG_INSPECT);
         printf("%s 3: Return value register\n", DEBUG_INSPECT);
         printf("%s 4: Program Memory\n", DEBUG_INSPECT);
+        printf("%s 5: Object-Reference\n", DEBUG_INSPECT);        
         printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_INSPECT);
         printf("%s ", DEBUG_INSPECT);
 
@@ -651,6 +652,26 @@ int processCommand(char* command) {
             
             case 4: {
                 listProgramMemory();
+                break;
+            }
+
+            case 5: {
+                ObjRef obj;
+
+                printf("%s Enter the address of the object reference:\n", DEBUG_INSPECT);
+                printf("%s 0x", DEBUG_INSPECT);
+                changeTextColor("CYAN");
+
+                obj = (ObjRef) strtol(getInput(), NULL, 16);
+                changeTextColor("WHITE");
+
+                if (obj == NULL) {
+                    printf("%s There is no object at specified pointer...\n", DEBUG_INSPECT);
+                    break;
+                }
+
+                printf(" Size in bytes:     %d\n", obj->size);
+                printf(" Value (in Base10): %d\n", *(int*)obj->data);
                 break;
             }
 

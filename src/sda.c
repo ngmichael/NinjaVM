@@ -86,7 +86,14 @@ void printStaticDataAreaTo(FILE* stream) {
 
     fprintf(stream, "Static data area contains %u variables.\n", sdaSize);
     for (i = 0; i < sdaSize; i++) {
-        fprintf(stream, "[%04u]: %d\n", i, *(int* )sda[i]->data);
+        if (sda[i] == NULL) {
+            fprintf(stream, "[%04u]: (NULL)\n", i);
+            continue;
+        }
+
+        fprintf(stream, "[%04u]: %p\n", i, (void *) sda[i]);
+        fprintf(stream, "        Size:  %d Bytes\n", sda[i]->size);
+        fprintf(stream, "        Value: %d\n", *(int *)sda[i]->data);
     }
 
     if (sdaSize > 0)

@@ -45,8 +45,8 @@ void execute(unsigned int opcode, int operand) {
         }
         case SUB: {
             ObjRef val1, val2, res;
-            val1 = popObjRef();
             val2 = popObjRef();
+            val1 = popObjRef();
             res = allocate(sizeof(int));
             *(int*)res->data = *(int*)val1->data - *(int*)val2->data;
             pushObjRef(res);
@@ -127,7 +127,7 @@ void execute(unsigned int opcode, int operand) {
         case WRCHR: {
             ObjRef val;
             val = popObjRef();
-            printf("%d", *val->data);
+            printf("%c", *val->data);
             break;
         }
         case PUSHG: {
@@ -219,12 +219,16 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case BRF: {
-            ObjRef value = popObjRef();
+            ObjRef value;
+
+            value = popObjRef();
             if (*(int *)value->data == FALSE) pc = operand;
             break;
         }
         case BRT: {
-            ObjRef value = popObjRef();
+            ObjRef value;
+            
+            value = popObjRef();
             if (*(int *)value->data == TRUE) pc = operand;
             break;
         }

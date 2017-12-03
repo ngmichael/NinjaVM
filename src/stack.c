@@ -142,7 +142,7 @@ void pushLocal(int position) {
         exit(E_ERR_STF_INDEX);
     }
 
-    pushObjRef(stack[sp].u.objRef);
+    pushObjRef(stack[pos].u.objRef);
 }
 
 /**
@@ -178,6 +178,7 @@ void popLocal(int position) {
  * @param size - The size of the new stack frame
  */
 void allocateStackFrame(int size) {
+    int i;
 
     if (size < 0) {
         printf("Error: Can't allocate stack frame with negative size!\n");
@@ -195,6 +196,11 @@ void allocateStackFrame(int size) {
     push(fp);
     fp = sp;
     sp = sp + size;
+
+    for (i = 0; i < sp - fp; i++) {
+        stack[fp+i].isObjRef = TRUE;
+        stack[fp+i].u.objRef = NULL;
+    }
 }
 
 /**
@@ -220,27 +226,23 @@ void printStackTo(FILE* stream) {
     for (i = sp; i >= 0; i--) {
         StackSlot slot;
         int value;
-        char* type;
+        char* typeString;
 
         /* Determine type of the stack slot */
         if (i < sp) {
             slot = stack[i];
             switch(slot.isObjRef) {
                 case TRUE: {
-                    type = calloc(7, sizeof(char));
-                    type = "OBJREF\0";
-                    value = *(int *)slot.u.objRef->data;
+                    typeString = "OBJREF\0";
                     break;
                 }
                 case FALSE: {
-                    type = calloc(7, sizeof(char));
-                    type = "NUMBER\0";
+                    typeString = "NUMBER\0";
                     value = slot.u.number;
                     break;
                 }
                 default: {
-                    type = calloc(10, sizeof(char));
-                    type = "UNDEFINED\0";
+                    typeString = "UNDEFINED\0";
                     value = 0;
                     break;
                 }
@@ -248,18 +250,30 @@ void printStackTo(FILE* stream) {
         }
 
         if (i == sp && i == fp) {
-            fprintf(stream, "sp, fp ---> [%04d]:\txxxx\n", i);
+            fprintf(stream, "sp, fp ---> [%04d]: XXXXXXXXXX\n", i);
         }
         else if (i == sp) {
-            fprintf(stream, "sp     ---> [%04d]:\txxxx\n", i);
+            fprintf(stream, "sp     ---> [%04d]: XXXXXXXXXX\n", i);
         }
         else if (i == fp) {
-            fprintf(stream, "fp     ---> [%04d]: Type: %10s, Value: %d\n", i, type, value);
+            if (slot.isObjRef == TRUE) {
+                fprintf(stream, "fp     ---> [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
+                if ((void *)slot.u.objRef != NULL) {
+                    fprintf(stream, "                    \tSize:  %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "                    \tValue: %d\n", *(int *)slot.u.objRef->data);
+                }
+            } else fprintf(stream, "fp     ---> [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
+            
         }
         else {
-            fprintf(stream, "            [%04d]: Type: %10s, Value: %d\n", i, type, value);
+            if (slot.isObjRef == TRUE) {
+                fprintf(stream, "            [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
+                if ((void *)slot.u.objRef != NULL) {
+                    fprintf(stream, "                    \tSize:  %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "                    \tValue: %d\n", *(int *)slot.u.objRef->data);
+                }
+            } else fprintf(stream, "            [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
         }
-        free(type);
     }
         
     fprintf(stream, "----- Bottom of stack -----\n");
