@@ -177,8 +177,8 @@ void execute(unsigned int opcode, int operand) {
         case LT: {
             ObjRef val1, val2, res;
             
-            val1 = popObjRef();
             val2 = popObjRef();
+            val1 = popObjRef();
             res = allocate(sizeof(int));
             *(int *)res->data = *(int *)val1->data < *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
@@ -187,8 +187,8 @@ void execute(unsigned int opcode, int operand) {
         case LE: {
             ObjRef val1, val2, res;
             
-            val1 = popObjRef();
             val2 = popObjRef();
+            val1 = popObjRef();
             res = allocate(sizeof(int));
             *(int *)res->data = *(int *)val1->data <= *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
@@ -197,8 +197,8 @@ void execute(unsigned int opcode, int operand) {
         case GT: {
             ObjRef val1, val2, res;
             
-            val1 = popObjRef();
             val2 = popObjRef();
+            val1 = popObjRef();
             res = allocate(sizeof(int));
             *(int *)res->data = *(int *)val1->data > *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
@@ -207,8 +207,8 @@ void execute(unsigned int opcode, int operand) {
         case GE: {
             ObjRef val1, val2, res;
             
-            val1 = popObjRef();
             val2 = popObjRef();
+            val1 = popObjRef();
             res = allocate(sizeof(int));
             *(int *)res->data = *(int *)val1->data >= *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);

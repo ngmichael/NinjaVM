@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
 
     pc = 0;
     halt = FALSE;
-    initStack(1000);
+    initStack(10000);
     returnValueRegister = NULL;
 
     if (runDebugger == TRUE) {
