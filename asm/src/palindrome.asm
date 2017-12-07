@@ -86,6 +86,8 @@ _exit:
 //
 _main:
 	asf	4
+	pushc	0
+	popl	1
 	call	_readInteger
 	pushr
 	popl	0
