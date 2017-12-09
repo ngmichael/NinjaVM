@@ -3,7 +3,7 @@
 
 #include "heap.h"
 
-#define VERSION 4
+#define VERSION 5
 
 #define FALSE 0
 #define TRUE 1
