@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     FILE* code;
     int args;
     int fileClose;
-    unsigned int formatIdentifier;
+    char* formatIdentifier;
     unsigned int njvmVersion;
     unsigned int globalVariableCount;
 
@@ -87,11 +87,13 @@ int main(int argc, char* argv[]) {
     }
 
     /* Validate that the loaded file is a Ninja-Program */
-    fread(&formatIdentifier, 1, sizeof(unsigned int), code);
-    if (formatIdentifier != 0x46424a4e){
+    formatIdentifier = calloc(4, sizeof(char));
+    fread(formatIdentifier, 4, sizeof(char), code);
+    if (strncmp(formatIdentifier, "NJBF", 4) != 0){
         printf("Not a Ninja program!\n");
         return E_ERR_NO_NJPROG;
     }
+    free(formatIdentifier);
     
     /* Validate that the Ninja-Program is compiled for this version of the VM. */
     fread(&njvmVersion, 1, sizeof(unsigned int), code);
