@@ -1,7 +1,7 @@
 #ifndef KSP_WS17_18_MAIN_H
 #define KSP_WS17_18_MAIN_H
 
-#include "heap.h"
+#include "../../lib/support.h"
 
 #define VERSION 5
 
@@ -22,6 +22,7 @@
 #define E_ERR_SYS_MEM       4  /* System memory allocation error */
 #define E_ERR_OPCODE        5  /* Unknown Instruction error */
 #define E_ERR_DIV_BY_ZERO   6  /* Division by Zero error */
+#define E_ERR_BIG_INT       7  /* Error during computation with big int object */
 
 /* Exit codes from program loading routine */
 #define E_ERR_NO_PROGF      10  /* No code file specified error */

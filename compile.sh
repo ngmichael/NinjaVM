@@ -8,6 +8,6 @@ if [ ! -d "out" ]; then
     mkdir out
 fi
 cd src
-gcc -g -std=c89 -Wall -pedantic -o ../out/njvm debugger.c heap.c instructions.c njvm.c sda.c stack.c utils.c
+gcc -g -std=c89 -Wall -pedantic -o ../out/njvm debugger.c instructions.c njvm.c sda.c stack.c support.c -L ../lib/ -l bigint
 cd ../out
 chmod +x njvm

@@ -1,6 +1,38 @@
 #include <stdio.h>
 #include <string.h>
-#include "headers/utils.h"
+#include <stdlib.h>
+#include "headers/njvm.h"
+#include "../lib/support.h"
+
+
+/**
+ * Prints the supplied error message
+ * 
+ * @param msg - the error message
+ */
+void fatalError(char* msg) {
+    fprintf(stderr, "ERROR: %s\n", msg);
+    exit(E_ERR_BIG_INT);
+}
+
+/**
+ * Creates a new object instance on the heap
+ * and returns a pointer to the first byte of 
+ * that object. The size component of the object is
+ * set aswell.
+ * 
+ * @param size - the amount of bytes that the object shall hold
+ * @return A pointer to the first byte of this Object on the heap
+ */
+ObjRef newPrimObject(int dataSize) {
+    ObjRef object = calloc(dataSize + sizeof(int), sizeof(int));
+    if (object == NULL) {
+        printf("Error: Failed to initialize memory for object with size %lu!\n", dataSize + sizeof(int));
+        exit(E_ERR_SYS_MEM);
+    }
+    object->size = dataSize;
+    return object;
+}
 
 /**
  * Changes the text color of the terminal to the
