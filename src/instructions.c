@@ -5,6 +5,7 @@
 #include "headers/njvm.h"
 #include "headers/sda.h"
 #include "../lib/support.h"
+#include "../lib/bigint.h"
 
 char* opcodes[] = {
     "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",
@@ -44,12 +45,10 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case SUB: {
-            ObjRef val1, val2, res;
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int*)res->data = *(int*)val1->data - *(int*)val2->data;
-            pushObjRef(res);
+            bip.op2 = popObjRef();
+            bip.op1 = popObjRef();
+            bigSub();
+            pushObjRef(bip.res);
             break;
         }
         case MUL: {
