@@ -9,6 +9,7 @@
 #include "headers/sda.h"
 #include "headers/debugger.h"
 #include "headers/utils.h"
+#include "headers/heap.h"
 
 unsigned int run;
 unsigned int breakpoint;
@@ -55,8 +56,14 @@ void memoryDump(char* path) {
     printStaticDataAreaTo(out);
     fprintf(out, "\n");
 
-    fprintf(out, "The content of the return value register: %d\n", returnValueRegister);
-    fprintf(out, "\n");
+    fprintf(out, "The content of the return value register:\n");
+    if (returnValueRegister == NULL) {
+        fprintf(out, "The register is empty! (NULL-Reference)\n");
+    }
+    else {
+        fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
+        fprintf(out, "Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+    }
 
     fprintf(out, "Content of program memory:\n\n");
     for (i = 0; i < instructionCount; i++) {
@@ -109,15 +116,15 @@ char* getInput(void) {
 
     cleanUp = 0;    
     newLine = NULL;
-    input = calloc(12, sizeof(unsigned char));
+    input = calloc(14, sizeof(unsigned char));
     if (input == NULL) {
         changeTextColor("RED");
         printf("%s ", ERROR);
-        printf("System could not allocate 12 bytes of memory for debugger input.\n");
+        printf("System could not allocate 14 bytes of memory for debugger input.\n");
         changeTextColor("WHITE");
         exit(E_ERR_IO_SHELL);
     }
-    if (fgets(input, 12, stdin) == NULL) {
+    if (fgets(input, 14, stdin) == NULL) {
         changeTextColor("RED");
         printf("Something went wrong while taking user input!\n");
         changeTextColor("WHITE");
@@ -139,7 +146,7 @@ char* getInput(void) {
         printf("*WARNING* ");
         changeTextColor("WHITE");
 
-        printf("Truncated input after 12 characters!\n");
+        printf("Truncated input after 14 characters!\n");
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
     }
 
@@ -318,14 +325,14 @@ int processCommand(char* command) {
                 value = getNumber();
                 changeTextColor("WHITE");
 
-                replaceStackSlotValue(slot, value);
+                replaceStackSlotValue(slot, TRUE, value);
 
                 break;
             }
 
             case 2: { /* Static data area*/
                 int slot;
-                int value;
+                ObjRef value;
 
                 printf("%s Listing contents of static data area:\n\n", DEBUG_EDIT);
                 changeTextColor("CYAN");
@@ -355,10 +362,12 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
+                value = allocate(sizeof(int));
+
                 printf("%s Now enter the new value for this global variable:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                value = getNumber();
+                *(int *)value->data = getNumber();
                 changeTextColor("WHITE");
 
                 setVariable(slot, value);
@@ -366,18 +375,26 @@ int processCommand(char* command) {
             }
 
             case 3: { /* Return value register */
-                int value;
+                ObjRef obj;
 
+                obj = allocate(sizeof(int));
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                printf("The current value of the return value register is: ");
-                printf("%d\n", returnValueRegister);
+                printf("The current value of the return value register is:\n");
+                if (returnValueRegister == NULL) {
+                    printf("Return value register contains NULL-Reference!\n");
+                }
+                else {
+                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
+                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                }
+                
                 changeTextColor("WHITE");
                 printf("%s Now enter a new value for the return value register: ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                value = getNumber();
+                *(int *)obj->data = getNumber();
                 changeTextColor("WHITE");
-                returnValueRegister = value;
+                returnValueRegister = obj;
                 break;
             }
 
@@ -592,6 +609,7 @@ int processCommand(char* command) {
         printf("%s 2: Static data area\n", DEBUG_INSPECT);
         printf("%s 3: Return value register\n", DEBUG_INSPECT);
         printf("%s 4: Program Memory\n", DEBUG_INSPECT);
+        printf("%s 5: Object-Reference\n", DEBUG_INSPECT);        
         printf("%s Choose one of the aforementioned or 0 to abort!\n", DEBUG_INSPECT);
         printf("%s ", DEBUG_INSPECT);
 
@@ -620,15 +638,40 @@ int processCommand(char* command) {
 
             case 3: {
                 printf("%s ", DEBUG_INSPECT);
-                changeTextColor("CYAN");
-                printf("The current value of the return value register is: ");
-                printf("%d\n", returnValueRegister);
+                printf("The current value of the return value register is:\n");
+                if (returnValueRegister == NULL) {
+                    printf("Return value register contains NULL-Reference!\n");
+                }
+                else {
+                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
+                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                }
                 changeTextColor("WHITE");
                 break;
             }
             
             case 4: {
                 listProgramMemory();
+                break;
+            }
+
+            case 5: {
+                ObjRef obj;
+
+                printf("%s Enter the address of the object reference:\n", DEBUG_INSPECT);
+                printf("%s 0x", DEBUG_INSPECT);
+                changeTextColor("CYAN");
+
+                obj = (ObjRef) strtol(getInput(), NULL, 16);
+                changeTextColor("WHITE");
+
+                if (obj == NULL) {
+                    printf("%s There is no object at specified pointer...\n", DEBUG_INSPECT);
+                    break;
+                }
+
+                printf(" Size in bytes:     %d\n", obj->size);
+                printf(" Value (in Base10): %d\n", *(int*)obj->data);
                 break;
             }
 
@@ -689,11 +732,8 @@ void debug(void) {
     
     verbose = FALSE;
     breakpoint = -1;
-    pc = 0;
     quit = FALSE;
     run = FALSE;
-    initStack(10000);
-    returnValueRegister = 0;
 
     printf("%s Initialization routine completed! Launching program...\n\n", DEBUGGER);
 

@@ -9,6 +9,7 @@ void main() {
     local Integer remainder;
     local Integer originalInteger;
 
+    reversedInteger = 0;
     n = readInteger();
     originalInteger = n;
 

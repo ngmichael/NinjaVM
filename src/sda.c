@@ -3,9 +3,10 @@
 #include "headers/njvm.h"
 #include "headers/sda.h"
 #include "headers/stack.h"
+#include "headers/heap.h"
 
 unsigned int sdaSize;
-int* sda;
+ObjRef* sda;
 
 /**
  * Initializes the static data area.
@@ -20,7 +21,7 @@ int* sda;
  */
 void initSda(unsigned int size) {
     sdaSize = size;
-    sda = calloc(size, sizeof(int));
+    sda = calloc(size, sizeof(ObjRef));
     if (sda == NULL && size > 0) {
         printf(
             "Error: Can't initialize sda with %lu Bytes of memory.\n",
@@ -41,7 +42,7 @@ void initSda(unsigned int size) {
  * dsiplay an error message and terminate the VM.
  */
 void popGlobal(unsigned int position) {
-    int value;
+    ObjRef value;
 
     if (position >= sdaSize) {
         printf(
@@ -51,7 +52,7 @@ void popGlobal(unsigned int position) {
         exit(E_ERR_SDA_INDEX);
     }
     
-    value = pop();
+    value = popObjRef();
     sda[position] = value;
 }
 
@@ -66,7 +67,7 @@ void popGlobal(unsigned int position) {
  * dsiplay an error message and terminate the VM.
  */
 void pushGlobal(unsigned int position) {
-    int value;
+    ObjRef value;
 
     if (position >= sdaSize) {
         printf(
@@ -77,7 +78,7 @@ void pushGlobal(unsigned int position) {
     }
 
     value = sda[position];
-    push(value);
+    pushObjRef(value);
 }
 
 void printStaticDataAreaTo(FILE* stream) {
@@ -85,7 +86,14 @@ void printStaticDataAreaTo(FILE* stream) {
 
     fprintf(stream, "Static data area contains %u variables.\n", sdaSize);
     for (i = 0; i < sdaSize; i++) {
-        fprintf(stream, "[%04u]: %d\n", i, sda[i]);
+        if (sda[i] == NULL) {
+            fprintf(stream, "[%04u]: (NULL)\n", i);
+            continue;
+        }
+
+        fprintf(stream, "[%04u]: %p\n", i, (void *) sda[i]);
+        fprintf(stream, "        Size:  %d Bytes\n", sda[i]->size);
+        fprintf(stream, "        Value: %d\n", *(int *)sda[i]->data);
     }
 
     if (sdaSize > 0)
@@ -116,8 +124,10 @@ int hasIndex(unsigned int n) {
  * @param value - the new value
  * @return TRUE if variable exists, FALSE otherwise
  */
-int setVariable(unsigned int varnum, int value) {
+int setVariable(unsigned int varnum, ObjRef value) {
+
     if (hasIndex(varnum) == FALSE) return FALSE;
+
     sda[varnum] = value;
     return TRUE;
 }
