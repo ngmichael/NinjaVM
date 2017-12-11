@@ -311,7 +311,7 @@ void replaceStackSlotValue(unsigned int slot, int isObjRef, int value) {
     if (isObjRef == TRUE) {
         ObjRef obj;
 
-        obj = allocate(sizeof(int));
+        obj = newPrimObject(sizeof(int));
         obj->size = sizeof(int);
         *(int *)obj->data = value;
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "headers/njvm.h"
 #include "../lib/support.h"
 
@@ -11,7 +12,7 @@
  */
 void fatalError(char* msg) {
     fprintf(stderr, "ERROR: %s\n", msg);
-    exit();
+    exit(E_ERR_BIG_INT);
 }
 
 /**
@@ -23,13 +24,13 @@ void fatalError(char* msg) {
  * @param size - the amount of bytes that the object shall hold
  * @return A pointer to the first byte of this Object on the heap
  */
-ObjRef allocate(unsigned int size) {
-    ObjRef object = calloc(size + sizeof(unsigned int), sizeof(unsigned int));
+ObjRef newPrimObject(int dataSize) {
+    ObjRef object = calloc(dataSize + sizeof(int), sizeof(int));
     if (object == NULL) {
-        printf("Error: Failed to initialize memory for object with size %lu!\n", size + sizeof(unsigned int));
+        printf("Error: Failed to initialize memory for object with size %lu!\n", dataSize + sizeof(int));
         exit(E_ERR_SYS_MEM);
     }
-    object->size = size;
+    object->size = dataSize;
     return object;
 }
 

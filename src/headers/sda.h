@@ -1,7 +1,7 @@
 #ifndef KSP_WS17_18_SDA_H
 #define KSP_WS17_18_SDA_H
 
-#include "../lib/support.h"
+#include "../../lib/support.h"
 
 void initSda(unsigned int size);
 void pushGlobal(unsigned int size);

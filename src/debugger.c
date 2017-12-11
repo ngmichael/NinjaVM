@@ -361,7 +361,7 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
-                value = allocate(sizeof(int));
+                value = newPrimObject(sizeof(int));
 
                 printf("%s Now enter the new value for this global variable:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
@@ -376,7 +376,7 @@ int processCommand(char* command) {
             case 3: { /* Return value register */
                 ObjRef obj;
 
-                obj = allocate(sizeof(int));
+                obj = newPrimObject(sizeof(int));
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
                 printf("The current value of the return value register is:\n");

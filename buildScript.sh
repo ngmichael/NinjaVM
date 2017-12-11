@@ -15,6 +15,9 @@ mkdir out/ngmh83
 # Copy source files
 cp src out/ngmh83/src -r
 
+# Copy libraraies
+cp lib out/ngmh83/lib -r
+
 # Copy and rename debugger documentation
 cp docs/DebuggerDocumentation.txt out/ngmh83/debug.txt
 
@@ -27,7 +30,7 @@ Muenscher, Felix, 5096954" > out/ngmh83/KSP-HU1.TEAM
 
 # Generate NinjaVM compile script and make it executable
 echo "cd src
-gcc -g -std=c89 -Wall -pedantic -o ../njvm njvm.c stack.c sda.c instructions.c debugger.c utils.c
+gcc -g -std=c89 -Wall -pedantic -o ../out/njvm debugger.c instructions.c njvm.c sda.c stack.c support.c -L ../lib/ -l bigint
 cd ..
 chmod +x njvm" > out/ngmh83/mknjvm
 chmod +x out/ngmh83/mknjvm
@@ -37,5 +40,5 @@ cd out
 tar -cvf ngmh83.tar ngmh83
 gzip ngmh83.tar
 
-# Cleanup all temporary file
+# Cleanup all temporary files
 rm ngmh83 -r

@@ -28,7 +28,7 @@ void execute(unsigned int opcode, int operand) {
         case PUSHC: {
             ObjRef object;
 
-            object = allocate(sizeof(int));
+            object = newPrimObject(sizeof(int));
             *(int *)object->data = operand;
 
             pushObjRef(object);
@@ -38,7 +38,7 @@ void execute(unsigned int opcode, int operand) {
             ObjRef val1, val2, res;
             val1 = popObjRef();
             val2 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int*)res->data = *(int*)val1->data + *(int*)val2->data;
             pushObjRef(res);
             break;
@@ -47,7 +47,7 @@ void execute(unsigned int opcode, int operand) {
             ObjRef val1, val2, res;
             val2 = popObjRef();
             val1 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int*)res->data = *(int*)val1->data - *(int*)val2->data;
             pushObjRef(res);
             break;
@@ -56,7 +56,7 @@ void execute(unsigned int opcode, int operand) {
             ObjRef val1, val2, res;
             val1 = popObjRef();
             val2 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int*)res->data = *(int*)val1->data * *(int*)val2->data;
             pushObjRef(res);
             break;
@@ -71,7 +71,7 @@ void execute(unsigned int opcode, int operand) {
                 exit(E_ERR_DIV_BY_ZERO);
             }
 
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int*)res->data = *(int*)val1->data / *(int*)val2->data;
             pushObjRef(res);
             break;
@@ -86,7 +86,7 @@ void execute(unsigned int opcode, int operand) {
                 exit(E_ERR_DIV_BY_ZERO);
             }
 
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int*)res->data = *(int*)val1->data % *(int*)val2->data;
             pushObjRef(res);
             break;
@@ -99,7 +99,7 @@ void execute(unsigned int opcode, int operand) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            object = allocate(sizeof(int));
+            object = newPrimObject(sizeof(int));
             *(int *)object->data = read;
             pushObjRef(object);
             break;
@@ -119,7 +119,7 @@ void execute(unsigned int opcode, int operand) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            object = allocate(sizeof(int));
+            object = newPrimObject(sizeof(int));
             *(int *)object->data = (int)read;
             pushObjRef(object);
             break;
@@ -159,7 +159,7 @@ void execute(unsigned int opcode, int operand) {
             
             val1 = popObjRef();
             val2 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int *)res->data = *(int *)val1->data == *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
@@ -169,7 +169,7 @@ void execute(unsigned int opcode, int operand) {
             
             val1 = popObjRef();
             val2 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int *)res->data = *(int *)val1->data != *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
@@ -179,7 +179,7 @@ void execute(unsigned int opcode, int operand) {
             
             val2 = popObjRef();
             val1 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int *)res->data = *(int *)val1->data < *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
@@ -189,7 +189,7 @@ void execute(unsigned int opcode, int operand) {
             
             val2 = popObjRef();
             val1 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int *)res->data = *(int *)val1->data <= *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
@@ -199,7 +199,7 @@ void execute(unsigned int opcode, int operand) {
             
             val2 = popObjRef();
             val1 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int *)res->data = *(int *)val1->data > *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;
@@ -209,7 +209,7 @@ void execute(unsigned int opcode, int operand) {
             
             val2 = popObjRef();
             val1 = popObjRef();
-            res = allocate(sizeof(int));
+            res = newPrimObject(sizeof(int));
             *(int *)res->data = *(int *)val1->data >= *(int *)val2->data ? TRUE : FALSE; 
             pushObjRef(res);
             break;

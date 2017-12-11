@@ -7,7 +7,7 @@ NinjaVM Exit code documentation
  4 (E_ERR_SYS_MEM)      = System memory allocation error
  5 (E_ERR_OPCODE)       = Unknown Instruction error
  6 (E_ERR_DIV_BY_ZERO)  = Division by Zero error
- 7                      = - undefined -
+ 7 (E_ERR_BIG_INT)      = Error during computation with big int object
  8                      = - undefined -
  9                      = - undefined -
 10 (E_ERR_NO_PROGF)     = No code file specified error
