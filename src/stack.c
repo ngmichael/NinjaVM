@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "headers/heap.h"
+#include "../lib/support.h"
 #include "headers/njvm.h"
 #include "headers/stack.h"
 

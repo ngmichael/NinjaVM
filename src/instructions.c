@@ -4,7 +4,7 @@
 #include "headers/stack.h"
 #include "headers/njvm.h"
 #include "headers/sda.h"
-#include "headers/heap.h"
+#include "../lib/support.h"
 
 char* opcodes[] = {
     "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",

@@ -1,7 +1,7 @@
 #ifndef KSP_WS17_18_STACK_H
 #define KSP_WS17_18_STACK_H
 
-#include "heap.h"
+#include "../lib/support.h"
 
 extern unsigned int sp;
 extern unsigned int fp;

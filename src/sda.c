@@ -3,7 +3,7 @@
 #include "headers/njvm.h"
 #include "headers/sda.h"
 #include "headers/stack.h"
-#include "headers/heap.h"
+#include "../lib/support.h"
 
 unsigned int sdaSize;
 ObjRef* sda;

@@ -7,8 +7,7 @@
 #include "headers/instructions.h"
 #include "headers/sda.h"
 #include "headers/debugger.h"
-#include "headers/utils.h"
-#include "headers/heap.h"
+#include "../lib/support.h"
 
 int halt;
 unsigned int pc;

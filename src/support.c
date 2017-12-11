@@ -1,9 +1,18 @@
 #include <stdio.h>
 #include <string.h>
 #include "headers/njvm.h"
-#include "headers/utils.h"
-#include "lib/support.h"
+#include "../lib/support.h"
 
+
+/**
+ * Prints the supplied error message
+ * 
+ * @param msg - the error message
+ */
+void fatalError(char* msg) {
+    fprintf(stderr, "ERROR: %s\n", msg);
+    exit();
+}
 
 /**
  * Creates a new object instance on the heap
