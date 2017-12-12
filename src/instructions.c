@@ -27,90 +27,55 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case PUSHC: {
-            ObjRef object;
-
-            object = newPrimObject(sizeof(int));
-            *(int *)object->data = operand;
-
-            pushObjRef(object);
+            bigFromInt(operand);
+            pushObjRef(bip.res);
             break;
         }
         case ADD: {
-            ObjRef val1, val2, res;
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int*)res->data = *(int*)val1->data + *(int*)val2->data;
-            pushObjRef(res);
+            bip.op1 = popObjRef();
+            bip.op2 = popObjRef();
+            bigAdd();
+            pushObjRef(bip.res);
             break;
         }
         case SUB: {
-            bip.op2 = popObjRef();
             bip.op1 = popObjRef();
+            bip.op2 = popObjRef();
             bigSub();
             pushObjRef(bip.res);
             break;
         }
         case MUL: {
-            ObjRef val1, val2, res;
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int*)res->data = *(int*)val1->data * *(int*)val2->data;
-            pushObjRef(res);
+            bip.op1 = popObjRef();
+            bip.op2 = popObjRef();
+            bigMul();
+            pushObjRef(bip.res);
             break;
         }
         case DIV: {
-            ObjRef val1, val2, res;
-            val2 = popObjRef();
-            val1 = popObjRef();
-            
-            if (*(int *)val2->data == 0) {
-                printf("Error: Division by zero\n");
-                exit(E_ERR_DIV_BY_ZERO);
-            }
-
-            res = newPrimObject(sizeof(int));
-            *(int*)res->data = *(int*)val1->data / *(int*)val2->data;
-            pushObjRef(res);
+            bip.op1 = popObjRef();
+            bip.op2 = popObjRef();
+            bigDiv();
+            pushObjRef(bip.res);
             break;
         }
         case MOD: {
-            ObjRef val1, val2, res;
-            val2 = popObjRef();
-            val1 = popObjRef();
-            
-            if (*(int *)val2->data == 0) {
-                printf("Error: Division by zero\n");
-                exit(E_ERR_DIV_BY_ZERO);
-            }
-
-            res = newPrimObject(sizeof(int));
-            *(int*)res->data = *(int*)val1->data % *(int*)val2->data;
-            pushObjRef(res);
-            break;
+            bip.op1 = popObjRef();
+            bip.op2 = popObjRef();
+            bigDiv();
+            pushObjRef(bip.rem);
         }
         case RDINT: {
-            ObjRef object;
-            int read, result;
-            result = scanf(" %d", &read);
-            if (result == 0 || result == EOF) {
-                printf("Error: Something went wrong while taking user input!\n");
-                exit(E_ERR_IO_SHELL);
-            }
-            object = newPrimObject(sizeof(int));
-            *(int *)object->data = read;
-            pushObjRef(object);
+            bigRead(stdin);
+            pushObjRef(bip.res);
             break;
         }
         case WRINT: {
-            ObjRef val;
-            val = popObjRef();
-            printf("%d", *(int *)val->data);
+            bip.op1 = popObjRef();
+            bigPrint(stdout);
             break;
         }
         case RDCHR: {
-            ObjRef object;
             char read;
             int result;
             result = scanf(" %c", &read);
@@ -118,15 +83,17 @@ void execute(unsigned int opcode, int operand) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            object = newPrimObject(sizeof(int));
-            *(int *)object->data = (int)read;
-            pushObjRef(object);
+            
+            bigFromInt((int) read);
+            pushObjRef(bip.res);
             break;
         }
         case WRCHR: {
-            ObjRef val;
-            val = popObjRef();
-            printf("%c", *val->data);
+            char c;
+
+            bip.op1 = popObjRef();
+            c = (char) bigToInt();
+            printf("%c", c);
             break;
         }
         case PUSHG: {
