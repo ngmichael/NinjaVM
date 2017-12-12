@@ -15,6 +15,23 @@ char* opcodes[] = {
 };
 
 /**
+ * Pops two objects from the stack into the BIP
+ * and calls the bigCmp() function.
+ * Result is then stored in op1 of BIP for
+ * further processing.
+ * 
+ * @return the result of the comparison as regular integer
+ */
+static int compare(void) {
+    bip.op1 = popObjRef();
+    bip.op2 = popObjRef();
+    bigCmp();
+
+    bip.op1 = bip.res;
+    return bigToInt();
+}
+
+/**
  * Executes an instruction with its operand.
  * 
  * @param opcode - the instruction to be executed
@@ -121,33 +138,27 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case EQ: {
-            ObjRef val1, val2, res;
-            
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int *)res->data = *(int *)val1->data == *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res == 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case NE: {
-            ObjRef val1, val2, res;
+            int res;
             
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int *)res->data = *(int *)val1->data != *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            res = compare();
+            bigFromInt(res != 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case LT: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int *)res->data = *(int *)val1->data < *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res < 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case LE: {
