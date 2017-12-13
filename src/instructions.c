@@ -162,33 +162,27 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case LE: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int *)res->data = *(int *)val1->data <= *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res <= 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case GT: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int *)res->data = *(int *)val1->data > *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res > 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case GE: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = newPrimObject(sizeof(int));
-            *(int *)res->data = *(int *)val1->data >= *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res >= 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case JMP: {
@@ -196,17 +190,17 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case BRF: {
-            ObjRef value;
+            int res;
 
-            value = popObjRef();
-            if (*(int *)value->data == FALSE) pc = operand;
+            res = compare();
+            if (res == FALSE) pc = operand;
             break;
         }
         case BRT: {
-            ObjRef value;
-            
-            value = popObjRef();
-            if (*(int *)value->data == TRUE) pc = operand;
+            int res;
+
+            res = compare();
+            if (res == TRUE) pc = operand;
             break;
         }
         case CALL: {
