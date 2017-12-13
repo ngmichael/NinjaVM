@@ -192,14 +192,16 @@ void execute(unsigned int opcode, int operand) {
         case BRF: {
             int res;
 
-            res = compare();
+            bip.op1 = popObjRef();
+            res = bigToInt();
             if (res == FALSE) pc = operand;
             break;
         }
         case BRT: {
             int res;
 
-            res = compare();
+            bip.op1 = popObjRef();
+            res = bigToInt();
             if (res == TRUE) pc = operand;
             break;
         }
