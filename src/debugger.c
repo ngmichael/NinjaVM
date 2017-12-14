@@ -9,6 +9,7 @@
 #include "headers/sda.h"
 #include "headers/debugger.h"
 #include "../lib/support.h"
+#include "../lib/bigint.h"
 
 unsigned int run;
 unsigned int breakpoint;
@@ -61,7 +62,10 @@ void memoryDump(char* path) {
     }
     else {
         fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
-        fprintf(out, "Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+        fprintf(out, "Value (in Base10): ");
+        bip.op1 = returnValueRegister;
+        bigPrint(out);
+        fprintf(out, "\n");
     }
 
     fprintf(out, "Content of program memory:\n\n");
@@ -331,7 +335,6 @@ int processCommand(char* command) {
 
             case 2: { /* Static data area*/
                 int slot;
-                ObjRef value;
 
                 printf("%s Listing contents of static data area:\n\n", DEBUG_EDIT);
                 changeTextColor("CYAN");
@@ -361,22 +364,19 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
-                value = newPrimObject(sizeof(int));
-
                 printf("%s Now enter the new value for this global variable:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                *(int *)value->data = getNumber();
+
+                bigFromInt(getNumber());
+
                 changeTextColor("WHITE");
 
-                setVariable(slot, value);
+                setVariable(slot, bip.res);
                 break;
             }
 
             case 3: { /* Return value register */
-                ObjRef obj;
-
-                obj = newPrimObject(sizeof(int));
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
                 printf("The current value of the return value register is:\n");
@@ -384,16 +384,19 @@ int processCommand(char* command) {
                     printf("Return value register contains NULL-Reference!\n");
                 }
                 else {
-                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
-                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                    printf("Size in bytes:     %d\n", returnValueRegister->size);
+                    printf("Value (in Base10): ");
+                    bip.op1 = returnValueRegister;
+                    bigPrint(stdout);
+                    printf("\n");
                 }
                 
                 changeTextColor("WHITE");
                 printf("%s Now enter a new value for the return value register: ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                *(int *)obj->data = getNumber();
+                bigFromInt(getNumber());
                 changeTextColor("WHITE");
-                returnValueRegister = obj;
+                returnValueRegister = bip.res;
                 break;
             }
 
@@ -654,7 +657,10 @@ int processCommand(char* command) {
                     changeTextColor("WHITE");
                     printf("%s ", DEBUG_INSPECT);
                     changeTextColor("CYAN");
-                    printf("Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                    printf("Value (in Base10): ");
+                    bip.op1 = returnValueRegister;
+                    bigPrint(stdout);
+                    printf("\n");
                 }
                 changeTextColor("WHITE");
                 break;
@@ -680,8 +686,11 @@ int processCommand(char* command) {
                     break;
                 }
 
-                printf(" Size in bytes:     %d\n", obj->size);
-                printf(" Value (in Base10): %d\n", *(int*)obj->data);
+                printf("Size in bytes:     %d\n", obj->size);
+                printf("Value (in Base10): ");
+                bip.op1 = obj;
+                bigPrint(stdout);
+                printf("\n");
                 break;
             }
 
