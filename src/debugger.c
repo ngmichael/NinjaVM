@@ -638,13 +638,23 @@ int processCommand(char* command) {
 
             case 3: {
                 printf("%s ", DEBUG_INSPECT);
+                changeTextColor("CYAN");
                 printf("The current value of the return value register is:\n");
                 if (returnValueRegister == NULL) {
+                    changeTextColor("WHITE");
+                    printf("%s ", DEBUG_INSPECT);
+                    changeTextColor("CYAN");
                     printf("Return value register contains NULL-Reference!\n");
                 }
                 else {
-                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
-                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                    changeTextColor("WHITE");
+                    printf("%s ", DEBUG_INSPECT);
+                    changeTextColor("CYAN");
+                    printf("Size in bytes:     %d\n", returnValueRegister->size);
+                    changeTextColor("WHITE");
+                    printf("%s ", DEBUG_INSPECT);
+                    changeTextColor("CYAN");
+                    printf("Value (in Base10): %d\n", *(int*)returnValueRegister->data);
                 }
                 changeTextColor("WHITE");
                 break;
