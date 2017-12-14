@@ -3,6 +3,8 @@
 
 #include "../../lib/support.h"
 
+extern unsigned int sdaSize;
+
 void initSda(unsigned int size);
 void pushGlobal(unsigned int size);
 void popGlobal(unsigned int size);

@@ -587,6 +587,7 @@ int processCommand(char* command) {
         printf(" \t\t  data-containing structures like the stack.\n");
 
         printf(" quit\t\t- Stops the VM at the next instruction cycle.\n");
+        printf(" reset\t\t- Resets the VM into its pre program launch state.\n");
         printf(" run\t\t- Starts continuous execution of instrcutions\n");
         printf(" \t\t  until a HALT is executed or the breakpoint\n");
         printf(" \t\t  is reached.\n");
@@ -690,6 +691,21 @@ int processCommand(char* command) {
         printf("Halting NinjaVM...\n");
         changeTextColor("WHITE");
         quit = TRUE;
+        return FALSE;
+    }
+    else if (strcmp("reset", command) == 0) {
+        printf("[Debugger/Reset]: ");
+        changeTextColor("YELLOW");
+        printf("RESETTING NINJA VIRTUAL MACHINE....\n");
+        changeTextColor("WHITE");
+        pc = 1;
+        sp = fp = 0;
+        returnValueRegister = NULL;
+        initSda(sdaSize);
+        run = FALSE;
+        breakpoint = -1;
+        verbose = FALSE;
+        printf("\nNinja Virtual Machine started\n");
         return FALSE;
     }
     else if (strcmp("run", command) == 0) {

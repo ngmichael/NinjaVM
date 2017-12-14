@@ -13,7 +13,7 @@ first instruction of the program and wait for a command.
 The following commands are available and explained in detail
 further below:
 
-breakpoint, dump, edit, execute, help, quit, run, step, verbose
+breakpoint, dump, edit, execute, help, quit, reset, run, step, verbose
 
 ++++++++++ breakpoint ++++++++++
 
@@ -71,6 +71,12 @@ Use this command to exit out of the debugger and the VM entirely.
 It will cause the VM to skip the current instruction and exit the
 execution loop afterwards. An exit message is displayed and the 
 VM is terminated.
+
+++++++++++ reset ++++++++++
+
+Resets the VM into its initial state. The program counter, stack pointer
+and stack-frame pointer get set to 0, global variables as well as the
+return value register are reset to nil.
 
 ++++++++++ run ++++++++++
 
