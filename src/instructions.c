@@ -17,18 +17,13 @@ char* opcodes[] = {
 /**
  * Pops two objects from the stack into the BIP
  * and calls the bigCmp() function.
- * Result is then stored in op1 of BIP for
- * further processing.
  * 
  * @return the result of the comparison as regular integer
  */
 static int compare(void) {
     bip.op1 = popObjRef();
     bip.op2 = popObjRef();
-    bigCmp();
-
-    bip.op1 = bip.res;
-    return bigToInt();
+    return bigCmp();
 }
 
 /**
