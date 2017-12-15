@@ -21,8 +21,8 @@ char* opcodes[] = {
  * @return the result of the comparison as regular integer
  */
 static int compare(void) {
-    bip.op1 = popObjRef();
     bip.op2 = popObjRef();
+    bip.op1 = popObjRef();
     return bigCmp();
 }
 
@@ -78,7 +78,10 @@ void execute(unsigned int opcode, int operand) {
             pushObjRef(bip.rem);
         }
         case RDINT: {
-            bigRead(stdin);
+            int read;
+
+            scanf(" %d", &read);
+            bigFromInt(read);
             pushObjRef(bip.res);
             break;
         }
