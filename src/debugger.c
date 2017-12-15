@@ -785,7 +785,6 @@ void debug(void) {
             changeTextColor("MAGENTA");
             printf("Reached breakpoint!\n");
             changeTextColor("WHITE");
-            breakpoint = 0;
         }
     
         doExecute = FALSE;
