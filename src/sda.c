@@ -4,6 +4,7 @@
 #include "headers/sda.h"
 #include "headers/stack.h"
 #include "../lib/support.h"
+#include "../lib/bigint.h"
 
 unsigned int sdaSize;
 ObjRef* sda;
@@ -93,7 +94,10 @@ void printStaticDataAreaTo(FILE* stream) {
 
         fprintf(stream, "[%04u]: %p\n", i, (void *) sda[i]);
         fprintf(stream, "        Size:  %d Bytes\n", sda[i]->size);
-        fprintf(stream, "        Value: %d\n", *(int *)sda[i]->data);
+        fprintf(stream, "        Value (in Base10): ");
+        bip.op1 = sda[i];
+        bigPrint(stream);
+        fprintf(stream, "\n");
     }
 
     if (sdaSize > 0)

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../lib/support.h"
+#include "../lib/bigint.h"
 #include "headers/njvm.h"
 #include "headers/stack.h"
 
@@ -259,8 +260,11 @@ void printStackTo(FILE* stream) {
             if (slot.isObjRef == TRUE) {
                 fprintf(stream, "fp     ---> [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
                 if ((void *)slot.u.objRef != NULL) {
-                    fprintf(stream, "                    \tSize:  %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "                    \tValue: %d\n", *(int *)slot.u.objRef->data);
+                    fprintf(stream, "                        Size:  %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "                        Value (in Base10): ");
+                    bip.op1 = slot.u.objRef;
+                    bigPrint(stream);
+                    fprintf(stream, "\n");
                 }
             } else fprintf(stream, "fp     ---> [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
             
@@ -269,8 +273,11 @@ void printStackTo(FILE* stream) {
             if (slot.isObjRef == TRUE) {
                 fprintf(stream, "            [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
                 if ((void *)slot.u.objRef != NULL) {
-                    fprintf(stream, "                    \tSize:  %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "                    \tValue: %d\n", *(int *)slot.u.objRef->data);
+                    fprintf(stream, "                        Size:  %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "                        Value (in Base10): ");
+                    bip.op1 = slot.u.objRef;
+                    bigPrint(stream);
+                    fprintf(stream, "\n");
                 }
             } else fprintf(stream, "            [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
         }
