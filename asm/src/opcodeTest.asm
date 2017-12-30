@@ -1,49 +1,120 @@
+    jmp __main
 
-asf 2
-pushc 20
-pushc 21 
-popl 1
-popl 0
+__calltest:
 
-// How the stack should look after:
-// 8: 0
-// 7: 1
-// 6: 0
-// 5: 0
-// 4: 1
-// 3: 0
-// 2: 21
-// 1: 20
-// 0: 0
+    pushc 10
+    wrint
+    ret
 
-// eq test
-pushl 0
-pushl 1
-eq
+__main:
+//pushc test
+    pushc 10
 
-// ne test
-pushl 0
-pushl 1
-ne
+//add test
+    pushc 10
+    add
 
-// gt test
-pushl 0
-pushl 1
-gt
+//sub test
+    pushc 10
+    sub
 
-// ge test
-pushl 0
-pushl 1
-ge
+//mul test
+    pushc 10
+    mul
 
-// lt test
-pushl 0
-pushl 1
-lt
+//div test
+    pushc 2
+    div
 
-// le test
-pushl 0
-pushl 1
-le
+//mod test
+    pushc 5
+    mod
 
-halt
+//rdint test
+    rdint
+
+//wrint test
+    wrint
+
+//rdchr test
+    rdchr
+
+//wrchr test
+    wrchr
+
+    popg 0
+    pushg 0
+
+//test for asf, rsf, pushl & popl
+
+    pushc 10
+    asf 1
+    popl 0
+    pushl 0
+    rsf
+
+    asf 2
+    pushc 10
+    pushc 20
+    popl 0
+    popl 1
+
+//eq test
+    pushl 0
+    pushl 1
+    eq
+
+//ne test
+    pushl 0
+    pushl 1
+    ne
+
+//gt test
+    pushl 0
+    pushl 1
+    gt
+
+//ge test
+    pushl 0
+    pushl 1
+    ge
+
+//lt test
+    pushl 0
+    pushl 1
+    lt
+
+//le test
+    pushl 0
+    pushl 1
+    le
+
+    rsf
+
+// brt test
+    pushc 1
+    brt __testofbrt
+    halt
+__testofbrt:
+
+    // brf test
+    pushc 0
+    brf __testbrf
+    halt
+__testbrf:
+
+    call __calltest
+
+    pushc 10
+    pushc 20
+    drop 2
+
+    pushc 10
+
+    popr
+
+    pushr
+
+    dup
+
+    halt
