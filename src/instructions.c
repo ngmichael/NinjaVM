@@ -51,8 +51,8 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case SUB: {
-            bip.op1 = popObjRef();
             bip.op2 = popObjRef();
+            bip.op1 = popObjRef();
             bigSub();
             pushObjRef(bip.res);
             break;
