@@ -76,6 +76,7 @@ void execute(unsigned int opcode, int operand) {
             bip.op1 = popObjRef();
             bigDiv();
             pushObjRef(bip.rem);
+            break;
         }
         case RDINT: {
             int read;
