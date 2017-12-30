@@ -65,15 +65,15 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case DIV: {
-            bip.op1 = popObjRef();
             bip.op2 = popObjRef();
+            bip.op1 = popObjRef();
             bigDiv();
             pushObjRef(bip.res);
             break;
         }
         case MOD: {
-            bip.op1 = popObjRef();
             bip.op2 = popObjRef();
+            bip.op1 = popObjRef();
             bigDiv();
             pushObjRef(bip.rem);
         }
