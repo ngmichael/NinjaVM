@@ -11,6 +11,12 @@
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF) 
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 
+#define MSB (1 << (8 * sizeof(unsigned int) - 1))
+#define IS_PRIM(objRef) ((( objRef)->size & MSB) == 0)
+
+#define GET_SIZE(objRef) ((objRef)->size & ~MSB)
+#define GET_REFS(objRef) ((ObjRef *)(objRef)->data)
+
 /* Exit codes */
 
 #define E_EXECOK            0  /* Execution OK */
