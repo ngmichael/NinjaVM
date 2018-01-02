@@ -1,0 +1,18 @@
+
+type Point = record {
+    Integer x;
+    Integer y;
+};
+
+global Point p;
+
+void main() {
+    local Integer result;
+
+    p = new(Point);
+    p.x = readInteger();
+    p.y = readInteger() + p.x;
+
+    result = p.x + p.y;
+    writeInteger(result);
+}
