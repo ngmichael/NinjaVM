@@ -238,6 +238,13 @@ void execute(unsigned int opcode, int operand) {
             pushObjRef(value);
             break;
         }
+        case NEW: {
+            ObjRef object;
+
+            object = newComplexObject(operand);
+            pushObjRef(object);
+            break;
+        }
         case GETF: {
             ObjRef object;
             ObjRef* fields;
