@@ -8,8 +8,8 @@
 #include "headers/instructions.h"
 #include "headers/sda.h"
 #include "headers/debugger.h"
-#include "headers/utils.h"
-#include "headers/heap.h"
+#include "../lib/support.h"
+#include "../lib/bigint.h"
 
 unsigned int run;
 unsigned int breakpoint;
@@ -62,7 +62,10 @@ void memoryDump(char* path) {
     }
     else {
         fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
-        fprintf(out, "Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+        fprintf(out, "Value (in Base10): ");
+        bip.op1 = returnValueRegister;
+        bigPrint(out);
+        fprintf(out, "\n");
     }
 
     fprintf(out, "Content of program memory:\n\n");
@@ -332,7 +335,6 @@ int processCommand(char* command) {
 
             case 2: { /* Static data area*/
                 int slot;
-                ObjRef value;
 
                 printf("%s Listing contents of static data area:\n\n", DEBUG_EDIT);
                 changeTextColor("CYAN");
@@ -362,22 +364,19 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
-                value = allocate(sizeof(int));
-
                 printf("%s Now enter the new value for this global variable:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                *(int *)value->data = getNumber();
+
+                bigFromInt(getNumber());
+
                 changeTextColor("WHITE");
 
-                setVariable(slot, value);
+                setVariable(slot, bip.res);
                 break;
             }
 
             case 3: { /* Return value register */
-                ObjRef obj;
-
-                obj = allocate(sizeof(int));
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
                 printf("The current value of the return value register is:\n");
@@ -385,16 +384,19 @@ int processCommand(char* command) {
                     printf("Return value register contains NULL-Reference!\n");
                 }
                 else {
-                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
-                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                    printf("Size in bytes:     %d\n", returnValueRegister->size);
+                    printf("Value (in Base10): ");
+                    bip.op1 = returnValueRegister;
+                    bigPrint(stdout);
+                    printf("\n");
                 }
                 
                 changeTextColor("WHITE");
                 printf("%s Now enter a new value for the return value register: ", DEBUG_EDIT);
                 changeTextColor("CYAN");
-                *(int *)obj->data = getNumber();
+                bigFromInt(getNumber());
                 changeTextColor("WHITE");
-                returnValueRegister = obj;
+                returnValueRegister = bip.res;
                 break;
             }
 
@@ -588,6 +590,7 @@ int processCommand(char* command) {
         printf(" \t\t  data-containing structures like the stack.\n");
 
         printf(" quit\t\t- Stops the VM at the next instruction cycle.\n");
+        printf(" reset\t\t- Resets the VM into its pre program launch state.\n");
         printf(" run\t\t- Starts continuous execution of instrcutions\n");
         printf(" \t\t  until a HALT is executed or the breakpoint\n");
         printf(" \t\t  is reached.\n");
@@ -638,13 +641,26 @@ int processCommand(char* command) {
 
             case 3: {
                 printf("%s ", DEBUG_INSPECT);
+                changeTextColor("CYAN");
                 printf("The current value of the return value register is:\n");
                 if (returnValueRegister == NULL) {
+                    changeTextColor("WHITE");
+                    printf("%s ", DEBUG_INSPECT);
+                    changeTextColor("CYAN");
                     printf("Return value register contains NULL-Reference!\n");
                 }
                 else {
-                    printf(" Size in bytes:     %d\n", returnValueRegister->size);
-                    printf(" Value (in Base10): %d\n", *(int*)returnValueRegister->data);
+                    changeTextColor("WHITE");
+                    printf("%s ", DEBUG_INSPECT);
+                    changeTextColor("CYAN");
+                    printf("Size in bytes:     %d\n", returnValueRegister->size);
+                    changeTextColor("WHITE");
+                    printf("%s ", DEBUG_INSPECT);
+                    changeTextColor("CYAN");
+                    printf("Value (in Base10): ");
+                    bip.op1 = returnValueRegister;
+                    bigPrint(stdout);
+                    printf("\n");
                 }
                 changeTextColor("WHITE");
                 break;
@@ -670,8 +686,11 @@ int processCommand(char* command) {
                     break;
                 }
 
-                printf(" Size in bytes:     %d\n", obj->size);
-                printf(" Value (in Base10): %d\n", *(int*)obj->data);
+                printf("Size in bytes:     %d\n", obj->size);
+                printf("Value (in Base10): ");
+                bip.op1 = obj;
+                bigPrint(stdout);
+                printf("\n");
                 break;
             }
 
@@ -691,6 +710,21 @@ int processCommand(char* command) {
         printf("Halting NinjaVM...\n");
         changeTextColor("WHITE");
         quit = TRUE;
+        return FALSE;
+    }
+    else if (strcmp("reset", command) == 0) {
+        printf("[Debugger/Reset]: ");
+        changeTextColor("YELLOW");
+        printf("RESETTING NINJA VIRTUAL MACHINE....\n");
+        changeTextColor("WHITE");
+        pc = 1;
+        sp = fp = 0;
+        returnValueRegister = NULL;
+        initSda(sdaSize);
+        run = FALSE;
+        breakpoint = -1;
+        verbose = FALSE;
+        printf("\nNinja Virtual Machine started\n");
         return FALSE;
     }
     else if (strcmp("run", command) == 0) {
@@ -751,7 +785,6 @@ void debug(void) {
             changeTextColor("MAGENTA");
             printf("Reached breakpoint!\n");
             changeTextColor("WHITE");
-            breakpoint = 0;
         }
     
         doExecute = FALSE;

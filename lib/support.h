@@ -1,3 +1,11 @@
+/*
+ * support.h -- object representation and support functions
+ */
+
+
+#ifndef _SUPPORT_H_
+#define _SUPPORT_H_
+
 #define RED     "\x1b[31m"
 #define GREEN   "\x1b[32m"
 #define YELLOW  "\x1b[33m"
@@ -19,3 +27,20 @@ void changeTextColor(char* color);
  * BLUE: unused
  * WHITE: DEFAULT; Everything else
  */
+
+
+/* object representation */
+
+typedef struct {
+  unsigned int size;			/* byte count of payload data */
+  unsigned char data[1];		/* payload data, size as needed */
+} *ObjRef;
+
+
+/* support functions */
+
+void fatalError(char *msg);		/* print a message and exit */
+ObjRef newPrimObject(int dataSize);	/* create a new primitive object */
+
+
+#endif /* _SUPPORT_H_ */

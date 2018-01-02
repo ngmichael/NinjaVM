@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "headers/heap.h"
 #include "headers/njvm.h"
 #include "headers/stack.h"
+#include "../lib/support.h"
+#include "../lib/bigint.h"
 
 StackSlot* stack;
 unsigned int sp;
@@ -259,8 +260,11 @@ void printStackTo(FILE* stream) {
             if (slot.isObjRef == TRUE) {
                 fprintf(stream, "fp     ---> [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
                 if ((void *)slot.u.objRef != NULL) {
-                    fprintf(stream, "                    \tSize:  %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "                    \tValue: %d\n", *(int *)slot.u.objRef->data);
+                    fprintf(stream, "                        Size:  %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "                        Value (in Base10): ");
+                    bip.op1 = slot.u.objRef;
+                    bigPrint(stream);
+                    fprintf(stream, "\n");
                 }
             } else fprintf(stream, "fp     ---> [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
             
@@ -269,8 +273,11 @@ void printStackTo(FILE* stream) {
             if (slot.isObjRef == TRUE) {
                 fprintf(stream, "            [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
                 if ((void *)slot.u.objRef != NULL) {
-                    fprintf(stream, "                    \tSize:  %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "                    \tValue: %d\n", *(int *)slot.u.objRef->data);
+                    fprintf(stream, "                        Size:  %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "                        Value (in Base10): ");
+                    bip.op1 = slot.u.objRef;
+                    bigPrint(stream);
+                    fprintf(stream, "\n");
                 }
             } else fprintf(stream, "            [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
         }
@@ -306,17 +313,14 @@ int isAccessibleStackSlot(int n) {
 void replaceStackSlotValue(unsigned int slot, int isObjRef, int value) {
     if (isAccessibleStackSlot(slot) == FALSE) {
         printf("Warning: %u is not an accessible stack slot!\n", slot);
+        return;
     }
 
     if (isObjRef == TRUE) {
-        ObjRef obj;
-
-        obj = allocate(sizeof(int));
-        obj->size = sizeof(int);
-        *(int *)obj->data = value;
+        bigFromInt(value);
 
         stack[slot].isObjRef = TRUE;
-        stack[slot].u.objRef = obj;
+        stack[slot].u.objRef = bip.res;
     }
     else if (isObjRef == FALSE) {
         stack[slot].isObjRef = FALSE;

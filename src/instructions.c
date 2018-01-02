@@ -4,7 +4,8 @@
 #include "headers/stack.h"
 #include "headers/njvm.h"
 #include "headers/sda.h"
-#include "headers/heap.h"
+#include "../lib/support.h"
+#include "../lib/bigint.h"
 
 char* opcodes[] = {
     "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",
@@ -12,6 +13,18 @@ char* opcodes[] = {
     "NE", "LT", "LE", "GT", "GE", "JMP", "BRF", "BRT", "CALL", "RET", "DROP",
     "PUSHR", "POPR", "DUP",
 };
+
+/**
+ * Pops two objects from the stack into the BIP
+ * and calls the bigCmp() function.
+ * 
+ * @return the result of the comparison as regular integer
+ */
+static int compare(void) {
+    bip.op2 = popObjRef();
+    bip.op1 = popObjRef();
+    return bigCmp();
+}
 
 /**
  * Executes an instruction with its operand.
@@ -26,92 +39,59 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case PUSHC: {
-            ObjRef object;
-
-            object = allocate(sizeof(int));
-            *(int *)object->data = operand;
-
-            pushObjRef(object);
+            bigFromInt(operand);
+            pushObjRef(bip.res);
             break;
         }
         case ADD: {
-            ObjRef val1, val2, res;
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int*)res->data = *(int*)val1->data + *(int*)val2->data;
-            pushObjRef(res);
+            bip.op1 = popObjRef();
+            bip.op2 = popObjRef();
+            bigAdd();
+            pushObjRef(bip.res);
             break;
         }
         case SUB: {
-            ObjRef val1, val2, res;
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int*)res->data = *(int*)val1->data - *(int*)val2->data;
-            pushObjRef(res);
+            bip.op2 = popObjRef();
+            bip.op1 = popObjRef();
+            bigSub();
+            pushObjRef(bip.res);
             break;
         }
         case MUL: {
-            ObjRef val1, val2, res;
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int*)res->data = *(int*)val1->data * *(int*)val2->data;
-            pushObjRef(res);
+            bip.op1 = popObjRef();
+            bip.op2 = popObjRef();
+            bigMul();
+            pushObjRef(bip.res);
             break;
         }
         case DIV: {
-            ObjRef val1, val2, res;
-            val2 = popObjRef();
-            val1 = popObjRef();
-            
-            if (*(int *)val2->data == 0) {
-                printf("Error: Division by zero\n");
-                exit(E_ERR_DIV_BY_ZERO);
-            }
-
-            res = allocate(sizeof(int));
-            *(int*)res->data = *(int*)val1->data / *(int*)val2->data;
-            pushObjRef(res);
+            bip.op2 = popObjRef();
+            bip.op1 = popObjRef();
+            bigDiv();
+            pushObjRef(bip.res);
             break;
         }
         case MOD: {
-            ObjRef val1, val2, res;
-            val2 = popObjRef();
-            val1 = popObjRef();
-            
-            if (*(int *)val2->data == 0) {
-                printf("Error: Division by zero\n");
-                exit(E_ERR_DIV_BY_ZERO);
-            }
-
-            res = allocate(sizeof(int));
-            *(int*)res->data = *(int*)val1->data % *(int*)val2->data;
-            pushObjRef(res);
+            bip.op2 = popObjRef();
+            bip.op1 = popObjRef();
+            bigDiv();
+            pushObjRef(bip.rem);
             break;
         }
         case RDINT: {
-            ObjRef object;
-            int read, result;
-            result = scanf(" %d", &read);
-            if (result == 0 || result == EOF) {
-                printf("Error: Something went wrong while taking user input!\n");
-                exit(E_ERR_IO_SHELL);
-            }
-            object = allocate(sizeof(int));
-            *(int *)object->data = read;
-            pushObjRef(object);
+            int read;
+
+            scanf(" %d", &read);
+            bigFromInt(read);
+            pushObjRef(bip.res);
             break;
         }
         case WRINT: {
-            ObjRef val;
-            val = popObjRef();
-            printf("%d", *(int *)val->data);
+            bip.op1 = popObjRef();
+            bigPrint(stdout);
             break;
         }
         case RDCHR: {
-            ObjRef object;
             char read;
             int result;
             result = scanf(" %c", &read);
@@ -119,15 +99,17 @@ void execute(unsigned int opcode, int operand) {
                 printf("Error: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
-            object = allocate(sizeof(int));
-            *(int *)object->data = (int)read;
-            pushObjRef(object);
+            
+            bigFromInt((int) read);
+            pushObjRef(bip.res);
             break;
         }
         case WRCHR: {
-            ObjRef val;
-            val = popObjRef();
-            printf("%c", *val->data);
+            char c;
+
+            bip.op1 = popObjRef();
+            c = (char) bigToInt();
+            printf("%c", c);
             break;
         }
         case PUSHG: {
@@ -155,63 +137,51 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case EQ: {
-            ObjRef val1, val2, res;
-            
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int *)res->data = *(int *)val1->data == *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res == 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case NE: {
-            ObjRef val1, val2, res;
+            int res;
             
-            val1 = popObjRef();
-            val2 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int *)res->data = *(int *)val1->data != *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            res = compare();
+            bigFromInt(res != 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case LT: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int *)res->data = *(int *)val1->data < *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res < 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case LE: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int *)res->data = *(int *)val1->data <= *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res <= 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case GT: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int *)res->data = *(int *)val1->data > *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res > 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case GE: {
-            ObjRef val1, val2, res;
-            
-            val2 = popObjRef();
-            val1 = popObjRef();
-            res = allocate(sizeof(int));
-            *(int *)res->data = *(int *)val1->data >= *(int *)val2->data ? TRUE : FALSE; 
-            pushObjRef(res);
+            int res;
+
+            res = compare();
+            bigFromInt(res >= 0 ? TRUE : FALSE);
+            pushObjRef(bip.res);
             break;
         }
         case JMP: {
@@ -219,17 +189,19 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case BRF: {
-            ObjRef value;
+            int res;
 
-            value = popObjRef();
-            if (*(int *)value->data == FALSE) pc = operand;
+            bip.op1 = popObjRef();
+            res = bigToInt();
+            if (res == FALSE) pc = operand;
             break;
         }
         case BRT: {
-            ObjRef value;
-            
-            value = popObjRef();
-            if (*(int *)value->data == TRUE) pc = operand;
+            int res;
+
+            bip.op1 = popObjRef();
+            res = bigToInt();
+            if (res == TRUE) pc = operand;
             break;
         }
         case CALL: {

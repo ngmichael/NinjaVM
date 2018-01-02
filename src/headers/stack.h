@@ -1,7 +1,7 @@
 #ifndef KSP_WS17_18_STACK_H
 #define KSP_WS17_18_STACK_H
 
-#include "heap.h"
+#include "../../lib/support.h"
 
 extern unsigned int sp;
 extern unsigned int fp;
@@ -26,5 +26,13 @@ void printStack(void);
 
 int isAccessibleStackSlot(int n);
 void replaceStackSlotValue(unsigned int slot, int isObjRef, int value);
+
+typedef struct {
+	int isObjRef;
+	union {
+		ObjRef objRef;
+		int number;
+	} u;
+} StackSlot;
 
 #endif /* KSP_WS17_18_STACK_H */
