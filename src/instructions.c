@@ -254,6 +254,18 @@ void execute(unsigned int opcode, int operand) {
             pushObjRef(bip.res);
             break;
         }
+        case REFNE: {
+            ObjRef ob1, ob2;
+            int res;
+
+            ob1 = popObjRef();
+            ob2 = popObjRef();
+            res = ob1 != ob2;
+            
+            bigFromInt(res);
+            pushObjRef(bip.res);
+            break;
+        }
         default: {
             printf("Error: Illegal opcode: %u\n", opcode);
             exit(E_ERR_OPCODE);
