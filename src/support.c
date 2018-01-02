@@ -25,7 +25,7 @@ void fatalError(char* msg) {
  * @return A pointer to the first byte of this Object on the heap
  */
 ObjRef newPrimObject(int dataSize) {
-    ObjRef object = calloc(dataSize + sizeof(int), sizeof(int));
+    ObjRef object = calloc(dataSize + sizeof(int), 1);
     if (object == NULL) {
         printf("Error: Failed to initialize memory for object with size %lu!\n", dataSize + sizeof(int));
         exit(E_ERR_SYS_MEM);
