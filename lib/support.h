@@ -41,6 +41,7 @@ typedef struct {
 
 void fatalError(char *msg);		/* print a message and exit */
 ObjRef newPrimObject(int dataSize);	/* create a new primitive object */
+ObjRef newComplexObject(int refCount); /* create a new complex object */
 
 
 #endif /* _SUPPORT_H_ */

@@ -34,6 +34,18 @@ ObjRef newPrimObject(int dataSize) {
     return object;
 }
 
+ObjRef newComplexObject(int refCount) {
+    ObjRef object = calloc((sizeof(ObjRef) * refCount) + sizeof(int), 1);
+
+    if (object == NULL) {
+        printf("Error: Failed to initialize memory for object with size %lu!\n", (sizeof(ObjRef) * refCount) + sizeof(int));
+        exit(E_ERR_SYS_MEM);
+    }
+
+    object->size = refCount | 0x1 << 31;
+    return NULL;
+}
+
 /**
  * Changes the text color of the terminal to the
  * specified color. The following colors are available:
