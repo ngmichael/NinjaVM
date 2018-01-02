@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../lib/support.h"
-#include "../lib/bigint.h"
 #include "headers/njvm.h"
 #include "headers/stack.h"
+#include "../lib/support.h"
+#include "../lib/bigint.h"
 
 StackSlot* stack;
 unsigned int sp;
@@ -313,17 +313,14 @@ int isAccessibleStackSlot(int n) {
 void replaceStackSlotValue(unsigned int slot, int isObjRef, int value) {
     if (isAccessibleStackSlot(slot) == FALSE) {
         printf("Warning: %u is not an accessible stack slot!\n", slot);
+        return;
     }
 
     if (isObjRef == TRUE) {
-        ObjRef obj;
-
-        obj = newPrimObject(sizeof(int));
-        obj->size = sizeof(int);
-        *(int *)obj->data = value;
+        bigFromInt(value);
 
         stack[slot].isObjRef = TRUE;
-        stack[slot].u.objRef = obj;
+        stack[slot].u.objRef = bip.res;
     }
     else if (isObjRef == FALSE) {
         stack[slot].isObjRef = FALSE;
