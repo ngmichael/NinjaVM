@@ -239,7 +239,8 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case GETF: {
-            ObjRef object, fields;
+            ObjRef object;
+            ObjRef* fields;
             int size;
 
             /* Check if the object is not primitive */
