@@ -25,7 +25,9 @@ void fatalError(char* msg) {
  * @return A pointer to the first byte of this Object on the heap
  */
 ObjRef newPrimObject(int dataSize) {
-    ObjRef object = calloc(dataSize + sizeof(int), 1);
+    ObjRef object;
+
+    object = calloc(dataSize + sizeof(int), 1);
     if (object == NULL) {
         printf("Error: Failed to initialize memory for object with size %lu!\n", dataSize + sizeof(int));
         exit(E_ERR_SYS_MEM);
@@ -34,8 +36,18 @@ ObjRef newPrimObject(int dataSize) {
     return object;
 }
 
+/**
+ * Creates a new complex object. These objects are used for storing
+ * records and arrays.
+ * 
+ * @param refCount - The total amount of object references this object can hold
+ * @return a new object with sufficient amount of memory to hold all references
+ */
 ObjRef newComplexObject(int refCount) {
-    ObjRef object = calloc((sizeof(ObjRef) * refCount) + sizeof(int), 1);
+    ObjRef object;
+    int i;
+
+    object = calloc((sizeof(ObjRef) * refCount) + sizeof(int), 1);
 
     if (object == NULL) {
         printf("Error: Failed to initialize memory for object with size %lu!\n", (sizeof(ObjRef) * refCount) + sizeof(int));
@@ -43,7 +55,7 @@ ObjRef newComplexObject(int refCount) {
     }
 
     object->size = refCount | 0x1 << 31;
-    return NULL;
+    return object;
 }
 
 /**
