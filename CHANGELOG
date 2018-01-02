@@ -1,8 +1,18 @@
+V 6.0
+
+ - Added the ability for calculations with numbers of arbitrary size
+
+V 5.0
+
+ - Values on the stack are now separated into VM control information
+   and objects for arithmetic
+ - Arithmetic objects are now stored on a heap
+
 V 4.0
 
-- Added support for procedure calls
-- Added support for code flow control
-- Added more debugging features
+ - Added support for procedure calls
+ - Added support for code flow control
+ - Added more debugging features
 
 V 3.0
 
