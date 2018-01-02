@@ -59,6 +59,30 @@ ObjRef newComplexObject(int refCount) {
 }
 
 /**
+ * Prints details about an object to a stream.
+ * 
+ * @param object - the object that is to be inspected
+ * @param outStream - a FILE* representing the stream
+ */
+void inspectObject(ObjRef object, FILE* outStream) {
+    if (object == NULL) { /* NULL-Pointer */
+        fprintf(outStream, "The object is a NIL-Reference!\n");
+    }
+    else if (IS_PRIM(object)) { /* Primitive-Object (BigInt) */
+        fprintf(outStream, "\tType             : Primitive\n");
+        fprintf(outStream, "\tSize             : %ul Bytes\n", object->size);
+        fprintf(outStream, "\tValue (in Base10): ");
+        bip.op1 = returnValueRegister;
+        bigPrint(outStream);
+        fprintf(outStream, "\n");
+    }
+    else { /* Complex Object */
+        fprintf(outStream, "\tType             : Complex\n");
+        fprintf(outStream, "\tReferencing:     : %d\n", GET_SIZE(object));
+    }
+}
+
+/**
  * Changes the text color of the terminal to the
  * specified color. The following colors are available:
  * 
