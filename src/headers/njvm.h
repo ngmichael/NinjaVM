@@ -45,6 +45,10 @@
 #define E_ERR_KILL_DEBUG    26 /* Debugger has exited in a non-standard way */
 #define E_ERR_ST_NO_OBJ     27 /* Tried to access a stackslot as an object, when it is a number */
 #define E_ERR_ST_NO_NUM     28 /* Tried to access a stackslot as a number, when it is an object */
+#define E_ERR_PRIM_OBJ      39 /* Tried to access a field on a primitive object. */
+#define E_ERR_REC_INDEX     40 /* Index of field in object was out of bounds */
+#define E_ERR_ARR_INDEX     41 /* Array index out of bounds */
+
 
 extern int halt;
 extern unsigned int pc;
