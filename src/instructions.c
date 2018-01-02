@@ -269,6 +269,32 @@ void execute(unsigned int opcode, int operand) {
             pushObjRef(fields[operand]);
             break;
         }
+        case PUTF: {
+            ObjRef* fields;
+            ObjRef value, object;
+            int size;
+
+            value = popObjRef();
+            object = popObjRef();
+
+            /* Check if the object is not primitive */
+            if (IS_PRIM(object)) {
+                printf("Error: Can't access fields on primitive objects!\n");
+                exit(E_ERR_PRIM_OBJ);
+            }
+            
+            /* Check that access is within boundaries of object */
+            size = GET_SIZE(object);
+            if (operand < 0 || operand > size-1) {
+                printf("Error: Record index out of bounds!\n");
+                exit(E_ERR_REC_INDEX);
+            }
+
+            /* Put the value into the field */
+            fields = GET_REFS(object);
+            fields[operand] = value;
+            break;
+        }
         case PUSHN: {
             pushObjRef((ObjRef) NULL);
             break;
