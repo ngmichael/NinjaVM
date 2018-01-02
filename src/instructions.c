@@ -237,6 +237,10 @@ void execute(unsigned int opcode, int operand) {
             pushObjRef(value);
             break;
         }
+        case PUSHN: {
+            pushObjRef((ObjRef) NULL);
+            break;
+        }
         default: {
             printf("Error: Illegal opcode: %u\n", opcode);
             exit(E_ERR_OPCODE);
