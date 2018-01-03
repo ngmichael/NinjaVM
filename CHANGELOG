@@ -1,3 +1,8 @@
+V 7.0
+
+ - Added support for Arrays
+ - Added support for Records
+
 V 6.0
 
  - Added the ability for calculations with numbers of arbitrary size
