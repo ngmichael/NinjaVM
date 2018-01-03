@@ -29,7 +29,6 @@
 #define E_ERR_OPCODE        5  /* Unknown Instruction error */
 #define E_ERR_DIV_BY_ZERO   6  /* Division by Zero error */
 #define E_ERR_BIG_INT       7  /* Error during computation with big int object */
-#define E_ERR_SYS_TIME      8  /* Error during retrival of system time (failure) of Unix system call 'time()' */
 
 /* Exit codes from program loading routine */
 #define E_ERR_NO_PROGF      10  /* No code file specified error */
@@ -46,9 +45,9 @@
 #define E_ERR_KILL_DEBUG    26 /* Debugger has exited in a non-standard way */
 #define E_ERR_ST_NO_OBJ     27 /* Tried to access a stackslot as an object, when it is a number */
 #define E_ERR_ST_NO_NUM     28 /* Tried to access a stackslot as a number, when it is an object */
-#define E_ERR_PRIM_OBJ      39 /* Tried to access a field on a primitive object. */
-#define E_ERR_REC_INDEX     40 /* Index of field in object was out of bounds */
-#define E_ERR_ARR_INDEX     41 /* Array index out of bounds */
+#define E_ERR_PRIM_OBJ      29 /* Tried to access a field on a primitive object. */
+#define E_ERR_REC_INDEX     30 /* Index of field in object was out of bounds */
+#define E_ERR_ARR_INDEX     31 /* Array index out of bounds */
 
 
 extern int halt;
