@@ -59,26 +59,34 @@ ObjRef newComplexObject(int refCount) {
 }
 
 /**
- * Prints details about an object to a stream.
+ * Prints details about an object to stdout.
  * 
  * @param object - the object that is to be inspected
- * @param outStream - a FILE* representing the stream
  */
-void inspectObject(ObjRef object, FILE* outStream) {
+void inspectObject(ObjRef object) {
     if (object == NULL) { /* NULL-Pointer */
-        fprintf(outStream, "The object is a NIL-Reference!\n");
+        printf("\tNIL-Reference\n");
     }
     else if (IS_PRIM(object)) { /* Primitive-Object (BigInt) */
-        fprintf(outStream, "\tType             : Primitive\n");
-        fprintf(outStream, "\tSize             : %ul Bytes\n", object->size);
-        fprintf(outStream, "\tValue (in Base10): ");
-        bip.op1 = returnValueRegister;
-        bigPrint(outStream);
-        fprintf(outStream, "\n");
+        printf("\tType             : Primitive\n");
+        printf("\tSize             : %u Bytes\n", object->size);
+        printf("\tValue (in Base10): ");
+        bip.op1 = object;
+        bigPrint(stdout);
+        printf("\n");
     }
     else { /* Complex Object */
-        fprintf(outStream, "\tType             : Complex\n");
-        fprintf(outStream, "\tReferencing:     : %d\n", GET_SIZE(object));
+        int i, size;
+        ObjRef* references;
+
+        size = GET_SIZE(object);
+        references = GET_REFS(object);
+        printf("\tType             : Complex\n");
+        printf("\tReferencing:     : %d\n", size);
+
+        for (i = 0; i < size; i++) {
+            printf("\t  [%06d]: %p\n", i, (void*) references[i]);
+        }
     }
 }
 

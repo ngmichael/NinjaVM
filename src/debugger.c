@@ -682,9 +682,13 @@ int processCommand(char* command) {
 
             case 5: { /*ObjRef*/
                 printf("%s Enter the address of the object reference:\n", DEBUG_INSPECT);
+                printf("%s ", DEBUG_INSPECT);
+                changeTextColor("YELLOW");
+                printf("*WARNING* ENTERING INVALID ADDRESS CAN CAUSE UNDEFINED BEHAVIOUR!\n");
+                changeTextColor("WHITE");
                 printf("%s 0x", DEBUG_INSPECT);
                 changeTextColor("CYAN");
-                inspectObject((ObjRef) strtol(getInput(), NULL, 16), stdout);
+                inspectObject((ObjRef) strtol(getInput(), NULL, 16));
                 break;
             }
 

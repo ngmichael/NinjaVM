@@ -43,7 +43,7 @@ void fatalError(char *msg);		/* print a message and exit */
 ObjRef newPrimObject(int dataSize);	/* create a new primitive object */
 ObjRef newComplexObject(int refCount); /* create a new complex object */
 
-void inspectObject(ObjRef object, FILE* outStream);
+void inspectObject(ObjRef object);
 
 
 #endif /* _SUPPORT_H_ */
