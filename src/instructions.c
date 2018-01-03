@@ -359,6 +359,20 @@ void execute(unsigned int opcode, int operand) {
             fields[index] = value;
             break;
         }
+        case GETSZ: {
+            ObjRef object;
+
+            object = popObjRef();
+            if (IS_PRIM(object)) {
+                bigFromInt(-1);
+                pushObjRef(bip.res);
+                break;
+            }
+
+            bigFromInt(GET_SIZE(object));
+            pushObjRef(bip.res);
+            break;
+        }
         case PUSHN: {
             pushObjRef((ObjRef) NULL);
             break;
