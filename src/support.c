@@ -45,7 +45,6 @@ ObjRef newPrimObject(int dataSize) {
  */
 ObjRef newComplexObject(int refCount) {
     ObjRef object;
-    int i;
 
     object = calloc((sizeof(ObjRef) * refCount) + sizeof(int), 1);
 
