@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "headers/njvm.h"
 #include "../lib/support.h"
+#include "../lib/bigint.h"
 
 
 /**
