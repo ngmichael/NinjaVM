@@ -55,22 +55,23 @@ void memoryDump(char* path) {
     printStaticDataAreaTo(out);
     fprintf(out, "\n");
 
-    fprintf(out, "The content of the return value register:\n");
-    if (returnValueRegister == NULL) {
-        fprintf(out, "The register is empty! (NULL-Reference)\n");
+    fprintf(out, "The current value of the return value register is: ");    
+    if (returnValueRegister == NULL) { /* NULL-Pointer */
+        fprintf(out, "(NIL)\n");
     }
-    else {
-        if(IS_PRIM(returnValueRegister)) {
-            fprintf(out, "Address: 0x%p", (void*) returnValueRegister);
-            fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
-            fprintf(out, "Value (in Base10): ");
-            bip.op1 = returnValueRegister;
-            bigPrint(out);
-            fprintf(out, "\n");
-        }
-        else {
-            inspectObject(returnValueRegister, out);
-        }
+    else if (IS_PRIM(returnValueRegister)) { /* Primitive-Object (BigInt) */
+        fprintf(out, "\n\tAddress          : %p\n\n", (void*)returnValueRegister);
+        fprintf(out, "\tType             : Primitive\n");
+        fprintf(out, "\tSize             : %u Bytes\n", returnValueRegister->size);
+        fprintf(out, "\tValue (in Base10): ");
+        bip.op1 = returnValueRegister;
+        bigPrint(out);
+        fprintf(out, "\n");
+    }
+    else { /* Complex Object */
+        fprintf(out, "\n\tAddress    : %p\n", (void*)returnValueRegister);
+        fprintf(out, "\tType       : Complex\n");
+        fprintf(out, "\tReferencing: %d\n", GET_SIZE(returnValueRegister));
     }
 
     fprintf(out, "Content of program memory:\n\n");
@@ -83,6 +84,8 @@ void memoryDump(char* path) {
     fprintf(out, "----- End of dump -----\n");
     fclose(out);
 }
+
+
 
 /**
  * Reads the next integer from stdin and truncates the rest.
@@ -649,8 +652,25 @@ int processCommand(char* command) {
             case 3: { /*RET*/
                 printf("%s ", DEBUG_INSPECT);
                 changeTextColor("CYAN");
-                printf("The current value of the return value register is:\n");
-                inspectObject(returnValueRegister, stdout);
+                printf("The current value of the return value register is: ");
+                
+                if (returnValueRegister == NULL) { /* NULL-Pointer */
+                    printf("(NIL)\n");
+                }
+                else if (IS_PRIM(returnValueRegister)) { /* Primitive-Object (BigInt) */
+                    printf("\n\tAddress          : %p\n", (void*)returnValueRegister);
+                    printf("\tType             : Primitive\n");
+                    printf("\tSize             : %u Bytes\n", returnValueRegister->size);
+                    printf("\tValue (in Base10): ");
+                    bip.op1 = returnValueRegister;
+                    bigPrint(stdout);
+                    printf("\n");
+                }
+                else { /* Complex Object */
+                    printf("\n\tAddress    : %p\n", (void*)returnValueRegister);
+                    printf("\tType       : Complex\n");
+                    printf("\tReferencing: %d\n", GET_SIZE(returnValueRegister));
+                }
                 changeTextColor("WHITE");
                 break;
             }
