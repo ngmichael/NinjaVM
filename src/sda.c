@@ -85,19 +85,26 @@ void pushGlobal(unsigned int position) {
 void printStaticDataAreaTo(FILE* stream) {
     unsigned int i;
 
-    fprintf(stream, "Static data area contains %u variables.\n", sdaSize);
+    fprintf(stream, "Static data area contains %u variable(s):\n", sdaSize);
     for (i = 0; i < sdaSize; i++) {
-        if (sda[i] == NULL) {
-            fprintf(stream, "[%04u]: (NULL)\n", i);
-            continue;
+        fprintf(stream, "[%04u]:\t", i);
+        if (sda[i] == NULL) { /* NULL-Pointer */
+            fprintf(stream, "(NIL)\n");
         }
-
-        fprintf(stream, "[%04u]: %p\n", i, (void *) sda[i]);
-        fprintf(stream, "        Size:  %d Bytes\n", sda[i]->size);
-        fprintf(stream, "        Value (in Base10): ");
-        bip.op1 = sda[i];
-        bigPrint(stream);
-        fprintf(stream, "\n");
+        else if (IS_PRIM(sda[i])) { /* Primitive-Object (BigInt) */
+            fprintf(stream, "Address: %p\n", (void*) sda[i]);
+            fprintf(stream, "\tType: Primitive\n");
+            fprintf(stream, "\tSize: %u Bytes\n", sda[i]->size);
+            fprintf(stream, "\tValue (in Base10): ");
+            bip.op1 = sda[i];
+            bigPrint(stream);
+            fprintf(stream, "\n");
+        }
+        else { /* Complex Object */
+            fprintf(stream, "Address: %p\n", (void*) sda[i]);
+            fprintf(stream, "\tType: Complex\n");
+            fprintf(stream, "\tReferencing: %d\n", GET_SIZE(sda[i]));
+        }
     }
 
     if (sdaSize > 0)

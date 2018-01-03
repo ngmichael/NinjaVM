@@ -43,29 +43,35 @@ void memoryDump(char* path) {
     }
 
     fprintf(out, "NinjaVM Memory Dump\n");
-    fprintf(out, "Exact timestamp: %s, %s\n", __DATE__, __TIME__);
     fprintf(out, "VM Version: %u\n", VERSION);
-    fprintf(out, "The most recently executed instruction:\n");
+    fprintf(out, "The next instruction for execution:\n");
     fprintf(out, "[%08d]: %s %d\n\n", pc-1, opcodes[programMemory[pc-1] >> 24], programMemory[pc-1] & 0x00FFFFFF);
 
     fprintf(out, "The stack at dump time:\n\n");
     printStackTo(out);
     fprintf(out, "\n");
 
-    fprintf(out, "The static data area at dump time:\n\n");
+    fprintf(out, "The static data area at dump time:\n");
     printStaticDataAreaTo(out);
     fprintf(out, "\n");
 
-    fprintf(out, "The content of the return value register:\n");
-    if (returnValueRegister == NULL) {
-        fprintf(out, "The register is empty! (NULL-Reference)\n");
+    fprintf(out, "The current value of the return value register is: ");    
+    if (returnValueRegister == NULL) { /* NULL-Pointer */
+        fprintf(out, "(NIL)\n");
     }
-    else {
-        fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
-        fprintf(out, "Value (in Base10): ");
+    else if (IS_PRIM(returnValueRegister)) { /* Primitive-Object (BigInt) */
+        fprintf(out, "\n\tAddress          : %p\n\n", (void*)returnValueRegister);
+        fprintf(out, "\tType             : Primitive\n");
+        fprintf(out, "\tSize             : %u Bytes\n", returnValueRegister->size);
+        fprintf(out, "\tValue (in Base10): ");
         bip.op1 = returnValueRegister;
         bigPrint(out);
         fprintf(out, "\n");
+    }
+    else { /* Complex Object */
+        fprintf(out, "\n\tAddress    : %p\n", (void*)returnValueRegister);
+        fprintf(out, "\tType       : Complex\n");
+        fprintf(out, "\tReferencing: %d\n", GET_SIZE(returnValueRegister));
     }
 
     fprintf(out, "Content of program memory:\n\n");
@@ -78,6 +84,8 @@ void memoryDump(char* path) {
     fprintf(out, "----- End of dump -----\n");
     fclose(out);
 }
+
+
 
 /**
  * Reads the next integer from stdin and truncates the rest.
@@ -364,6 +372,8 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
+                printf("%s Enter '0' for \"PRIMITIVE\" or something else for complex:\n", DEBUG_EDIT);
+                
                 printf("%s Now enter the new value for this global variable:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
@@ -545,14 +555,14 @@ int processCommand(char* command) {
         }
 
         opcode = 0;
-        while(opcode < 32) {
+        while(opcode < 42) {
             if (strcasecmp(asmInstr, opcodes[opcode]) == 0) {
                 break;
             }
             opcode = opcode + 1;
         }
 
-        if (opcode == 32) {
+        if (opcode == 42) {
             printf("%s ", DEBUG_EXEC);
             changeTextColor("YELLOW");
             printf("*WARNING* ");
@@ -619,11 +629,11 @@ int processCommand(char* command) {
         inspectNumber = getNumber();
 
         switch(inspectNumber) {
-            case 0: {
+            case 0: { /*Abort*/
                 break;
             }
 
-            case 1: {
+            case 1: { /*Stack*/
                 printf("%s Listing contents of stack:\n\n", DEBUG_INSPECT);
                 changeTextColor("CYAN");
                 printStack();
@@ -631,7 +641,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 2: {
+            case 2: { /*SDA*/
                 printf("%s Listing contents of static data area:\n\n", DEBUG_INSPECT);
                 changeTextColor("CYAN");
                 printStaticDataArea();
@@ -639,58 +649,46 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 3: {
+            case 3: { /*RET*/
                 printf("%s ", DEBUG_INSPECT);
                 changeTextColor("CYAN");
-                printf("The current value of the return value register is:\n");
-                if (returnValueRegister == NULL) {
-                    changeTextColor("WHITE");
-                    printf("%s ", DEBUG_INSPECT);
-                    changeTextColor("CYAN");
-                    printf("Return value register contains NULL-Reference!\n");
+                printf("The current value of the return value register is: ");
+                
+                if (returnValueRegister == NULL) { /* NULL-Pointer */
+                    printf("(NIL)\n");
                 }
-                else {
-                    changeTextColor("WHITE");
-                    printf("%s ", DEBUG_INSPECT);
-                    changeTextColor("CYAN");
-                    printf("Size in bytes:     %d\n", returnValueRegister->size);
-                    changeTextColor("WHITE");
-                    printf("%s ", DEBUG_INSPECT);
-                    changeTextColor("CYAN");
-                    printf("Value (in Base10): ");
+                else if (IS_PRIM(returnValueRegister)) { /* Primitive-Object (BigInt) */
+                    printf("\n\tAddress          : %p\n", (void*)returnValueRegister);
+                    printf("\tType             : Primitive\n");
+                    printf("\tSize             : %u Bytes\n", returnValueRegister->size);
+                    printf("\tValue (in Base10): ");
                     bip.op1 = returnValueRegister;
                     bigPrint(stdout);
                     printf("\n");
+                }
+                else { /* Complex Object */
+                    printf("\n\tAddress    : %p\n", (void*)returnValueRegister);
+                    printf("\tType       : Complex\n");
+                    printf("\tReferencing: %d\n", GET_SIZE(returnValueRegister));
                 }
                 changeTextColor("WHITE");
                 break;
             }
             
-            case 4: {
+            case 4: { /*PROG MEM*/
                 listProgramMemory();
                 break;
             }
 
-            case 5: {
-                ObjRef obj;
-
+            case 5: { /*ObjRef*/
                 printf("%s Enter the address of the object reference:\n", DEBUG_INSPECT);
+                printf("%s ", DEBUG_INSPECT);
+                changeTextColor("YELLOW");
+                printf("*WARNING* ENTERING INVALID ADDRESS CAN CAUSE UNDEFINED BEHAVIOUR!\n");
+                changeTextColor("WHITE");
                 printf("%s 0x", DEBUG_INSPECT);
                 changeTextColor("CYAN");
-
-                obj = (ObjRef) strtol(getInput(), NULL, 16);
-                changeTextColor("WHITE");
-
-                if (obj == NULL) {
-                    printf("%s There is no object at specified pointer...\n", DEBUG_INSPECT);
-                    break;
-                }
-
-                printf("Size in bytes:     %d\n", obj->size);
-                printf("Value (in Base10): ");
-                bip.op1 = obj;
-                bigPrint(stdout);
-                printf("\n");
+                inspectObject((ObjRef) strtol(getInput(), NULL, 16));
                 break;
             }
 

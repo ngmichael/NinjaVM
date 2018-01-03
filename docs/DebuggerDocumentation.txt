@@ -38,6 +38,8 @@ This information is comprised of the following:
 
 +++++++++ edit ++++++++++
 
+- THIS FEATURE IS DEPRECATED UNTIL FURTHER NOTICE-
+
 Edit allows you to edit one of the following parts of the VM:
 
 - The stack
@@ -64,6 +66,7 @@ You can inspect the following things:
 - The static data area
 - The return value register
 - The program memory
+- An Object-Reference
 
 ++++++++++ quit ++++++++++
 

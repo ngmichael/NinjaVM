@@ -258,26 +258,42 @@ void printStackTo(FILE* stream) {
         }
         else if (i == fp) {
             if (slot.isObjRef == TRUE) {
-                fprintf(stream, "fp     ---> [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
-                if ((void *)slot.u.objRef != NULL) {
-                    fprintf(stream, "                        Size:  %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "                        Value (in Base10): ");
+                fprintf(stream, "fp     ---> [%04d]: Type: %s, Address: %p\n", i, typeString, (void*) slot.u.objRef);
+                if (slot.u.objRef == NULL) { /* NULL-Pointer */
+                    continue;
+                }
+                else if (IS_PRIM(slot.u.objRef)) { /* Primitive-Object (BigInt) */
+                    fprintf(stream, "              Type: Primitive\n");
+                    fprintf(stream, "              Size: %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "              Value (in Base10): ");
                     bip.op1 = slot.u.objRef;
                     bigPrint(stream);
                     fprintf(stream, "\n");
+                }
+                else { /* Complex Object */
+                    fprintf(stream, "              Type: Complex\n");
+                    fprintf(stream, "              Referencing: %d\n", GET_SIZE(slot.u.objRef));
                 }
             } else fprintf(stream, "fp     ---> [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
             
         }
         else {
             if (slot.isObjRef == TRUE) {
-                fprintf(stream, "            [%04d]: Type: %s, Address: %p\n", i, typeString, (void *)slot.u.objRef);
-                if ((void *)slot.u.objRef != NULL) {
-                    fprintf(stream, "                        Size:  %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "                        Value (in Base10): ");
+                fprintf(stream, "            [%04d]: Type: %s, Address: %p\n", i, typeString, (void*) slot.u.objRef);
+                if (slot.u.objRef == NULL) { /* NULL-Pointer */
+                    continue;
+                }
+                else if (IS_PRIM(slot.u.objRef)) { /* Primitive-Object (BigInt) */
+                    fprintf(stream, "              Type: Primitive\n");
+                    fprintf(stream, "              Size: %u Bytes\n", slot.u.objRef->size);
+                    fprintf(stream, "              Value (in Base10): ");
                     bip.op1 = slot.u.objRef;
                     bigPrint(stream);
                     fprintf(stream, "\n");
+                }
+                else { /* Complex Object */
+                    fprintf(stream, "              Type: Complex\n");
+                    fprintf(stream, "              Referencing: %d\n", GET_SIZE(slot.u.objRef));
                 }
             } else fprintf(stream, "            [%04d]: Type: %s, Value:   %d\n", i, typeString, value);
         }

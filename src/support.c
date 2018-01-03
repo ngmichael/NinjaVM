@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "headers/njvm.h"
 #include "../lib/support.h"
+#include "../lib/bigint.h"
 
 
 /**
@@ -25,13 +26,68 @@ void fatalError(char* msg) {
  * @return A pointer to the first byte of this Object on the heap
  */
 ObjRef newPrimObject(int dataSize) {
-    ObjRef object = calloc(dataSize + sizeof(int), sizeof(int));
+    ObjRef object;
+
+    object = calloc(dataSize + sizeof(int), 1);
     if (object == NULL) {
         printf("Error: Failed to initialize memory for object with size %lu!\n", dataSize + sizeof(int));
         exit(E_ERR_SYS_MEM);
     }
     object->size = dataSize;
     return object;
+}
+
+/**
+ * Creates a new complex object. These objects are used for storing
+ * records and arrays.
+ * 
+ * @param refCount - The total amount of object references this object can hold
+ * @return a new object with sufficient amount of memory to hold all references
+ */
+ObjRef newComplexObject(int refCount) {
+    ObjRef object;
+
+    object = calloc((sizeof(ObjRef) * refCount) + sizeof(int), 1);
+
+    if (object == NULL) {
+        printf("Error: Failed to initialize memory for object with size %lu!\n", (sizeof(ObjRef) * refCount) + sizeof(int));
+        exit(E_ERR_SYS_MEM);
+    }
+
+    object->size = refCount | 0x1 << 31;
+    return object;
+}
+
+/**
+ * Prints details about an object to stdout.
+ * 
+ * @param object - the object that is to be inspected
+ */
+void inspectObject(ObjRef object) {
+    if (object == NULL) { /* NULL-Pointer */
+        printf("\tNIL-Reference\n");
+    }
+    else if (IS_PRIM(object)) { /* Primitive-Object (BigInt) */
+        printf("\tType             : Primitive\n");
+        printf("\tSize             : %u Bytes\n", object->size);
+        printf("\tValue (in Base10): ");
+        bip.op1 = object;
+        bigPrint(stdout);
+        printf("\n");
+    }
+    else { /* Complex Object */
+        int i, size;
+        ObjRef* references;
+
+        size = GET_SIZE(object);
+        references = GET_REFS(object);
+        printf("\tType             : Complex\n");
+        printf("\tReferencing:     : %d\n", size);
+
+        for (i = 0; i < size; i++) {
+            printf("\t  [%06d]: %p\n", i, (void*) references[i]);
+        }
+    }
 }
 
 /**

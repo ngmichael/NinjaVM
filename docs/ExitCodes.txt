@@ -27,3 +27,8 @@ NinjaVM Exit code documentation
 24 (E_ERR_STF_FREE)     = Stackframe release error
 25 (E_ERR_SDA_INDEX)    = Static data area variable index out of bounds
 26 (E_ERR_KILL_DEBUG)   = Debugger has exited in a non-standard way
+27 (E_ERR_ST_NO_OBJ)    = Tried to access a stackslot as an object, when it is a number
+28 (E_ERR_ST_NO_NUM)    = Tried to access a stackslot as a number, when it is an object
+29 (E_ERR_PRIM_OBJ)     = Tried to access a field on a primitive object
+30 (E_ERR_REC_INDEX)    = Index of field in object was out of bounds
+31 (E_ERR_ARR_INDEX)    = Array index out of bounds

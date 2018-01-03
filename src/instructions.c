@@ -11,7 +11,8 @@ char* opcodes[] = {
     "HALT", "PUSHC", "ADD", "SUB", "MUL", "DIV", "MOD", "RDINT", "WRINT",
     "RDCHR", "WRCHR", "PUSHG", "POPG", "ASF", "RSF", "PUSHL", "POPL", "EQ",
     "NE", "LT", "LE", "GT", "GE", "JMP", "BRF", "BRT", "CALL", "RET", "DROP",
-    "PUSHR", "POPR", "DUP",
+    "PUSHR", "POPR", "DUP", "NEW", "GETF", "PUTF", "NEWA", "GETFA", "PUTFA",
+    "GETSZ", "PUSHN", "REFEQ", "REFNE",
 };
 
 /**
@@ -235,6 +236,171 @@ void execute(unsigned int opcode, int operand) {
             value = popObjRef();
             pushObjRef(value);
             pushObjRef(value);
+            break;
+        }
+        case NEW: {
+            ObjRef object;
+
+            object = newComplexObject(operand);
+            pushObjRef(object);
+            break;
+        }
+        case GETF: {
+            ObjRef object;
+            ObjRef* fields;
+            int size;
+
+            /* Check if the object is not primitive */
+            object = popObjRef();
+            if (IS_PRIM(object)) {
+                printf("Error: Can't access fields on primitive objects!\n");
+                exit(E_ERR_PRIM_OBJ);
+            }
+            
+            /* Check that access is within boundaries of object */
+            size = GET_SIZE(object);
+            if (operand < 0 || operand > size-1) {
+                printf("Error: Record index out of bounds!\n");
+                exit(E_ERR_REC_INDEX);
+            }
+
+            /* Retrive the field from the object */
+            fields = GET_REFS(object);
+            pushObjRef(fields[operand]);
+            break;
+        }
+        case PUTF: {
+            ObjRef* fields;
+            ObjRef value, object;
+            int size;
+
+            value = popObjRef();
+            object = popObjRef();
+
+            /* Check if the object is not primitive */
+            if (IS_PRIM(object)) {
+                printf("Error: Can't access fields on primitive objects!\n");
+                exit(E_ERR_PRIM_OBJ);
+            }
+            
+            /* Check that access is within boundaries of object */
+            size = GET_SIZE(object);
+            if (operand < 0 || operand > size-1) {
+                printf("Error: Record index out of bounds!\n");
+                exit(E_ERR_REC_INDEX);
+            }
+
+            /* Put the value into the field */
+            fields = GET_REFS(object);
+            fields[operand] = value;
+            break;
+        }
+        case NEWA: {
+            int size;
+            ObjRef array;
+
+            bip.op1 = popObjRef();
+            size = bigToInt();
+
+            array = newComplexObject(size);
+            pushObjRef(array);
+            break;
+        }
+        case GETFA: {
+            int index, size;
+            ObjRef array;
+            ObjRef* fields;
+
+            bip.op1 = popObjRef();
+            index = bigToInt();
+
+            array = popObjRef();
+            if (IS_PRIM(array)) {
+                printf("Error: Can't access fields on primitive objects!\n");
+                exit(E_ERR_PRIM_OBJ);
+            }
+            
+            /* Check that access is within boundaries of array */
+            size = GET_SIZE(array);
+            if (index < 0 || index > size-1) {
+                printf("Error: Array index out of bounds!\n");
+                exit(E_ERR_ARR_INDEX);
+            }
+
+            /* Retrive the field from the array */
+            fields = GET_REFS(array);
+            pushObjRef(fields[index]);
+            break;
+        }
+        case PUTFA: {
+            int index, size;
+            ObjRef array, value;
+            ObjRef* fields;
+
+            value = popObjRef();
+            bip.op1 = popObjRef();
+            index = bigToInt();
+
+            array = popObjRef();
+            
+            /* Check if the object is not primitive */
+            if (IS_PRIM(array)) {
+                printf("Error: Can't access fields on primitive objects!\n");
+                exit(E_ERR_PRIM_OBJ);
+            }
+            
+            /* Check that access is within boundaries of object */
+            size = GET_SIZE(array);
+            if (index < 0 || index > size-1) {
+                printf("Error: Array index out of bounds!\n");
+                exit(E_ERR_ARR_INDEX);
+            }
+
+            /* Put the value into the field */
+            fields = GET_REFS(array);
+            fields[index] = value;
+            break;
+        }
+        case GETSZ: {
+            ObjRef object;
+
+            object = popObjRef();
+            if (IS_PRIM(object)) {
+                bigFromInt(-1);
+                pushObjRef(bip.res);
+                break;
+            }
+
+            bigFromInt(GET_SIZE(object));
+            pushObjRef(bip.res);
+            break;
+        }
+        case PUSHN: {
+            pushObjRef((ObjRef) NULL);
+            break;
+        }
+        case REFEQ: {
+            ObjRef ob1, ob2;
+            int res;
+
+            ob1 = popObjRef();
+            ob2 = popObjRef();
+            res = ob1 == ob2;
+            
+            bigFromInt(res);
+            pushObjRef(bip.res);
+            break;
+        }
+        case REFNE: {
+            ObjRef ob1, ob2;
+            int res;
+
+            ob1 = popObjRef();
+            ob2 = popObjRef();
+            res = ob1 != ob2;
+            
+            bigFromInt(res);
+            pushObjRef(bip.res);
             break;
         }
         default: {
