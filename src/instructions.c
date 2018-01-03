@@ -309,6 +309,7 @@ void execute(unsigned int opcode, int operand) {
         case GETFA: {
             int index, size;
             ObjRef array;
+            ObjRef* fields;
 
             bip.op1 = popObjRef();
             index = bigToInt();
@@ -334,6 +335,7 @@ void execute(unsigned int opcode, int operand) {
         case PUTFA: {
             int index, size;
             ObjRef array, value;
+            ObjRef* fields;
 
             value = popObjRef();
             bip.op1 = popObjRef();
