@@ -43,9 +43,8 @@ void memoryDump(char* path) {
     }
 
     fprintf(out, "NinjaVM Memory Dump\n");
-    fprintf(out, "Exact timestamp: %s, %s\n", __DATE__, __TIME__);
     fprintf(out, "VM Version: %u\n", VERSION);
-    fprintf(out, "The most recently executed instruction:\n");
+    fprintf(out, "The next instruction for execution:\n");
     fprintf(out, "[%08d]: %s %d\n\n", pc-1, opcodes[programMemory[pc-1] >> 24], programMemory[pc-1] & 0x00FFFFFF);
 
     fprintf(out, "The stack at dump time:\n\n");
