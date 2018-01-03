@@ -331,6 +331,34 @@ void execute(unsigned int opcode, int operand) {
             pushObjRef(fields[index]);
             break;
         }
+        case PUTFA: {
+            int index, size;
+            ObjRef array, value;
+
+            value = popObjRef();
+            bip.op1 = popObjRef();
+            index = bigToInt();
+
+            array = popObjRef();
+            
+            /* Check if the object is not primitive */
+            if (IS_PRIM(array)) {
+                printf("Error: Can't access fields on primitive objects!\n");
+                exit(E_ERR_PRIM_OBJ);
+            }
+            
+            /* Check that access is within boundaries of object */
+            size = GET_SIZE(array);
+            if (index < 0 || index > size-1) {
+                printf("Error: Array index out of bounds!\n");
+                exit(E_ERR_ARR_INDEX);
+            }
+
+            /* Put the value into the field */
+            fields = GET_REFS(array);
+            fields[index] = value;
+            break;
+        }
         case PUSHN: {
             pushObjRef((ObjRef) NULL);
             break;
