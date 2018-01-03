@@ -1,0 +1,41 @@
+//
+// twodim.nj -- 2-dimensional array access
+//
+
+void writeArray(Integer[][] a) {
+  local Integer n;
+  local Integer i;
+  local Integer m;
+  local Integer j;
+  n = sizeof(a);
+  i = 0;
+  while (i < n) {
+    m = sizeof(a[i]);
+    j = 0;
+    while (j < m) {
+      writeInteger(a[i][j]);
+      writeCharacter(' ');
+      j = j + 1;
+    }
+    writeCharacter('\n');
+    i = i + 1;
+  }
+}
+
+void main() {
+  local Integer[][] m;
+  local Integer i;
+  local Integer j;
+  m = new(Integer[3][]);
+  i = 0;
+  while (i < 3) {
+    m[i] = new(Integer[4]);
+    j = 0;
+    while (j < 4) {
+      m[i][j] = 10 * (i + 1) + (j + 1);
+      j = j + 1;
+    }
+    i = i + 1;
+  }
+  writeArray(m);
+}
