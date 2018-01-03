@@ -295,6 +295,17 @@ void execute(unsigned int opcode, int operand) {
             fields[operand] = value;
             break;
         }
+        case NEWA: {
+            int size;
+            ObjRef array;
+
+            bip.op1 = popObjRef();
+            size = bigToInt();
+
+            array = newComplexObject(size);
+            pushObjRef(array);
+            break;
+        }
         case PUSHN: {
             pushObjRef((ObjRef) NULL);
             break;
