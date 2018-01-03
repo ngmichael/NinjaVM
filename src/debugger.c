@@ -52,7 +52,7 @@ void memoryDump(char* path) {
     printStackTo(out);
     fprintf(out, "\n");
 
-    fprintf(out, "The static data area at dump time:\n\n");
+    fprintf(out, "The static data area at dump time:\n");
     printStaticDataAreaTo(out);
     fprintf(out, "\n");
 
@@ -61,11 +61,17 @@ void memoryDump(char* path) {
         fprintf(out, "The register is empty! (NULL-Reference)\n");
     }
     else {
-        fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
-        fprintf(out, "Value (in Base10): ");
-        bip.op1 = returnValueRegister;
-        bigPrint(out);
-        fprintf(out, "\n");
+        if(IS_PRIM(returnValueRegister)) {
+            fprintf(out, "Address: 0x%p", (void*) returnValueRegister);
+            fprintf(out, "Size in bytes:     %d\n", returnValueRegister->size);
+            fprintf(out, "Value (in Base10): ");
+            bip.op1 = returnValueRegister;
+            bigPrint(out);
+            fprintf(out, "\n");
+        }
+        else {
+            inspectObject(returnValueRegister, out);
+        }
     }
 
     fprintf(out, "Content of program memory:\n\n");
@@ -364,6 +370,8 @@ int processCommand(char* command) {
                     return FALSE;
                 }
 
+                printf("%s Enter '0' for \"PRIMITIVE\" or something else for complex:\n", DEBUG_EDIT);
+                
                 printf("%s Now enter the new value for this global variable:\n", DEBUG_EDIT);
                 printf("%s ", DEBUG_EDIT);
                 changeTextColor("CYAN");
@@ -545,14 +553,14 @@ int processCommand(char* command) {
         }
 
         opcode = 0;
-        while(opcode < 32) {
+        while(opcode < 42) {
             if (strcasecmp(asmInstr, opcodes[opcode]) == 0) {
                 break;
             }
             opcode = opcode + 1;
         }
 
-        if (opcode == 32) {
+        if (opcode == 42) {
             printf("%s ", DEBUG_EXEC);
             changeTextColor("YELLOW");
             printf("*WARNING* ");
@@ -619,11 +627,11 @@ int processCommand(char* command) {
         inspectNumber = getNumber();
 
         switch(inspectNumber) {
-            case 0: {
+            case 0: { /*Abort*/
                 break;
             }
 
-            case 1: {
+            case 1: { /*Stack*/
                 printf("%s Listing contents of stack:\n\n", DEBUG_INSPECT);
                 changeTextColor("CYAN");
                 printStack();
@@ -631,7 +639,7 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 2: {
+            case 2: { /*SDA*/
                 printf("%s Listing contents of static data area:\n\n", DEBUG_INSPECT);
                 changeTextColor("CYAN");
                 printStaticDataArea();
@@ -639,58 +647,25 @@ int processCommand(char* command) {
                 break;
             }
 
-            case 3: {
+            case 3: { /*RET*/
                 printf("%s ", DEBUG_INSPECT);
                 changeTextColor("CYAN");
                 printf("The current value of the return value register is:\n");
-                if (returnValueRegister == NULL) {
-                    changeTextColor("WHITE");
-                    printf("%s ", DEBUG_INSPECT);
-                    changeTextColor("CYAN");
-                    printf("Return value register contains NULL-Reference!\n");
-                }
-                else {
-                    changeTextColor("WHITE");
-                    printf("%s ", DEBUG_INSPECT);
-                    changeTextColor("CYAN");
-                    printf("Size in bytes:     %d\n", returnValueRegister->size);
-                    changeTextColor("WHITE");
-                    printf("%s ", DEBUG_INSPECT);
-                    changeTextColor("CYAN");
-                    printf("Value (in Base10): ");
-                    bip.op1 = returnValueRegister;
-                    bigPrint(stdout);
-                    printf("\n");
-                }
+                inspectObject(returnValueRegister, stdout);
                 changeTextColor("WHITE");
                 break;
             }
             
-            case 4: {
+            case 4: { /*PROG MEM*/
                 listProgramMemory();
                 break;
             }
 
-            case 5: {
-                ObjRef obj;
-
+            case 5: { /*ObjRef*/
                 printf("%s Enter the address of the object reference:\n", DEBUG_INSPECT);
                 printf("%s 0x", DEBUG_INSPECT);
                 changeTextColor("CYAN");
-
-                obj = (ObjRef) strtol(getInput(), NULL, 16);
-                changeTextColor("WHITE");
-
-                if (obj == NULL) {
-                    printf("%s There is no object at specified pointer...\n", DEBUG_INSPECT);
-                    break;
-                }
-
-                printf("Size in bytes:     %d\n", obj->size);
-                printf("Value (in Base10): ");
-                bip.op1 = obj;
-                bigPrint(stdout);
-                printf("\n");
+                inspectObject((ObjRef) strtol(getInput(), NULL, 16), stdout);
                 break;
             }
 
