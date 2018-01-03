@@ -306,6 +306,31 @@ void execute(unsigned int opcode, int operand) {
             pushObjRef(array);
             break;
         }
+        case GETFA: {
+            int index, size;
+            ObjRef array;
+
+            bip.op1 = popObjRef();
+            index = bigToInt();
+
+            array = popObjRef();
+            if (IS_PRIM(array)) {
+                printf("Error: Can't access fields on primitive objects!\n");
+                exit(E_ERR_PRIM_OBJ);
+            }
+            
+            /* Check that access is within boundaries of array */
+            size = GET_SIZE(array);
+            if (index < 0 || index > size-1) {
+                printf("Error: Array index out of bounds!\n");
+                exit(E_ERR_ARR_INDEX);
+            }
+
+            /* Retrive the field from the array */
+            fields = GET_REFS(array);
+            pushObjRef(fields[index]);
+            break;
+        }
         case PUSHN: {
             pushObjRef((ObjRef) NULL);
             break;
