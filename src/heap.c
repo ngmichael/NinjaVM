@@ -16,3 +16,15 @@ void initHeap(void) {
     dest = heap;
     src = heap + (heapSize / 2); 
 }
+
+unsigned char* allocate(unsigned int nBytes) {
+    if (dest + nBytes <= src) {
+        unsigned char* ret;
+        ret = dest;
+        dest = dest + nBytes;
+        return ret;
+    }
+
+    printf("Error: Out of memory!\n");
+    exit(E_ERR_OUT_OF_MEM);
+}
