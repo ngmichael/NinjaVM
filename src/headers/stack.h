@@ -7,7 +7,7 @@ extern unsigned int sp;
 extern unsigned int fp;
 extern unsigned int stackSize;
 
-void initStack(unsigned int size);
+void initStack(void);
 
 void push(int value);
 void pushObjRef(ObjRef value);

@@ -31,9 +31,9 @@ int main(int argc, char* argv[]) {
     char* formatIdentifier;
     unsigned int njvmVersion;
     unsigned int globalVariableCount;
-
     unsigned int runDebugger;
 
+    stackSize = 65536; /* Byte -> 64 KiB*/
     runDebugger = FALSE;
     programMemory = NULL;
     code = NULL;
@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
             printf("\t--help\t\tDisplays this help.\n");
             printf("\t--version\tDisplays version number of the VM.\n");
             printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
+            printf("\t--stack <n>\tSet Stack size to n KiB. Default: 64 KiB\n");
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
@@ -58,6 +59,19 @@ int main(int argc, char* argv[]) {
         else if (strcmp("--debug", argv[args]) == 0) {
             runDebugger = TRUE;
             printf("%s Launching NinjaVM in debug mode...\n", DEBUGGER);
+        }
+        else if (strcmp("--stack", argv[args]) == 0) {
+            args++;
+            if (args >= argc) {
+                printf("Error: Size for '--stack' missing!\n");
+                printf("\tUsage: '--stack <n> KiB' -> --stack 64\n");
+                exit(E_ERR_CLI);
+            }
+            stackSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
+            if (stackSize <= 0) {
+                printf("Error: Stack size must be greater than 0!\n");
+                exit(E_ERR_CLI);
+            }
         }
         /* 
          * If the argument does not start with a "--" it is
@@ -130,7 +144,7 @@ int main(int argc, char* argv[]) {
 
     pc = 0;
     halt = FALSE;
-    initStack(10000);
+    initStack();
     returnValueRegister = NULL;
 
     if (runDebugger == TRUE) {

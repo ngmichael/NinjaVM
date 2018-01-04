@@ -7,9 +7,9 @@
 
 StackSlot* stack;
 unsigned int sp;
-unsigned int stackSize;
-
 unsigned int fp;
+unsigned int stackSize;
+unsigned int maxElements;
 
 /**
  * Allocates size * 4 Bytes of memory for the stack
@@ -20,16 +20,16 @@ unsigned int fp;
  * 
  * @param size - the number slots for the stack
  */
-void initStack(unsigned int size) {
-    stack = (StackSlot*) calloc(size, sizeof(StackSlot));
+void initStack(void) {
+    stack = (StackSlot*) calloc(stackSize, sizeof(unsigned char));
     if (stack == NULL) {
-        printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
+        printf("Error: Failed to initialize stack with size %u Bytes.\n", stackSize);
         exit(E_ERR_SYS_MEM);
     }
 
     sp = 0;
     fp = 0;
-    stackSize = size;
+    maxElements = stackSize / sizeof(StackSlot);
 }
 
 /**
@@ -41,7 +41,7 @@ void initStack(unsigned int size) {
  * @param value - the value to be pushed onto the stack
  */
 void push(int value) {
-    if (sp >= stackSize) {
+    if (sp >= maxElements) {
         printf("Error: Stack overflow\n");
         exit(E_ERR_ST_OVER);
     }
@@ -60,15 +60,13 @@ void push(int value) {
  * @param value - the value to be pushed onto the stack
  */
 void pushObjRef(ObjRef obj) {
-
-    if (sp >= stackSize) {
+    if (sp >= maxElements) {
         printf("Error: Stack overflow\n");
         exit(E_ERR_ST_OVER);
     }
 
     stack[sp].isObjRef = TRUE;
     stack[sp].u.objRef = obj;
-
     sp = sp + 1;
 }
 
@@ -81,7 +79,6 @@ void pushObjRef(ObjRef obj) {
  * @return value - the top most value from the stack as an integer
  */
 int pop(void) {
-
     StackSlot value;
 
     if (sp == 0) {
@@ -186,7 +183,7 @@ void allocateStackFrame(int size) {
         exit(E_ERR_STF_ALLOC);
     }
 
-    if (sp + (size + 1) > stackSize) {
+    if (sp + (size + 1) > maxElements) {
         printf(
             "Error: Can't allocate stack frame with size %d: Stack overflow\n",
             size
