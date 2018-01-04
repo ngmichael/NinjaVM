@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "headers/njvm.h"
+#include "headers/heap.h"
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
@@ -28,11 +29,7 @@ void fatalError(char* msg) {
 ObjRef newPrimObject(int dataSize) {
     ObjRef object;
 
-    object = calloc(dataSize + sizeof(int), 1);
-    if (object == NULL) {
-        printf("Error: Failed to initialize memory for object with size %lu!\n", dataSize + sizeof(int));
-        exit(E_ERR_SYS_MEM);
-    }
+    object = (ObjRef) allocate(dataSize + sizeof(int));
     object->size = dataSize;
     return object;
 }
@@ -47,13 +44,7 @@ ObjRef newPrimObject(int dataSize) {
 ObjRef newComplexObject(int refCount) {
     ObjRef object;
 
-    object = calloc((sizeof(ObjRef) * refCount) + sizeof(int), 1);
-
-    if (object == NULL) {
-        printf("Error: Failed to initialize memory for object with size %lu!\n", (sizeof(ObjRef) * refCount) + sizeof(int));
-        exit(E_ERR_SYS_MEM);
-    }
-
+    object = (ObjRef) allocate((sizeof(ObjRef) * refCount) + sizeof(int));
     object->size = refCount | 0x1 << 31;
     return object;
 }
