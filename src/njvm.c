@@ -7,6 +7,7 @@
 #include "headers/instructions.h"
 #include "headers/sda.h"
 #include "headers/debugger.h"
+#include "headers/heap.h"
 #include "../lib/support.h"
 
 int halt;
@@ -33,7 +34,8 @@ int main(int argc, char* argv[]) {
     unsigned int globalVariableCount;
     unsigned int runDebugger;
 
-    stackSize = 65536; /* Byte -> 64 KiB*/
+    stackSize = 65536; /* Bytes -> 64 KiB */
+    heapSize = 8388608; /* Bytes -> 8192 KiB */
     runDebugger = FALSE;
     programMemory = NULL;
     code = NULL;
@@ -145,6 +147,7 @@ int main(int argc, char* argv[]) {
     pc = 0;
     halt = FALSE;
     initStack();
+    initHeap();
     returnValueRegister = NULL;
 
     if (runDebugger == TRUE) {
