@@ -29,7 +29,7 @@ Für Aufgabenblätter und die Hausübungen werden Tags erstellt, sobald die Lös
 1. [VM4](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe4/index.html): Call/Return, Argumente, Rueckgabewert, Boole'sche Ausdruecke, fertig bis 28.11.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/V4.0.0)
 1. [VM5](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe5/index.html): Rechenobjekte auf dem Heap, fertig bis 05.12.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/V5.0.0)
 1. [VM6](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe6/index.html): Bibliothek fuer beliebig grosse Zahlen, fertig bis 12.12.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/V6.0.0)
-1. [VM7](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe7/index.html): Records, Arrays, Referenzvergleiche, fertig bis 19.12.2017
+1. [VM7](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe7/index.html): Records, Arrays, Referenzvergleiche, fertig bis 19.12.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/V7.0.0)
 1. [VM8](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe8/index.html): Compacting Garbage Collector, fertig bis 23.01.2018
 1. [Hausübung 1](https://homepages.thm.de/~hg53/ksp-ws1718/kspHU1.html): VM [Version 4](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe4/index.html) vollständig funktionsfähig. **Deadline 28.11.2017, 18.00 Uhr**
 1. [Hausübung 2](https://homepages.thm.de/~hg53/ksp-ws1718/kspHU2.html): VM [Version 8](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe8/index.html) vollständig funktionsfähig. **Deadline 23.01.2018, 18.00 Uhr**
