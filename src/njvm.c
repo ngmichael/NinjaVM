@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
             printf("\t--version\tDisplays version number of the VM.\n");
             printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
             printf("\t--stack <n>\tSet Stack size to n KiB. Default: 64 KiB\n");
+            printf("\t--heap <n>\tSet Heap size to n KiB. Default: 8192 KiB\n");
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
@@ -72,6 +73,19 @@ int main(int argc, char* argv[]) {
             stackSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
             if (stackSize <= 0) {
                 printf("Error: Stack size must be greater than 0!\n");
+                exit(E_ERR_CLI);
+            }
+        }
+        else if (strcmp("--heap", argv[args]) == 0) {
+            args++;
+            if (args >= argc) {
+                printf("Error: Size for '--heap' missing!\n");
+                printf("\tUsage: '--heap <n> KiB' -> --heap 8192\n");
+                exit(E_ERR_CLI);
+            }
+            heapSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
+            if (heapSize <= 0) {
+                printf("Error: Heap size must be greater than 0!\n");
                 exit(E_ERR_CLI);
             }
         }
