@@ -1,8 +1,8 @@
-#ifndef KSP_WS1718_DEBUGGER_H
+#ifndef KSP_WS1718_HEAP_H
 
-#define KSP_WS1718_DEBUGGER_H
+#define KSP_WS1718_HEAP_H
 
-extern unsigned int heapSize;
+extern unsigned long heapSize;
 
 void initHeap(void);
 unsigned char* allocate(unsigned int nBytes);
