@@ -4,7 +4,9 @@
 #include "headers/njvm.h"
 #include "headers/heap.h"
 
-unsigned long heapSize;
+unsigned long heapSize; /* The amount of bytes available to the heap */
+unsigned long maxAllocatableBytes; /* Number of bytes for one half of the heap */
+unsigned long allocatedBytes /* Number of occupied bytes in the current half of the heap*/
 
 unsigned char* heap; /* Main Heap-Pointer */
 unsigned char* src;  /* Source pointer (Quell) - Unused*/
@@ -21,6 +23,8 @@ void initHeap(void) {
     }
     dest = heap;
     src = heap + (heapSize / 2); 
+    maxAllocatableBytes = heapSize / 2;
+    allocatedBytes = 0;
 }
 
 /**
@@ -30,7 +34,7 @@ void initHeap(void) {
  * @return a pointer to the first byte of the requested memory
  */
 unsigned char* allocate(unsigned int nBytes) {
-    if (dest + nBytes <= src) {
+    if (allocatedBytes + nBytes <= maxAllocatableBytes) {
         unsigned char* ret;
         ret = dest;
         dest = dest + nBytes;
