@@ -89,7 +89,7 @@ unsigned char* allocate(unsigned int nBytes) {
  * free half of the heap
  */
 ObjRef copyToFreeMemory(ObjRef orig) {
-    unsigned char* copy;
+    ObjRef copy;
     size_t size;
 
     if (IS_PRIM(orig)) {
@@ -98,10 +98,10 @@ ObjRef copyToFreeMemory(ObjRef orig) {
     else {
         size = (sizeof(ObjRef) * GET_SIZE(orig)) + sizeof(int);
     }
-    copy = allocate(size);
+    copy = (ObjRef) allocate(size);
     memcpy((void*) copy, (void*) orig, size);
-    if (!IS_PRIM(orig)) ((ObjRef) copy)->size |= MSB;
-    return (ObjRef) copy;
+    if (!IS_PRIM(orig)) copy->size |= MSB;
+    return copy;
 }
 
 ObjRef relocate(ObjRef orig) {
