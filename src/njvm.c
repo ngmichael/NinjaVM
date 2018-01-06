@@ -39,6 +39,7 @@ int main(int argc, char* argv[]) {
     runDebugger = FALSE;
     programMemory = NULL;
     code = NULL;
+    gcPurge = FALSE;
 
     /*
      * Interpret command line arguments
@@ -53,6 +54,7 @@ int main(int argc, char* argv[]) {
             printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
             printf("\t--stack <n>\tSet Stack size to n KiB. Default: 64 KiB\n");
             printf("\t--heap <n>\tSet Heap size to n KiB. Default: 8192 KiB\n");
+            printf("\t--gcpurge\tOverrides the cleared heap memory after every GC run.\n");
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
@@ -88,6 +90,9 @@ int main(int argc, char* argv[]) {
                 printf("Error: Heap size must be greater than 0!\n");
                 exit(E_ERR_CLI);
             }
+        }
+        else if (strcmp("--gcpurge", argv[args]) == 0) {
+            gcPurge = TRUE;
         }
         /* 
          * If the argument does not start with a "--" it is

@@ -6,6 +6,7 @@
 #define FORWARD_POINTER(x) ((x)->size & 0x3FFFFFFF)
 
 extern unsigned long heapSize;
+extern int gcPurge;
 
 void initHeap(void);
 unsigned char* allocate(unsigned int nBytes);

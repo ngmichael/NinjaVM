@@ -11,6 +11,7 @@ unsigned long heapSize; /* The amount of bytes available to the heap */
 unsigned long maxAllocatableBytes; /* Number of bytes for one half of the heap */
 unsigned long allocatedBytes; /* Number of occupied bytes in the current half of the heap*/
 unsigned int gcRunning; /* Flag for determining if the gc is running or not*/
+int gcPurge; /* Flag for determining if the old heap half is cleared after GC run*/
 
 unsigned char* heap; /* Main Heap-Pointer */
 unsigned char* src;  /* Source pointer (Quell) - Unused*/
@@ -164,6 +165,14 @@ void gc(void) {
         /* Iterate over references and relocate */
         for (i = 0; i < refCount; i++) {
             refs[i] = relocate(refs[i]);
+        }
+    }
+
+    if (gcPurge == TRUE) {
+        /* Override the src heap half with 0 */
+        unsigned char* ptr;
+        for(ptr = src; ptr < src + maxAllocatableBytes; ptr++ ){
+            *ptr = 0;
         }
     }
 }
