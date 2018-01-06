@@ -8,6 +8,9 @@ unsigned char* heap; /* Main Heap-Pointer */
 unsigned char* src;  /* Source pointer (Quell) - Unused*/
 unsigned char* dest; /* Destination pointer (Ziel) - Used for allocation*/
 
+/**
+ * Initializes the heap based on the value of variable heapSize
+ */
 void initHeap(void) {
     heap = calloc(heapSize, sizeof(unsigned char));
     if (heap == NULL) {
@@ -18,6 +21,12 @@ void initHeap(void) {
     src = heap + (heapSize / 2); 
 }
 
+/**
+ * Allocates memory for objects on the heap.
+ * 
+ * @param nBytes - the requested number of bytes of memory
+ * @return a pointer to the first byte of the requested memory
+ */
 unsigned char* allocate(unsigned int nBytes) {
     if (dest + nBytes <= src) {
         unsigned char* ret;
