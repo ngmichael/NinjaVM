@@ -1,0 +1,11 @@
+void main() {
+    local Integer i;
+    local Integer[] numbers;
+
+    i = 0;
+    numbers = new(Integer[1000000000000000000]);
+
+    while (i < 1000000000000000000) {
+        numbers[i] = i % 3;
+    }   
+}
