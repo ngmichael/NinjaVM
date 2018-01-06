@@ -92,9 +92,15 @@ ObjRef copyToFreeMemory(ObjRef orig) {
     unsigned char* copy;
     size_t size;
 
-    size = orig->size;
+    if (IS_PRIM(orig)) {
+        size = orig->size;
+    }
+    else {
+        size = (sizeof(ObjRef) * GET_SIZE(orig)) + sizeof(int);
+    }
     copy = allocate(size);
     memcpy((void*) copy, (void*) orig, size);
+    if (!IS_PRIM(orig)) ((ObjRef) copy)->size |= MSB;
     return (ObjRef) copy;
 }
 
@@ -142,8 +148,10 @@ void gc(void) {
     for (i = 0; i < sp; i++) {
         StackSlot slot;
         
-        slot = stack[sp];
-        if (slot.isObjRef == FALSE) continue;
+        slot = stack[i];
+        if (slot.isObjRef == FALSE) {
+            continue;
+        }
         slot.u.objRef = relocate(slot.u.objRef);
     }
 
