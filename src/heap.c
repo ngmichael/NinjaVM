@@ -194,10 +194,7 @@ void gc(void) {
 
     if (gcPurge == TRUE) {
         /* Override the src heap half with 0 */
-        unsigned char* ptr;
-        for(ptr = src; ptr < src + maxAllocatableBytes; ptr++ ){
-            *ptr = 0;
-        }
+        memset((void*) src, 0, maxAllocatableBytes);
     }
 }
 
