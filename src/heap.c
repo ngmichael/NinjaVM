@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "headers/njvm.h"
+#include "headers/heap.h"
 
 unsigned long heapSize;
 
@@ -39,13 +41,35 @@ unsigned char* allocate(unsigned int nBytes) {
     exit(E_ERR_OUT_OF_MEM);
 }
 
+/**
+ * Copies an object to the free half of the heap.
+ * 
+ * @param orig - the source object to be copied
+ * @return a pointer to an exact replica of the object located in the 
+ * free half of the heap
+ */
+ObjRef copyToFreeMemory(ObjRef orig) {
+    unsigned char* copy;
+    size_t size;
+
+    size = orig->size;
+    copy = allocate(size);
+    memcpy((void*) copy, (void*) orig, size);
+    return (ObjRef) copy;
+}
+
 ObjRef relocate(ObjRef orig) {
     ObjRef copy;
 
     if (orig == NULL) {
         copy = NULL;
     }
-    else if (BROKEN_HEART(orig)) /* Broken-Heart Flag*/
+    else if (BROKEN_HEART(orig)) { /* Broken-Heart Flag */
+        copy = dest + FORWARD_POINTER(orig);
+    }
+    else { /* Object needs to be copied to free memory*/
+
+    }
 
     return copy;
 }
