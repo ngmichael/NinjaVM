@@ -7,6 +7,8 @@ extern unsigned int sp;
 extern unsigned int fp;
 extern unsigned int stackSize;
 
+extern StackSlot* stack;
+
 void initStack(void);
 
 void push(int value);
