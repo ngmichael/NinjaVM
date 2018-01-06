@@ -55,6 +55,7 @@ int main(int argc, char* argv[]) {
             printf("\t--stack <n>\tSet Stack size to n KiB. Default: 64 KiB\n");
             printf("\t--heap <n>\tSet Heap size to n KiB. Default: 8192 KiB\n");
             printf("\t--gcpurge\tOverrides the cleared heap memory after every GC run.\n");
+            printf("\t--gcstats\tPrint GC statistics to stdout after ever GC run.\n");
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
@@ -93,6 +94,9 @@ int main(int argc, char* argv[]) {
         }
         else if (strcmp("--gcpurge", argv[args]) == 0) {
             gcPurge = TRUE;
+        }
+        else if (strcmp("--gcstats", argv[args]) == 0) {
+            gcStats = TRUE;
         }
         /* 
          * If the argument does not start with a "--" it is

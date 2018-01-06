@@ -12,16 +12,23 @@ unsigned long maxAllocatableBytes; /* Number of bytes for one half of the heap *
 unsigned long allocatedBytes; /* Number of occupied bytes in the current half of the heap*/
 unsigned int gcRunning; /* Flag for determining if the gc is running or not*/
 int gcPurge; /* Flag for determining if the old heap half is cleared after GC run*/
+int gcStats; /* Flag for determining if gc statistics should be printed after gc run */
 
 unsigned char* heap; /* Main Heap-Pointer */
 unsigned char* src;  /* Source pointer (Quell) - Unused*/
 unsigned char* dest; /* Destination pointer (Ziel) - Used for allocation*/
 unsigned char* freePointer; /* Points to the next free byte in the current half*/
 
-ObjRef copyToFreeMemory(ObjRef orig);
-ObjRef relocate(ObjRef orig);
-void gc(void);
+unsigned int objectCount; /* Amount of objects created since last gc run */
+unsigned int occupiedObjectBytes; /* Accumulated byte count of these objects */
+unsigned int livingObjectCount; /* Amount of all living objects*/
+
+/* Function delcarations */
 unsigned char* allocate(unsigned int nBytes);
+void gc(void);
+ObjRef relocate(ObjRef orig);
+ObjRef copyToFreeMemory(ObjRef orig);
+void printGcStatistics(void);
 
 /**
  * Initializes the heap based on the value of variable heapSize
@@ -38,6 +45,9 @@ void initHeap(void) {
     maxAllocatableBytes = heapSize / 2;
     allocatedBytes = 0;
     gcRunning = FALSE;
+    objectCount = 0;
+    occupiedObjectBytes = 0;
+    livingObjectCount = 0;
 }
 
 /**
@@ -53,6 +63,9 @@ unsigned char* allocate(unsigned int nBytes) {
         ret = freePointer;
         freePointer = freePointer + nBytes;
         allocatedBytes += nBytes;
+        livingObjectCount++;
+        objectCount++;
+        occupiedObjectBytes += nBytes;
         return ret;
     }
     else if (gcRunning == FALSE) {
@@ -116,6 +129,7 @@ void gc(void) {
 
     gcRunning = TRUE;
     allocatedBytes = 0;
+    livingObjectCount = 0;
     /* Step 1: Flip dest and src*/
     temp = dest;
     dest = src;
@@ -168,6 +182,8 @@ void gc(void) {
         }
     }
 
+    if (gcStats == TRUE) printGcStatistics();
+
     if (gcPurge == TRUE) {
         /* Override the src heap half with 0 */
         unsigned char* ptr;
@@ -175,4 +191,15 @@ void gc(void) {
             *ptr = 0;
         }
     }
+}
+
+void printGcStatistics(void) {
+    printf("\n");
+    printf(" ----- Garbage Collector Stats -----\n");
+    printf("Objects created since last run: %u (%u Bytes)\n", objectCount, occupiedObjectBytes);
+    printf("Currently alive objects: %u (%lu Bytes)\n", livingObjectCount, allocatedBytes);
+    printf("Remaining space on heap: %lu Bytes\n", maxAllocatableBytes - allocatedBytes);
+    printf("------------------------------------\n");
+    objectCount = 0;
+    occupiedObjectBytes = 0;
 }

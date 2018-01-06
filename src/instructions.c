@@ -4,6 +4,7 @@
 #include "headers/stack.h"
 #include "headers/njvm.h"
 #include "headers/sda.h"
+#include "headers/heap.h"
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
@@ -37,6 +38,10 @@ void execute(unsigned int opcode, int operand) {
     switch (opcode) {
         case HALT: {
             halt = TRUE;
+            if (gcStats == TRUE) {
+                gc();
+                gcRunning = FALSE;
+            }
             break;
         }
         case PUSHC: {

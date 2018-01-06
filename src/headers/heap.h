@@ -7,8 +7,11 @@
 
 extern unsigned long heapSize;
 extern int gcPurge;
+extern int gcStats;
+extern unsigned int gcRunning;
 
 void initHeap(void);
 unsigned char* allocate(unsigned int nBytes);
+void gc(void);
 
 #endif
