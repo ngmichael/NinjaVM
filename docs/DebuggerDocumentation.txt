@@ -13,7 +13,7 @@ first instruction of the program and wait for a command.
 The following commands are available and explained in detail
 further below:
 
-breakpoint, dump, edit, execute, help, quit, reset, run, step, verbose
+breakpoint, dump, edit, execute, gc, help, quit, reset, run, step, verbose
 
 ++++++++++ breakpoint ++++++++++
 
@@ -56,6 +56,11 @@ This command allows you to execute one arbitrary instruction that you
 enter during runtime of the program. The execution of the instruction
 can take effect on everything except for program memory 
 and the program counter.
+
+++++++++++ gc ++++++++++
+
+This command initiates the Garbage Collector and displays
+the GC-Statistics after completion.
 
 ++++++++++ inspect ++++++++++
 

@@ -8,6 +8,7 @@
 #include "headers/instructions.h"
 #include "headers/sda.h"
 #include "headers/debugger.h"
+#include "headers/heap.h"
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
@@ -582,6 +583,11 @@ int processCommand(char* command) {
         free(asmInstr);
         return FALSE;
     }
+    else if (strcmp("gc", command) == 0) {
+        gc();
+        gcRunning = FALSE;
+        return FALSE;
+    }
     else if (strcmp("help", command) == 0) {
         printf("\n");
         changeTextColor("YELLOW");
@@ -596,6 +602,7 @@ int processCommand(char* command) {
         printf(" \t\t  memory, the stack, ect.\n");
 
         printf(" exectue\t- Executes an instruction\n");
+        printf(" gc\t\t- Initiates the Garbage Collector.\n");
         printf(" inspect\t- Print the content of one of the VMs many\n");
         printf(" \t\t  data-containing structures like the stack.\n");
 
