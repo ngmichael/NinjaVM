@@ -38,3 +38,29 @@ unsigned char* allocate(unsigned int nBytes) {
     printf("Error: Out of memory!\n");
     exit(E_ERR_OUT_OF_MEM);
 }
+
+ObjRef relocate(ObjRef orig) {
+    ObjRef copy;
+
+    if (orig == NULL) {
+        copy = NULL;
+    }
+    else if (BROKEN_HEART(orig)) /* Broken-Heart Flag*/
+
+    return copy;
+}
+
+/**
+ * Main function for the garbage collector
+ */
+void gc(void) {
+    unsigned char* temp;
+
+    /* Step 1: Flip dest and src*/
+    temp = dest;
+    dest = src;
+    src = temp;
+
+    /* Step 2: Copy from all object containing structures (stack, ...)*/
+    
+}
