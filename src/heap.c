@@ -65,10 +65,15 @@ ObjRef relocate(ObjRef orig) {
         copy = NULL;
     }
     else if (BROKEN_HEART(orig)) { /* Broken-Heart Flag */
-        copy = dest + FORWARD_POINTER(orig);
+        copy = (ObjRef) (heap + FORWARD_POINTER(orig));
     }
     else { /* Object needs to be copied to free memory*/
+        unsigned int newSizeValue;
 
+        copy = copyToFreeMemory(orig); /* Copy the object */
+        newSizeValue = 1 << (8 * sizeof(unsigned int) - 2); /* Set BH Flag */
+        newSizeValue = newSizeValue | ((unsigned char*) copy - heap);
+        orig->size = newSizeValue;
     }
 
     return copy;
