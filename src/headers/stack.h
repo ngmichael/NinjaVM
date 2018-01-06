@@ -7,8 +7,6 @@ extern unsigned int sp;
 extern unsigned int fp;
 extern unsigned int stackSize;
 
-extern StackSlot* stack;
-
 void initStack(void);
 
 void push(int value);
@@ -36,5 +34,7 @@ typedef struct {
 		int number;
 	} u;
 } StackSlot;
+
+extern StackSlot* stack;
 
 #endif /* KSP_WS17_18_STACK_H */

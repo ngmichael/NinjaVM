@@ -1,12 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "headers/njvm.h"
 #include "headers/heap.h"
+#include "headers/stack.h"
+#include "headers/sda.h"
+#include "headers/njvm.h"
+#include "../lib/bigint.h"
 
 unsigned long heapSize; /* The amount of bytes available to the heap */
 unsigned long maxAllocatableBytes; /* Number of bytes for one half of the heap */
-unsigned long allocatedBytes /* Number of occupied bytes in the current half of the heap*/
+unsigned long allocatedBytes; /* Number of occupied bytes in the current half of the heap*/
 
 unsigned char* heap; /* Main Heap-Pointer */
 unsigned char* src;  /* Source pointer (Quell) - Unused*/
@@ -88,6 +91,7 @@ ObjRef relocate(ObjRef orig) {
  */
 void gc(void) {
     unsigned char* temp;
+    unsigned int i;
 
     /* Step 1: Flip dest and src*/
     temp = dest;
@@ -95,5 +99,30 @@ void gc(void) {
     src = temp;
 
     /* Step 2: Copy from all object containing structures (stack, ...)*/
+
+    /* Stack */
+    for (i = 0; i < sp; i++) {
+        StackSlot slot;
+        
+        slot = stack[sp];
+        if (slot.isObjRef == FALSE) continue;
+        slot.u.objRef = relocate(slot.u.objRef);
+    }
+
+    /* SDA */
+    for (i = 0; i < sdaSize; i++) {
+        sda[i] = relocate(sda[i]);
+    }
+
+    /* RET */
+    returnValueRegister = relocate(returnValueRegister);
+
+    /* BIP */
+    bip.op1 = relocate(bip.op1);
+    bip.op2 = relocate(bip.op2);
+    bip.res = relocate(bip.res);
+    bip.rem = relocate(bip.rem);
     
+    /* Step 3: Iterate over all objects in dest mem and copy all objects from
+    src mem that they still point to. Fix these pointers aswell.*/
 }
