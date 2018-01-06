@@ -10,10 +10,17 @@
 unsigned long heapSize; /* The amount of bytes available to the heap */
 unsigned long maxAllocatableBytes; /* Number of bytes for one half of the heap */
 unsigned long allocatedBytes; /* Number of occupied bytes in the current half of the heap*/
+unsigned int gcRunning; /* Flag for determining if the gc is running or not*/
 
 unsigned char* heap; /* Main Heap-Pointer */
 unsigned char* src;  /* Source pointer (Quell) - Unused*/
 unsigned char* dest; /* Destination pointer (Ziel) - Used for allocation*/
+unsigned char* freePointer; /* Points to the next free byte in the current half*/
+
+ObjRef copyToFreeMemory(ObjRef orig);
+ObjRef relocate(ObjRef orig);
+void gc(void);
+unsigned char* allocate(unsigned int nBytes);
 
 /**
  * Initializes the heap based on the value of variable heapSize
@@ -25,9 +32,11 @@ void initHeap(void) {
         exit(E_ERR_SYS_MEM);
     }
     dest = heap;
+    freePointer = heap;
     src = heap + (heapSize / 2); 
     maxAllocatableBytes = heapSize / 2;
     allocatedBytes = 0;
+    gcRunning = FALSE;
 }
 
 /**
@@ -39,13 +48,23 @@ void initHeap(void) {
 unsigned char* allocate(unsigned int nBytes) {
     if (allocatedBytes + nBytes <= maxAllocatableBytes) {
         unsigned char* ret;
-        ret = dest;
-        dest = dest + nBytes;
+
+        ret = freePointer;
+        freePointer = freePointer + nBytes;
+        allocatedBytes += nBytes;
         return ret;
     }
-
-    printf("Error: Out of memory!\n");
-    exit(E_ERR_OUT_OF_MEM);
+    else if (gcRunning == FALSE) {
+        unsigned char* ret;
+        gc();
+        ret = allocate(nBytes);
+        gcRunning = FALSE;
+        return ret;
+    }
+    else {
+        printf("Error: Out of memory!\n");
+        exit(E_ERR_OUT_OF_MEM);
+    }
 }
 
 /**
@@ -92,11 +111,15 @@ ObjRef relocate(ObjRef orig) {
 void gc(void) {
     unsigned char* temp;
     unsigned int i;
+    unsigned int destOffSet;
 
+    gcRunning = TRUE;
+    allocatedBytes = 0;
     /* Step 1: Flip dest and src*/
     temp = dest;
     dest = src;
     src = temp;
+    freePointer = dest;
 
     /* Step 2: Copy from all object containing structures (stack, ...)*/
 
@@ -125,4 +148,22 @@ void gc(void) {
     
     /* Step 3: Iterate over all objects in dest mem and copy all objects from
     src mem that they still point to. Fix these pointers aswell.*/
+    destOffSet = 0;
+    while(destOffSet < allocatedBytes) {
+        ObjRef obj;
+        int refCount;
+        ObjRef* refs;
+
+        obj = (ObjRef) (dest + destOffSet); /* Jump to and fetch the next object in the heap*/
+        destOffSet += obj->size; /* Advance the byte counter*/
+
+        if (IS_PRIM(obj)) continue; /* Continue loop if object is primitive*/
+        refCount = GET_SIZE(obj); /* Get the amount of references*/
+        refs = GET_REFS(obj); /* Get the references themselfs*/
+
+        /* Iterate over references and relocate */
+        for (i = 0; i < refCount; i++) {
+            refs[i] = relocate(refs[i]);
+        }
+    }
 }
