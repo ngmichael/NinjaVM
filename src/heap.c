@@ -5,6 +5,7 @@
 #include "headers/stack.h"
 #include "headers/sda.h"
 #include "headers/njvm.h"
+#include "../lib/support.h"
 #include "../lib/bigint.h"
 
 unsigned long heapSize; /* The amount of bytes available to the heap */
@@ -90,17 +91,16 @@ unsigned char* allocate(unsigned int nBytes) {
  */
 ObjRef copyToFreeMemory(ObjRef orig) {
     ObjRef copy;
-    size_t size;
 
     if (IS_PRIM(orig)) {
-        size = orig->size;
+        copy = newPrimObject(orig->size);
+        memcpy(copy->data, orig->data, orig->size);
     }
     else {
-        size = (sizeof(ObjRef) * GET_SIZE(orig)) + sizeof(int);
+        copy = newComplexObject(GET_SIZE(orig));
+        memcpy(copy->data, orig->data, sizeof(ObjRef) * GET_SIZE(orig));
+        printf("    %d %d\n", GET_SIZE(orig), GET_SIZE(copy));
     }
-    copy = (ObjRef) allocate(size);
-    memcpy((void*) copy, (void*) orig, size);
-    if (!IS_PRIM(orig)) copy->size |= MSB;
     return copy;
 }
 
@@ -146,13 +146,10 @@ void gc(void) {
 
     /* Stack */
     for (i = 0; i < sp; i++) {
-        StackSlot slot;
-        
-        slot = stack[i];
-        if (slot.isObjRef == FALSE) {
+        if (stack[i].isObjRef == FALSE) {
             continue;
         }
-        slot.u.objRef = relocate(slot.u.objRef);
+        stack[i].u.objRef = relocate(stack[i].u.objRef);
     }
 
     /* SDA */
