@@ -262,10 +262,6 @@ void printStackTo(FILE* stream) {
                 else if (IS_PRIM(slot.u.objRef)) { /* Primitive-Object (BigInt) */
                     fprintf(stream, "              Type: Primitive\n");
                     fprintf(stream, "              Size: %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "              Value (in Base10): ");
-                    bip.op1 = slot.u.objRef;
-                    bigPrint(stream);
-                    fprintf(stream, "\n");
                 }
                 else { /* Complex Object */
                     fprintf(stream, "              Type: Complex\n");
@@ -283,10 +279,6 @@ void printStackTo(FILE* stream) {
                 else if (IS_PRIM(slot.u.objRef)) { /* Primitive-Object (BigInt) */
                     fprintf(stream, "              Type: Primitive\n");
                     fprintf(stream, "              Size: %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "              Value (in Base10): ");
-                    bip.op1 = slot.u.objRef;
-                    bigPrint(stream);
-                    fprintf(stream, "\n");
                 }
                 else { /* Complex Object */
                     fprintf(stream, "              Type: Complex\n");

@@ -99,7 +99,6 @@ ObjRef copyToFreeMemory(ObjRef orig) {
     else {
         copy = newComplexObject(GET_SIZE(orig));
         memcpy(copy->data, orig->data, sizeof(ObjRef) * GET_SIZE(orig));
-        printf("    %d %d\n", GET_SIZE(orig), GET_SIZE(copy));
     }
     return copy;
 }
