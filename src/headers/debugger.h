@@ -13,5 +13,6 @@
 #define ERROR "[Debugger]: An error has occurred:\n[Debugger]:"
 
 void debug(void);
+void memoryDump(char* path);
 
 #endif

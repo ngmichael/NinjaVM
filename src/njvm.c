@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <signal.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "headers/instructions.h"
@@ -16,6 +17,13 @@ unsigned int* programMemory;
 unsigned int instructionCount;
 
 ObjRef returnValueRegister;
+
+void sigsegvHandler(int signum) {
+    printf("ERROR: Caught internal exception SIGSEGV!\n");
+    printf("Performing memory dump to '/njvm_err.log'\n");
+    memoryDump("njvm_err.log");
+    exit(E_ERR_SYS_MEM);
+}
 
 /**
  * Main entry point - called at program launch
@@ -40,6 +48,8 @@ int main(int argc, char* argv[]) {
     programMemory = NULL;
     code = NULL;
     gcPurge = FALSE;
+
+    signal(SIGSEGV, sigsegvHandler);
 
     /*
      * Interpret command line arguments
@@ -135,7 +145,7 @@ int main(int argc, char* argv[]) {
     
     /* Validate that the Ninja-Program is compiled for this version of the VM. */
     fread(&njvmVersion, 1, sizeof(unsigned int), code);
-    if (njvmVersion != VERSION){
+    if (njvmVersion > VERSION){
         printf("Wrong VM version!\n");
         printf("VM: %02x, PROGRAM: %02x\n", VERSION, njvmVersion);
         return E_ERR_VM_VER;
