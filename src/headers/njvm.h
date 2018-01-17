@@ -3,7 +3,7 @@
 
 #include "../../lib/support.h"
 
-#define VERSION 7
+#define VERSION 8
 
 #define FALSE 0
 #define TRUE 1
