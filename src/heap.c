@@ -105,6 +105,7 @@ ObjRef copyToFreeMemory(ObjRef orig) {
 
 ObjRef relocate(ObjRef orig) {
     ObjRef copy;
+    unsigned int oldSize;
 
     if (orig == NULL) {
         copy = NULL;
@@ -118,8 +119,20 @@ ObjRef relocate(ObjRef orig) {
         copy = copyToFreeMemory(orig); /* Copy the object */
         newSizeValue = 1 << (8 * sizeof(unsigned int) - 2); /* Set BH Flag */
         newSizeValue = newSizeValue | ((unsigned char*) copy - heap);
+        oldSize = orig->size;
         orig->size = newSizeValue;
     }
+
+    if (orig != NULL) {
+        if ((oldSize != copy->size) || (orig->data != copy->data)) {
+            printf("\n ERROR: *** ASSERTION FAILED *** [GC] heap.relocate() - orig and copy do not match!\n");
+            printf("        *** ASSERTION FAILED *** SizeMatch: %s, DataMatch: %s\n",
+                (oldSize != copy->size) == TRUE ? "FALSE" : "TRUE",
+                (orig->data != copy->data) == TRUE ? "FALSE" : "TRUE" );
+            exit(15);
+        }
+    }
+
 
     return copy;
 }
@@ -132,6 +145,7 @@ void gc(void) {
     unsigned int i;
     unsigned int destOffSet;
 
+    printf("Garbage-Collector\n");
     gcRunning = TRUE;
     allocatedBytes = 0;
     livingObjectCount = 0;
@@ -175,6 +189,10 @@ void gc(void) {
 
         obj = (ObjRef) (dest + destOffSet); /* Jump to and fetch the next object in the heap*/
         destOffSet += obj->size; /* Advance the byte counter*/
+        if (obj->size == 0) {
+            destOffSet += 1;
+            continue;
+        }
 
         if (IS_PRIM(obj)) continue; /* Continue loop if object is primitive*/
         refCount = GET_SIZE(obj); /* Get the amount of references*/
