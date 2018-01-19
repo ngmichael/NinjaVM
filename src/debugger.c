@@ -668,10 +668,6 @@ int processCommand(char* command) {
                     printf("\n\tAddress          : %p\n", (void*)returnValueRegister);
                     printf("\tType             : Primitive\n");
                     printf("\tSize             : %u Bytes\n", returnValueRegister->size);
-                    printf("\tValue (in Base10): ");
-                    bip.op1 = returnValueRegister;
-                    bigPrint(stdout);
-                    printf("\n");
                 }
                 else { /* Complex Object */
                     printf("\n\tAddress    : %p\n", (void*)returnValueRegister);

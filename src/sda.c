@@ -95,10 +95,6 @@ void printStaticDataAreaTo(FILE* stream) {
             fprintf(stream, "Address: %p\n", (void*) sda[i]);
             fprintf(stream, "\tType: Primitive\n");
             fprintf(stream, "\tSize: %u Bytes\n", sda[i]->size);
-            fprintf(stream, "\tValue (in Base10): ");
-            bip.op1 = sda[i];
-            bigPrint(stream);
-            fprintf(stream, "\n");
         }
         else { /* Complex Object */
             fprintf(stream, "Address: %p\n", (void*) sda[i]);
