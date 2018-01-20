@@ -5,6 +5,7 @@
 #include "headers/stack.h"
 #include "headers/sda.h"
 #include "headers/njvm.h"
+#include "headers/debugger.h"
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
@@ -105,34 +106,17 @@ ObjRef copyToFreeMemory(ObjRef orig) {
 
 ObjRef relocate(ObjRef orig) {
     ObjRef copy;
-    unsigned int oldSize;
 
     if (orig == NULL) {
         copy = NULL;
     }
-    else if (BROKEN_HEART(orig)) { /* Broken-Heart Flag */
-        copy = (ObjRef) (heap + FORWARD_POINTER(orig));
+    else if (IS_RELOCATED(orig)) { /* Broken-Heart Flag */
+        copy = (ObjRef) (dest + FORWARD_POINTER(orig));
     }
     else { /* Object needs to be copied to free memory*/
-        unsigned int newSizeValue;
-
-        copy = copyToFreeMemory(orig); /* Copy the object */
-        newSizeValue = 1 << (8 * sizeof(unsigned int) - 2); /* Set BH Flag */
-        newSizeValue = newSizeValue | ((unsigned char*) copy - heap);
-        oldSize = orig->size;
-        orig->size = newSizeValue;
+        copy = copyToFreeMemory(orig);
+        orig->size = BROKEN_HEART | ((unsigned char*) copy - dest);
     }
-
-    if (orig != NULL) {
-        if ((oldSize != copy->size) || (orig->data != copy->data)) {
-            printf("\n ERROR: *** ASSERTION FAILED *** [GC] heap.relocate() - orig and copy do not match!\n");
-            printf("        *** ASSERTION FAILED *** SizeMatch: %s, DataMatch: %s\n",
-                (oldSize != copy->size) == TRUE ? "FALSE" : "TRUE",
-                (orig->data != copy->data) == TRUE ? "FALSE" : "TRUE" );
-            exit(15);
-        }
-    }
-
 
     return copy;
 }
@@ -143,9 +127,8 @@ ObjRef relocate(ObjRef orig) {
 void gc(void) {
     unsigned char* temp;
     unsigned int i;
-    unsigned int destOffSet;
-
-    printf("Garbage-Collector\n");
+    unsigned char* next;
+    
     gcRunning = TRUE;
     allocatedBytes = 0;
     livingObjectCount = 0;
@@ -181,27 +164,29 @@ void gc(void) {
     
     /* Step 3: Iterate over all objects in dest mem and copy all objects from
     src mem that they still point to. Fix these pointers aswell.*/
-    destOffSet = 0;
-    while(destOffSet < allocatedBytes) {
+    next = dest;
+    while(next < freePointer) {
         ObjRef obj;
         int refCount;
         ObjRef* refs;
 
-        obj = (ObjRef) (dest + destOffSet); /* Jump to and fetch the next object in the heap*/
-        destOffSet += obj->size; /* Advance the byte counter*/
-        if (obj->size == 0) {
-            destOffSet += 1;
-            continue;
+        obj = (ObjRef) next; /* Jump to and fetch the next object in the heap*/
+
+        if (IS_PRIM(obj)) {
+            next += sizeof(unsigned int) + obj->size;
+            continue; /* Continue loop if object is primitive*/
+        } 
+        else {
+            refCount = GET_SIZE(obj); /* Get the amount of references*/
+            refs = GET_REFS(obj); /* Get the references themselfs*/
+
+            /* Iterate over references and relocate */
+            for (i = 0; i < refCount; i++) {
+                refs[i] = relocate(refs[i]);
+            }
         }
 
-        if (IS_PRIM(obj)) continue; /* Continue loop if object is primitive*/
-        refCount = GET_SIZE(obj); /* Get the amount of references*/
-        refs = GET_REFS(obj); /* Get the references themselfs*/
-
-        /* Iterate over references and relocate */
-        for (i = 0; i < refCount; i++) {
-            refs[i] = relocate(refs[i]);
-        }
+        next += sizeof(unsigned int) + (sizeof(ObjRef) * refCount);
     }
 
     if (gcStats == TRUE) printGcStatistics();

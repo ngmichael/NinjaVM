@@ -2,8 +2,9 @@
 
 #define KSP_WS1718_HEAP_H
 
-#define BROKEN_HEART(x) ( ((x)->size & (1 << (8 * sizeof(unsigned int) - 2))) != 0)
-#define FORWARD_POINTER(x) ((x)->size & 0x3FFFFFFF)
+#define BROKEN_HEART ( (1 << (8 * sizeof(unsigned int) - 2)))
+#define IS_RELOCATED(x) ( ((x)->size & BROKEN_HEART) != 0)
+#define FORWARD_POINTER(x) ((x)->size & ~BROKEN_HEART)
 
 extern unsigned long heapSize;
 extern int gcPurge;

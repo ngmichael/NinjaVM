@@ -3,6 +3,8 @@
 #include <errno.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "headers/instructions.h"
@@ -15,13 +17,20 @@ int halt;
 unsigned int pc;
 unsigned int* programMemory;
 unsigned int instructionCount;
+volatile sig_atomic_t signalFlag;
 
 ObjRef returnValueRegister;
 
 void sigsegvHandler(int signum) {
-    printf("ERROR: Caught internal exception SIGSEGV!\n");
+    if (signalFlag == TRUE) {
+        raise(SIGKILL);
+    }
+    signalFlag = TRUE;
+    changeTextColor("WHITE");
+    printf("\nERROR: Caught internal exception SIGSEGV!\n");
     printf("Performing memory dump to '/njvm_err.log'\n");
     memoryDump("njvm_err.log");
+    printf("Dump completed! Exiting gracefully...\n");
     exit(E_ERR_SYS_MEM);
 }
 
@@ -42,6 +51,7 @@ int main(int argc, char* argv[]) {
     unsigned int globalVariableCount;
     unsigned int runDebugger;
 
+    signalFlag = FALSE;
     stackSize = 65536; /* Bytes -> 64 KiB */
     heapSize = 8388608; /* Bytes -> 8192 KiB */
     runDebugger = FALSE;
