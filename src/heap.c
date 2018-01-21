@@ -125,17 +125,17 @@ ObjRef relocate(ObjRef orig) {
  * Main function for the garbage collector
  */
 void gc(void) {
-    unsigned char* temp;
+    unsigned char* temp_for_heap_flip;
+    unsigned char* nextObj;
     unsigned int i;
-    unsigned char* next;
     
     gcRunning = TRUE;
     allocatedBytes = 0;
     livingObjectCount = 0;
     /* Step 1: Flip dest and src*/
-    temp = dest;
+    temp_for_heap_flip = dest;
     dest = src;
-    src = temp;
+    src = temp_for_heap_flip;
     freePointer = dest;
 
     /* Step 2: Copy from all object containing structures (stack, ...)*/
@@ -164,17 +164,16 @@ void gc(void) {
     
     /* Step 3: Iterate over all objects in dest mem and copy all objects from
     src mem that they still point to. Fix these pointers aswell.*/
-    next = dest;
-    while(next < freePointer) {
+    nextObj = dest;
+    while(nextObj < freePointer) {
         ObjRef obj;
         int refCount;
         ObjRef* refs;
 
-        obj = (ObjRef) next; /* Jump to and fetch the next object in the heap*/
+        obj = (ObjRef) nextObj; /* Jump to and fetch the next object in the heap*/
 
         if (IS_PRIM(obj)) {
-            next += sizeof(unsigned int) + obj->size;
-            continue; /* Continue loop if object is primitive*/
+            nextObj += sizeof(unsigned int) + obj->size; /* Continue loop if object is primitive*/
         } 
         else {
             refCount = GET_SIZE(obj); /* Get the amount of references*/
@@ -184,9 +183,8 @@ void gc(void) {
             for (i = 0; i < refCount; i++) {
                 refs[i] = relocate(refs[i]);
             }
+            nextObj += sizeof(unsigned int) + (sizeof(ObjRef) * refCount);
         }
-
-        next += sizeof(unsigned int) + (sizeof(ObjRef) * refCount);
     }
 
     if (gcStats == TRUE) printGcStatistics();
@@ -200,10 +198,28 @@ void gc(void) {
 void printGcStatistics(void) {
     printf("\n");
     printf(" ----- Garbage Collector Stats -----\n");
-    printf("Objects created since last run: %u (%u Bytes)\n", objectCount, occupiedObjectBytes);
+    printf("Objects created since last run: %u (%lu Bytes)\n", objectCount-livingObjectCount, occupiedObjectBytes-allocatedBytes);
     printf("Currently alive objects: %u (%lu Bytes)\n", livingObjectCount, allocatedBytes);
     printf("Remaining space on heap: %lu Bytes\n", maxAllocatableBytes - allocatedBytes);
     printf("------------------------------------\n");
     objectCount = 0;
     occupiedObjectBytes = 0;
+}
+
+void printHeap(FILE* out) {
+    int i;
+
+    if (out == NULL) {
+        return;
+    }
+
+    fprintf(out, "Address:         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
+    fprintf(out, "%p:  ", (void*) dest);
+    for (i = 0; i < maxAllocatableBytes; i++) {
+        if (i % 16 == 0){
+            fprintf(out, "\n%p:  ", (void*) (dest+i));
+        }
+        fprintf(out, "%02X ", (int) dest[i]);
+    }
+    fprintf(out, "\n");
 }
