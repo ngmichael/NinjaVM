@@ -370,6 +370,10 @@ void execute(unsigned int opcode, int operand) {
             ObjRef object;
 
             object = popObjRef();
+            if (object == NULL) {
+                printf("ERROR: Can't get size from NIL-Object!");
+                exit(E_ERR_NIL_REF);
+            }
             if (IS_PRIM(object)) {
                 bigFromInt(-1);
                 pushObjRef(bip.res);

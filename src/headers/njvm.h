@@ -30,6 +30,7 @@
 #define E_ERR_DIV_BY_ZERO   6  /* Division by Zero error */
 #define E_ERR_BIG_INT       7  /* Error during computation with big int object */
 #define E_ERR_OUT_OF_MEM    8  /* Remaining heap space to small for memory request */
+#define E_ERR_NIL_REF       9  /* Tried accessing or calculating with NIL-Object */
 
 /* Exit codes from program loading routine */
 #define E_ERR_NO_PROGF      10  /* No code file specified error */

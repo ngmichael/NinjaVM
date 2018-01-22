@@ -8,8 +8,8 @@ NinjaVM Exit code documentation
  5 (E_ERR_OPCODE)       = Unknown Instruction error
  6 (E_ERR_DIV_BY_ZERO)  = Division by Zero error
  7 (E_ERR_BIG_INT)      = Error during computation with big int object
- 8                      = - undefined -
- 9                      = - undefined -
+ 8 (E_ERR_OUT_OF_MEM)   = Remaining heap space to small for memory request
+ 9 (E_ERR_NIL_REF)      = Tried to access or calculate with NIL-Object
 10 (E_ERR_NO_PROGF)     = No code file specified error
 11 (E_ERR_NO_NJPROG)    = Code file not a Ninja program error
 12 (E_ERR_VM_VER)       = Wrong VM Version error 
