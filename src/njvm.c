@@ -110,6 +110,10 @@ int main(int argc, char* argv[]) {
                 printf("Error: Heap size must be greater than 0!\n");
                 exit(E_ERR_CLI);
             }
+            if (heapSize > 2146435072) {
+                printf("Error: Can not allocate more than 2047 MiB of heap!\n");
+                exit(E_ERR_CLI);
+            }
         }
         else if (strcmp("--gcpurge", argv[args]) == 0) {
             gcPurge = TRUE;
