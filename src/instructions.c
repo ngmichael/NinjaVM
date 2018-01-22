@@ -245,8 +245,14 @@ void execute(unsigned int opcode, int operand) {
         }
         case NEW: {
             ObjRef object;
+            ObjRef* refs;
+            int i;
 
             object = newComplexObject(operand);
+            refs = GET_REFS(object);
+            for (i = 0; i < operand; i++) {
+                refs[i] = (ObjRef) NULL;
+            }
             pushObjRef(object);
             break;
         }
@@ -255,8 +261,9 @@ void execute(unsigned int opcode, int operand) {
             ObjRef* fields;
             int size;
 
-            /* Check if the object is not primitive */
             object = popObjRef();
+
+            /* Check that the object is not primitive */
             if (IS_PRIM(object)) {
                 printf("Error: Can't access fields on primitive objects!\n");
                 exit(E_ERR_PRIM_OBJ);
