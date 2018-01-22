@@ -138,6 +138,9 @@ void gc(void) {
     src = temp;
     freePointer = dest;
 
+    /* Clear the new half of the heap before writing to it. */
+    memset((void*)dest, 0, maxAllocatableBytes);
+
     /* Step 2: Copy from all object containing structures (stack, ...)*/
 
     /* Stack */
