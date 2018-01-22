@@ -376,9 +376,14 @@ void execute(unsigned int opcode, int operand) {
 
             value = popObjRef();
             bip.op1 = popObjRef();
+            array = popObjRef();
             index = bigToInt();
 
-            array = popObjRef();
+            /* Check that the object is not a NULL-Pointer */
+            if (array == NULL) {
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
+                exit(E_ERR_NIL_REF);
+            }
             
             /* Check if the object is not primitive */
             if (IS_PRIM(array)) {
@@ -403,7 +408,7 @@ void execute(unsigned int opcode, int operand) {
 
             object = popObjRef();
             if (object == NULL) {
-                printf("ERROR: Can't get size from NIL-Object!");
+                printf("ERROR: Can't get size from NIL-Reference!");
                 exit(E_ERR_NIL_REF);
             }
             if (IS_PRIM(object)) {
