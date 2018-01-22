@@ -293,6 +293,11 @@ void execute(unsigned int opcode, int operand) {
 
             value = popObjRef();
             object = popObjRef();
+            /* Check that the object is not a NULL-Pointer */
+            if (object == NULL) {
+                printf("ERROR: Can access fields on NIL-Reference!\n");
+                exit(E_ERR_NIL_REF);
+            }
 
             /* Check if the object is not primitive */
             if (IS_PRIM(object)) {
