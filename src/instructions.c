@@ -264,7 +264,7 @@ void execute(unsigned int opcode, int operand) {
             object = popObjRef();
             /* Check that the object is not a NULL-Pointer */
             if (object == NULL) {
-                printf("ERROR: Can access fields on NIL-Reference!\n");
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
                 exit(E_ERR_NIL_REF);
             }
 
@@ -295,7 +295,7 @@ void execute(unsigned int opcode, int operand) {
             object = popObjRef();
             /* Check that the object is not a NULL-Pointer */
             if (object == NULL) {
-                printf("ERROR: Can access fields on NIL-Reference!\n");
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
                 exit(E_ERR_NIL_REF);
             }
 
@@ -343,9 +343,15 @@ void execute(unsigned int opcode, int operand) {
             ObjRef* fields;
 
             bip.op1 = popObjRef();
+            array = popObjRef();
             index = bigToInt();
 
-            array = popObjRef();
+            /* Check that the object is not a NULL-Pointer */
+            if (array == NULL) {
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
+                exit(E_ERR_NIL_REF);
+            }
+
             if (IS_PRIM(array)) {
                 printf("Error: Can't access fields on primitive objects!\n");
                 exit(E_ERR_PRIM_OBJ);
