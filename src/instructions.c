@@ -318,13 +318,22 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case NEWA: {
-            int size;
+            int size, i;
             ObjRef array;
+            ObjRef* refs;
 
+            /* Calculate size for array */
             bip.op1 = popObjRef();
             size = bigToInt();
 
+            /* Create the array */
             array = newComplexObject(size);
+            refs = GET_REFS(array);
+            
+            /* Initialize the array */
+            for(i = 0; i < size; i++) {
+                refs[i] = (ObjRef) NULL;
+            }
             pushObjRef(array);
             break;
         }
