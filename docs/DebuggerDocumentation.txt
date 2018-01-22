@@ -13,7 +13,7 @@ first instruction of the program and wait for a command.
 The following commands are available and explained in detail
 further below:
 
-breakpoint, dump, edit, execute, gc, help, quit, reset, run, step, verbose
+breakpoint, dump, execute, gc, help, quit, reset, run, step, verbose
 
 ++++++++++ breakpoint ++++++++++
 
@@ -35,20 +35,6 @@ This information is comprised of the following:
 - Current values from the static data area
 - Current value of the return value register
 - Dump of program memory
-
-+++++++++ edit ++++++++++
-
-- THIS FEATURE IS DEPRECATED UNTIL FURTHER NOTICE-
-
-Edit allows you to edit one of the following parts of the VM:
-
-- The stack
-- The static data area
-- The return value register
-- The program memory
-- The program counter
-- The stack pointer
-- The frame pointer
 
 ++++++++++ execute ++++++++++
 
