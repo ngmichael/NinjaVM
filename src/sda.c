@@ -7,7 +7,10 @@
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
+/* The amount of ObjRefs that the static data area can hold*/
 unsigned int sdaSize;
+
+/* The static data area itself*/
 ObjRef* sda;
 
 /**
@@ -26,7 +29,7 @@ void initSda(unsigned int size) {
     sda = calloc(size, sizeof(ObjRef));
     if (sda == NULL && size > 0) {
         printf(
-            "Error: Can't initialize sda with %lu Bytes of memory.\n",
+            "ERROR: Can't initialize sda with %lu Bytes of memory.\n",
             sizeof(int) * size
         );
         exit(E_ERR_SYS_MEM);
@@ -48,7 +51,7 @@ void popGlobal(unsigned int position) {
 
     if (position >= sdaSize) {
         printf(
-            "Error: Can't save global variable '%d'! Index out of bounds!\n",
+            "ERROR: Can't save global variable '%d'! Index out of bounds!\n",
             position
         );
         exit(E_ERR_SDA_INDEX);
@@ -73,7 +76,7 @@ void pushGlobal(unsigned int position) {
 
     if (position >= sdaSize) {
         printf(
-            "Error: Can't read global variable '%d'! Index out of bounds!\n",
+            "ERROR: Can't read global variable '%d'! Index out of bounds!\n",
             position
         );
         exit(E_ERR_SDA_INDEX);
@@ -83,6 +86,13 @@ void pushGlobal(unsigned int position) {
     pushObjRef(value);
 }
 
+/**
+ * Prints the content of the static data are to the specified
+ * stream. If an object is not NIL, its size and type will also
+ * be printed appart from its address on the heap.
+ * 
+ * @param stream - The destination stream for the output
+ */
 void printStaticDataAreaTo(FILE* stream) {
     unsigned int i;
 
@@ -115,31 +125,9 @@ void printStaticDataArea(void) {
     printStaticDataAreaTo(stdout);
 }
 
+/**
+ * Overrides the entire static data areas memory with zeros.
+ */
 void purgeSda(void) {
     memset((void *) sda, 0, sdaSize * sizeof(ObjRef));
-}
-
-/**
- * Checks if the static data area has the specified index.
- * 
- * @param n the index to be checked
- * @return TRUE if index is valid, FALSE otherwise
- */
-int hasIndex(unsigned int n) {
-    return n < sdaSize ? TRUE : FALSE;
-}
-
-/**
- * Directly alters the specified variable to the specified value.
- * 
- * @param variable - the index of the global variable
- * @param value - the new value
- * @return TRUE if variable exists, FALSE otherwise
- */
-int setVariable(unsigned int varnum, ObjRef value) {
-
-    if (hasIndex(varnum) == FALSE) return FALSE;
-
-    sda[varnum] = value;
-    return TRUE;
 }
