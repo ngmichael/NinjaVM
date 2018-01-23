@@ -14,5 +14,6 @@ extern unsigned int gcRunning;
 void initHeap(void);
 unsigned char* allocate(unsigned int nBytes);
 void gc(void);
+void printHeap(FILE* out);
 
 #endif

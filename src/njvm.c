@@ -44,7 +44,6 @@ void sigsegvHandler(int signum) {
     signalFlag = TRUE;
     changeTextColor("WHITE");
     printf("\nERROR: Caught internal exception SIGSEGV!\n");
-    printf("Performing memory dump to '/njvm_err.log'\n");
     memoryDump("njvm_err.log");
     printf("Dump completed! Exiting gracefully...\n");
     exit(E_ERR_SYS_MEM);

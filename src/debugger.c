@@ -63,11 +63,6 @@ void memoryDump(char* path) {
     else if (IS_PRIM(returnValueRegister)) { /* Primitive-Object (BigInt) */
         fprintf(out, "\n\tAddress          : %p\n\n", (void*)returnValueRegister);
         fprintf(out, "\tType             : Primitive\n");
-        fprintf(out, "\tSize             : %u Bytes\n", returnValueRegister->size);
-        fprintf(out, "\tValue (in Base10): ");
-        bip.op1 = returnValueRegister;
-        bigPrint(out);
-        fprintf(out, "\n");
     }
     else { /* Complex Object */
         fprintf(out, "\n\tAddress    : %p\n", (void*)returnValueRegister);
@@ -80,6 +75,10 @@ void memoryDump(char* path) {
         fprintf(out, "[%08d]: %6s %d\n", i, opcodes[programMemory[i] >> 24], SIGN_EXTEND(IMMEDIATE(programMemory[i])));
     }
     fprintf(out, "** End of program memory **\n");
+    fprintf(out, "\n");
+
+    fprintf(out, "Content of heap:\n\n");
+    printHeap(out);
     fprintf(out, "\n");
 
     fprintf(out, "----- End of dump -----\n");
