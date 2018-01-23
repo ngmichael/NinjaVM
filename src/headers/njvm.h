@@ -31,11 +31,12 @@
 #define E_ERR_BIG_INT       7  /* Error during computation with big int object */
 #define E_ERR_OUT_OF_MEM    8  /* Remaining heap space to small for memory request */
 #define E_ERR_NIL_REF       9  /* Tried accessing or calculating with NIL-Object */
+#define E_ERR_JMP           10 /* Tried jumping outside of program memory */
 
 /* Exit codes from program loading routine */
-#define E_ERR_NO_PROGF      10  /* No code file specified error */
-#define E_ERR_NO_NJPROG     11  /* Code file not a Ninja program error */
-#define E_ERR_VM_VER        12  /* Wrong VM Version error */
+#define E_ERR_NO_PROGF      17  /* No code file specified error */
+#define E_ERR_NO_NJPROG     18  /* Code file not a Ninja program error */
+#define E_ERR_VM_VER        19  /* Wrong VM Version error */
 
 /* Internal VM error exit codes */
 #define E_ERR_ST_OVER       20 /* Stack overflow error */

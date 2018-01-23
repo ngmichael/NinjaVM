@@ -191,12 +191,20 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case JMP: {
+            if (operand < 0 || operand > instructionCount-1) {
+                printf("ERROR: Illegal jump destination!\n");
+                exit(E_ERR_JMP);
+            }
             pc = operand;
             break;
         }
         case BRF: {
             int res;
 
+            if (operand < 0 || operand > instructionCount-1) {
+                printf("ERROR: Illegal jump destination!\n");
+                exit(E_ERR_JMP);
+            }
             bip.op1 = popObjRef();
             res = bigToInt();
             if (res == FALSE) pc = operand;
@@ -205,12 +213,20 @@ void execute(unsigned int opcode, int operand) {
         case BRT: {
             int res;
 
+            if (operand < 0 || operand > instructionCount-1) {
+                printf("ERROR: Illegal jump destination!\n");
+                exit(E_ERR_JMP);
+            }
             bip.op1 = popObjRef();
             res = bigToInt();
             if (res == TRUE) pc = operand;
             break;
         }
         case CALL: {
+            if (operand < 0 || operand > instructionCount-1) {
+                printf("ERROR: Illegal jump destination!\n");
+                exit(E_ERR_JMP);
+            }
             push(pc);
             pc = operand;
             break;
