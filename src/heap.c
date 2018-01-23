@@ -38,7 +38,7 @@ void printGcStatistics(void);
 void initHeap(void) {
     heap = calloc(heapSize, sizeof(unsigned char));
     if (heap == NULL) {
-        printf("Error: System can't supply %lu Bytes for heap creation!\n", heapSize);
+        printf("ERROR: System can't supply %lu Bytes for heap creation!\n", heapSize);
         exit(E_ERR_SYS_MEM);
     }
     dest = heap;
@@ -78,7 +78,7 @@ unsigned char* allocate(unsigned int nBytes) {
         return ret;
     }
     else {
-        printf("Error: Out of memory!\n");
+        printf("ERROR: Out of memory!\n");
         exit(E_ERR_OUT_OF_MEM);
     }
 }

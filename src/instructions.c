@@ -102,7 +102,7 @@ void execute(unsigned int opcode, int operand) {
             int result;
             result = scanf(" %c", &read);
             if (result == 0 || result == EOF) {
-                printf("Error: Something went wrong while taking user input!\n");
+                printf("ERROR: Something went wrong while taking user input!\n");
                 exit(E_ERR_IO_SHELL);
             }
             
@@ -237,7 +237,7 @@ void execute(unsigned int opcode, int operand) {
         }
         case DROP: {
             if (((int)sp - operand) < 0) {
-                printf("Error: Stack underflow!\n");
+                printf("ERROR: Stack underflow!\n");
                 exit(E_ERR_ST_UNDER);
             }
             sp = sp - operand;
@@ -286,14 +286,14 @@ void execute(unsigned int opcode, int operand) {
 
             /* Check that the object is not primitive */
             if (IS_PRIM(object)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                printf("ERROR: Can't access fields on primitive objects!\n");
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(object);
             if (operand < 0 || operand > size-1) {
-                printf("Error: Record index out of bounds!\n");
+                printf("ERROR: Record index out of bounds!\n");
                 exit(E_ERR_REC_INDEX);
             }
 
@@ -317,14 +317,14 @@ void execute(unsigned int opcode, int operand) {
 
             /* Check if the object is not primitive */
             if (IS_PRIM(object)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                printf("ERROR: Can't access fields on primitive objects!\n");
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(object);
             if (operand < 0 || operand > size-1) {
-                printf("Error: Record index out of bounds!\n");
+                printf("ERROR: Record index out of bounds!\n");
                 exit(E_ERR_REC_INDEX);
             }
 
@@ -369,14 +369,14 @@ void execute(unsigned int opcode, int operand) {
             }
 
             if (IS_PRIM(array)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                printf("ERROR: Can't access fields on primitive objects!\n");
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of array */
             size = GET_SIZE(array);
             if (index < 0 || index > size-1) {
-                printf("Error: Array index out of bounds!\n");
+                printf("ERROR: Array index out of bounds!\n");
                 exit(E_ERR_ARR_INDEX);
             }
 
@@ -403,14 +403,14 @@ void execute(unsigned int opcode, int operand) {
             
             /* Check if the object is not primitive */
             if (IS_PRIM(array)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                printf("ERROR: Can't access fields on primitive objects!\n");
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(array);
             if (index < 0 || index > size-1) {
-                printf("Error: Array index out of bounds!\n");
+                printf("ERROR: Array index out of bounds!\n");
                 exit(E_ERR_ARR_INDEX);
             }
 
@@ -466,7 +466,7 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         default: {
-            printf("Error: Illegal opcode: %u\n", opcode);
+            printf("ERROR: Illegal opcode: %u\n", opcode);
             exit(E_ERR_OPCODE);
         }
     }

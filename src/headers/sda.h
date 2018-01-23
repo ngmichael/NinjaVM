@@ -14,7 +14,4 @@ void purgeSda(void);
 void printStaticDataArea(void);
 void printStaticDataAreaTo(FILE* stream);
 
-int hasIndex(unsigned int n);
-int setVariable(unsigned int varnum, ObjRef value);
-
 #endif /* KSP_WS17_18_SDA_H */

@@ -25,9 +25,6 @@ void purgeStack(void);
 void printStackTo(FILE* stream);
 void printStack(void);
 
-int isAccessibleStackSlot(int n);
-void replaceStackSlotValue(unsigned int slot, int isObjRef, int value);
-
 typedef struct {
 	int isObjRef;
 	union {
