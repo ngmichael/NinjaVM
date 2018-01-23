@@ -32,6 +32,6 @@ Für Aufgabenblätter und die Hausübungen werden Tags erstellt, sobald die Lös
 1. [VM7](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe7/index.html): Records, Arrays, Referenzvergleiche, fertig bis 19.12.2017 [Lösung](https://git.thm.de/ngmh83/ksp_ws17-18/tree/V7.0.0)
 1. [VM8](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe8/index.html): Compacting Garbage Collector, fertig bis 23.01.2018
 1. [Hausübung 1](https://homepages.thm.de/~hg53/ksp-ws1718/kspHU1.html): VM [Version 4](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe4/index.html) vollständig funktionsfähig. **Deadline 28.11.2017, 18.00 Uhr**
-1. [Hausübung 2](https://homepages.thm.de/~hg53/ksp-ws1718/kspHU2.html): VM [Version 8](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe8/index.html) vollständig funktionsfähig. **Deadline 23.01.2018, 18.00 Uhr**
+1. [Hausübung 2](https://homepages.thm.de/~hg53/ksp-ws1718/kspHU2.html): VM [Version 8](https://homepages.thm.de/~hg53/ksp-ws1718/aufgabe8/index.html) vollständig funktionsfähig. **Deadline 26.01.2018, 18.00 Uhr**
 
 Sobald eine Lösung veröffentlicht ist, wird ein Link zum Commit der Lösung zum jeweiligen Aufgabenblatt hinzugefügt.
