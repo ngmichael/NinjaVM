@@ -21,6 +21,7 @@ void releaseStackFrame(void);
 void popLocal(int position);
 void pushLocal(int position);
 
+void purgeStack(void);
 void printStackTo(FILE* stream);
 void printStack(void);
 

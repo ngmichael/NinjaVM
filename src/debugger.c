@@ -459,9 +459,10 @@ int processCommand(char* command) {
         printf("RESETTING NINJA VIRTUAL MACHINE....\n");
         changeTextColor("WHITE");
         pc = 1;
-        sp = fp = 0;
+        purgeStack();
+        purgeSda();
+        purgeHeap();
         returnValueRegister = NULL;
-        initSda(sdaSize);
         run = FALSE;
         breakpoint = -1;
         verbose = FALSE;

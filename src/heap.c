@@ -226,3 +226,15 @@ void printHeap(FILE* out) {
     }
     fprintf(out, "\n");
 }
+
+void purgeHeap(void) {
+    memset((void*) heap, 0, heapSize);
+    dest = heap;
+    freePointer = heap;
+    src = heap + (heapSize / 2); 
+    allocatedBytes = 0;
+    gcRunning = FALSE;
+    objectCount = 0;
+    occupiedObjectBytes = 0;
+    livingObjectCount = 0;
+}

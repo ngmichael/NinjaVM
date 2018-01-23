@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "../lib/support.h"
@@ -217,6 +218,11 @@ void releaseStackFrame(void) {
 
     sp = fp;
     fp = pop();
+}
+
+void purgeStack(void) {
+    memset((void*) stack, 0, stackSize);
+    sp = fp = 0;
 }
 
 void printStackTo(FILE* stream) {

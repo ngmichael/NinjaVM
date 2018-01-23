@@ -10,6 +10,7 @@ void initSda(unsigned int size);
 void pushGlobal(unsigned int size);
 void popGlobal(unsigned int size);
 
+void purgeSda(void);
 void printStaticDataArea(void);
 void printStaticDataAreaTo(FILE* stream);
 

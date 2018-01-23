@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "headers/njvm.h"
 #include "headers/sda.h"
 #include "headers/stack.h"
@@ -112,6 +113,10 @@ void printStaticDataAreaTo(FILE* stream) {
  */
 void printStaticDataArea(void) {
     printStaticDataAreaTo(stdout);
+}
+
+void purgeSda(void) {
+    memset((void *) sda, 0, sdaSize * sizeof(ObjRef));
 }
 
 /**
