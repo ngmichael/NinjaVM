@@ -104,6 +104,15 @@ ObjRef copyToFreeMemory(ObjRef orig) {
     return copy;
 }
 
+/**
+ * Relocates an object from its current address to a new address
+ * in the current half of the heap. If it has already been relocated, 
+ * the address of that relocated object is returned instead.
+ * If the input is NULL, the output is NULL.
+ * 
+ * @param orig - the object to be relocated
+ * @return the new address of the object
+ */
 ObjRef relocate(ObjRef orig) {
     ObjRef copy;
 
@@ -198,6 +207,9 @@ void gc(void) {
     }
 }
 
+/**
+ * Prints garbage collector statistics
+ */
 void printGcStatistics(void) {
     printf("\n");
     printf(" ----- Garbage Collector Stats -----\n");
@@ -209,6 +221,9 @@ void printGcStatistics(void) {
     occupiedObjectBytes = 0;
 }
 
+/**
+ * Prints a raw byte dump of the heap.
+ */
 void printHeap(FILE* out) {
     int i;
 
@@ -227,6 +242,9 @@ void printHeap(FILE* out) {
     fprintf(out, "\n");
 }
 
+/**
+ * Overwrites the entire memory of the heap.
+ */
 void purgeHeap(void) {
     memset((void*) heap, 0, heapSize);
     dest = heap;
