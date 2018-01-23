@@ -1,3 +1,11 @@
+V 8.0
+
+- Added a compacting garbage collector using a stop-and-copy method
+  - Added CLI argument --gcstats for printing GC statistics after each run
+  - Added CLI argument --gcpurge for clearing the old half of the heap
+- Added CLI argument --stack for manually setting the stack size
+- Added CLI argument --heap for manually setting the size of the object heap
+
 V 7.0
 
  - Added support for Arrays
