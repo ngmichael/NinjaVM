@@ -58,12 +58,12 @@ void sigsegvHandler(int signum) {
  */
 int main(int argc, char* argv[]) {
 
-    FILE* code;
-    int args;
-    char* formatIdentifier;
-    unsigned int njvmVersion;
-    unsigned int globalVariableCount;
-    unsigned int runDebugger;
+    FILE* code; /* Pointer to the code file */
+    int args; /* Temporary counter variable for cli argument processing loop */
+    char* formatIdentifier; /* Temp variable for processing format identifier*/
+    unsigned int njvmVersion; /* Temp var for processing program version */
+    unsigned int globalVariableCount; /*Var for storing amount of global vars*/
+    unsigned int runDebugger; /* Flag for launching debugger */
 
     signalFlag = FALSE;
     stackSize = 65536; /* Bytes -> 64 KiB */
@@ -73,6 +73,7 @@ int main(int argc, char* argv[]) {
     code = NULL;
     gcPurge = FALSE;
 
+    /* Register signal handler for segmentation fault here */
     signal(SIGSEGV, sigsegvHandler);
 
     /*
@@ -103,30 +104,30 @@ int main(int argc, char* argv[]) {
         else if (strcmp("--stack", argv[args]) == 0) {
             args++;
             if (args >= argc) {
-                printf("Error: Size for '--stack' missing!\n");
+                printf("ERROR: Size for '--stack' missing!\n");
                 printf("\tUsage: '--stack <n> KiB' -> --stack 64\n");
                 exit(E_ERR_CLI);
             }
             stackSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
             if (stackSize <= 0) {
-                printf("Error: Stack size must be greater than 0!\n");
+                printf("ERROR: Stack size must be greater than 0!\n");
                 exit(E_ERR_CLI);
             }
         }
         else if (strcmp("--heap", argv[args]) == 0) {
             args++;
             if (args >= argc) {
-                printf("Error: Size for '--heap' missing!\n");
+                printf("ERROR: Size for '--heap' missing!\n");
                 printf("\tUsage: '--heap <n> KiB' -> --heap 8192\n");
                 exit(E_ERR_CLI);
             }
             heapSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
             if (heapSize <= 0) {
-                printf("Error: Heap size must be greater than 0!\n");
+                printf("ERROR: Heap size must be greater than 0!\n");
                 exit(E_ERR_CLI);
             }
             if (heapSize > 2146435072) {
-                printf("Error: Can not allocate more than 2047 MiB of heap!\n");
+                printf("ERROR: Can not allocate more than 2047 MiB of heap!\n");
                 exit(E_ERR_CLI);
             }
         }
@@ -151,14 +152,14 @@ int main(int argc, char* argv[]) {
         }
         else {
             /* Catch any unknown arguments and terminate */
-            printf("Error: Unrecognized argument '%s'\n", argv[args]);
+            printf("ERROR: Unrecognized argument '%s'\n", argv[args]);
             return E_ERR_CLI;
         }
     }
 
     /* Check if a codefile has been specified */
     if (code == NULL) {
-        printf("Error: No code file specified!\n"); 
+        printf("ERROR: No code file specified!\n"); 
         return E_ERR_NO_PROGF;
     }
 
@@ -184,13 +185,13 @@ int main(int argc, char* argv[]) {
     programMemory = calloc(instructionCount, sizeof(unsigned int));
     if (programMemory == NULL) {
         printf(
-            "Error: System could not allocate %lu of memory for program\n",
+            "ERROR: System could not allocate %lu of memory for program\n",
             sizeof(unsigned int) * instructionCount
         );
         return E_ERR_SYS_MEM;
     }
 
-    /* Allocate memory for the static data area. */
+    /* Read the amount of global variables. */
     fread(&globalVariableCount, 1, sizeof(int), code);
     
     /* Read all remaining data (instructions) into programMemory. */
@@ -198,11 +199,12 @@ int main(int argc, char* argv[]) {
     
     /* Close the file.*/
     if (fclose(code) != 0) {
-        printf("Error: Could not close program file after reading:\n");
+        printf("ERROR: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
         return E_ERR_IO_FILE;
     }
 
+    /* Initialize the VM */
     pc = 0;
     halt = FALSE;
     initStack();
@@ -210,6 +212,7 @@ int main(int argc, char* argv[]) {
     initHeap();
     returnValueRegister = NULL;
 
+    /* Launch the debugger if flag is set */
     if (runDebugger == TRUE) {
         printf("%s Loaded program successfully: %d instructions | %d global variables\n",
             DEBUGGER, instructionCount, globalVariableCount);
@@ -221,7 +224,9 @@ int main(int argc, char* argv[]) {
 
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {
+        /*Instruction register and variable for storing the decoded opcode */
         unsigned int instruction, opcode;
+        /* Variable for storing the decode immediate value */
         int operand;
 
         /* Load instruction */
