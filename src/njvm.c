@@ -13,14 +13,30 @@
 #include "headers/heap.h"
 #include "../lib/support.h"
 
-int halt;
+/* Flag for nominally halting the VM */
+unsigned int halt;
+
+/* Program counter - always points to the next instruction in program memory */
 unsigned int pc;
+
+/* Program memory - pointer to the memory region that holds the instructions */
 unsigned int* programMemory;
+
+/* Total amount of instructions in program memory */
 unsigned int instructionCount;
+
+/* Flag for determinig if the signal handler was called recursively */
 volatile sig_atomic_t signalFlag;
 
+/* The return value register of the VM*/
 ObjRef returnValueRegister;
 
+/**
+ * This function is responsible for handling a segmentation fault.
+ * It attempts to write out a memory dump to an error log file
+ * and a gracefull exit.
+ * If this causes another segfault, the process simply kills itself.
+ */
 void sigsegvHandler(int signum) {
     if (signalFlag == TRUE) {
         raise(SIGKILL);
@@ -45,7 +61,6 @@ int main(int argc, char* argv[]) {
 
     FILE* code;
     int args;
-    int fileClose;
     char* formatIdentifier;
     unsigned int njvmVersion;
     unsigned int globalVariableCount;
@@ -178,14 +193,12 @@ int main(int argc, char* argv[]) {
 
     /* Allocate memory for the static data area. */
     fread(&globalVariableCount, 1, sizeof(int), code);
-    initSda(globalVariableCount);
     
     /* Read all remaining data (instructions) into programMemory. */
     fread(programMemory, instructionCount, sizeof(unsigned int), code);
     
     /* Close the file.*/
-    fileClose = fclose(code);
-    if (fileClose != 0) {
+    if (fclose(code) != 0) {
         printf("Error: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
         return E_ERR_IO_FILE;
@@ -194,6 +207,7 @@ int main(int argc, char* argv[]) {
     pc = 0;
     halt = FALSE;
     initStack();
+    initSda(globalVariableCount);
     initHeap();
     returnValueRegister = NULL;
 

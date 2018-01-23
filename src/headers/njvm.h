@@ -53,7 +53,7 @@
 #define E_ERR_ARR_INDEX     31 /* Array index out of bounds */
 
 
-extern int halt;
+extern unsigned int halt;
 extern unsigned int pc;
 extern unsigned int* programMemory;
 extern unsigned int instructionCount;
