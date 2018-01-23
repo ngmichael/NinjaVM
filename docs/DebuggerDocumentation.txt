@@ -1,4 +1,4 @@
-Debugger Documentation for NinjaVM Version 4
+Debugger Documentation for NinjaVM Version 8
 
 To activate the debugger, launch the VM with the command
 line parameter --debug:
@@ -6,8 +6,8 @@ line parameter --debug:
     $ ./njvm --debug programFile.bin
 
 The debugger will load the program file and initialize the VM.
-If an error occurs during this process, it will be displayed
-to you and the VM will terminate. Once the initialization
+If errors occur during this process they will be displayed
+and the VM will terminate. Once the initialization
 process has finished, the debugger will prompt you with the
 first instruction of the program and wait for a command.
 The following commands are available and explained in detail
@@ -19,7 +19,7 @@ breakpoint, dump, execute, gc, help, quit, reset, run, step, verbose
 
 With this command you can set a breakpoint at a desired instruction.
 This can be used in combination with the run command, because it is
-the only way the programmer has to stop continuous program execution
+the only way to stop continuous program execution
 once the run command has been given. 
 
 ++++++++++ dump ++++++++++
@@ -35,6 +35,7 @@ This information is comprised of the following:
 - Current values from the static data area
 - Current value of the return value register
 - Dump of program memory
+- A raw dump of the heap
 
 ++++++++++ execute ++++++++++
 
@@ -45,8 +46,7 @@ and the program counter.
 
 ++++++++++ gc ++++++++++
 
-This command initiates the Garbage Collector and displays
-the GC-Statistics after completion.
+This command initiates the Garbage Collector.
 
 ++++++++++ inspect ++++++++++
 
@@ -70,7 +70,7 @@ VM is terminated.
 
 Resets the VM into its initial state. The program counter, stack pointer
 and stack-frame pointer get set to 0, global variables as well as the
-return value register are reset to nil.
+return value register are reset to nil and the heap is cleared.
 
 ++++++++++ run ++++++++++
 
