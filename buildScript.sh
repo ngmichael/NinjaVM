@@ -24,13 +24,13 @@ cp docs/DebuggerDocumentation.txt out/ngmh83/debug.txt
 # Generate readme.txt
 cp docs/ExitCodes.txt out/ngmh83/ExitCodes.txt
 
-# Generate KSP-HU1.TEAM file
+# Generate KSP-HU2.TEAM file
 echo "Michael, Noah George, 5090989
 Muenscher, Felix, 5096954" > out/ngmh83/KSP-HU2.TEAM
 
 # Generate NinjaVM compile script and make it executable
 echo "cd src
-gcc -g -std=c89 -Wall -pedantic -o ../out/njvm debugger.c heap.c instructions.c njvm.c sda.c stack.c support.c -L ../lib/ -l bigint
+gcc -g -std=c89 -Wall -pedantic -o ../njvm debugger.c heap.c instructions.c njvm.c sda.c stack.c support.c -L ../lib/ -l bigint
 cd ..
 chmod +x njvm" > out/ngmh83/mknjvm
 chmod +x out/ngmh83/mknjvm
