@@ -6,27 +6,25 @@
 #ifndef _SUPPORT_H_
 #define _SUPPORT_H_
 
-#define RED     "\x1b[31m"
-#define GREEN   "\x1b[32m"
-#define YELLOW  "\x1b[33m"
-#define BLUE    "\x1b[34m"
-#define MAGENTA "\x1b[35m"
-#define CYAN    "\x1b[36m"
-#define WHITE   "\x1b[0m"
+#define RESET		      0
+#define BRIGHT 		    1
+#define DIM		        2
+#define ITALIC        3
+#define UNDERLINE     4
+#define REVERSE		    7
+#define HIDDEN		    8
+#define STRIKETHROUGH 9
 
-void changeTextColor(char* color);
+#define BLACK 		0
+#define RED		    1
+#define GREEN		  2
+#define YELLOW		3
+#define BLUE		  4
+#define MAGENTA		5
+#define CYAN		  6
+#define	WHITE		  7
 
-/*
- * Color codes - and their meaning:
- * 
- * RED: used for fatal errors, all errors that prevent further program execution
- * YELLOW: warnings and debugger help output
- * GREEN: OPCODES, when displayed in debugger
- * CYAN: INSPECT OUTPUT: When inspecting stack, sda, ect in debugger
- * MAGENTA: BREAKPOINTS
- * BLUE: unused
- * WHITE: DEFAULT; Everything else
- */
+void changeTextColor(unsigned int foreground, unsigned int background, unsigned int state);
 
 
 /* object representation */

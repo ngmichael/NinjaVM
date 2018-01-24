@@ -13,7 +13,9 @@
  * @param msg - the error message
  */
 void fatalError(char* msg) {
+    changeTextColor(RED, BLACK, BRIGHT);
     fprintf(stderr, "ERROR: %s\n", msg);
+    changeTextColor(WHITE, BLACK, RESET);
     exit(E_ERR_BIG_INT);
 }
 
@@ -91,26 +93,8 @@ void inspectObject(ObjRef object) {
  * 
  * @param color - A string representation of the color name.
  */
-void changeTextColor(char* color) {
-    if (strcmp(color, "RED") == 0) {
-        printf("%s", RED);
-    }
-    else if (strcmp(color, "GREEN") == 0) {
-        printf("%s", GREEN);
-    }
-    else if (strcmp(color, "YELLOW") == 0) {
-        printf("%s", YELLOW);
-    }
-    else if (strcmp(color, "BLUE") == 0) {
-        printf("%s", BLUE);
-    }
-    else if (strcmp(color, "MAGENTA") == 0) {
-        printf("%s", MAGENTA);
-    }
-    else if (strcmp(color, "CYAN") == 0) {
-        printf("%s", CYAN);
-    }
-    else {
-        printf("%s", WHITE);
-    }
+void changeTextColor(unsigned int foreground, unsigned int background, unsigned int state) {
+    char colorString[13];
+	sprintf(colorString, "%c[%d;%d;%dm", 0x1B, state, foreground + 30, background + 40);
+	printf("%s", colorString);
 }

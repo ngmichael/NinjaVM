@@ -466,7 +466,11 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         default: {
-            printf("ERROR: Illegal opcode: %u\n", opcode);
+            changeTextColor(RED, BLACK, BRIGHT);
+            printf("ERROR: Illegal opcode: ");
+            changeTextColor(WHITE, BLACK, BRIGHT);
+            printf("%u\n", opcode);
+            changeTextColor(WHITE, BLACK, RESET);
             exit(E_ERR_OPCODE);
         }
     }

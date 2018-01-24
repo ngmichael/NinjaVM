@@ -29,7 +29,9 @@ unsigned int maxElements;
 void initStack(void) {
     stack = (StackSlot*) calloc(stackSize, sizeof(unsigned char));
     if (stack == NULL) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Failed to initialize stack with size %u Bytes.\n", stackSize);
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_SYS_MEM);
     }
 
@@ -48,7 +50,9 @@ void initStack(void) {
  */
 void push(int value) {
     if (sp >= maxElements) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Stack overflow\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_ST_OVER);
     }
 
@@ -67,7 +71,9 @@ void push(int value) {
  */
 void pushObjRef(ObjRef obj) {
     if (sp >= maxElements) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Stack overflow\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_ST_OVER);
     }
 
@@ -88,7 +94,9 @@ int pop(void) {
     StackSlot value;
 
     if (sp == 0) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Stack underflow\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_ST_UNDER);
     }
 
@@ -96,7 +104,9 @@ int pop(void) {
     value = stack[sp];
 
     if (value.isObjRef == TRUE) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Tried to access stackslot as number, but it contains object!\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_ST_NO_NUM);
     }
 
@@ -113,7 +123,9 @@ ObjRef popObjRef(void) {
     StackSlot value;
 
     if (sp == 0) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Stack underflow\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_ST_UNDER);
     }
 
@@ -121,7 +133,9 @@ ObjRef popObjRef(void) {
     value = stack[sp];
     
     if (value.isObjRef == FALSE) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Tried to access stackslot as object, but it contains a number!\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_ST_NO_OBJ);
     }
 
@@ -142,14 +156,18 @@ void pushLocal(int position) {
     pos = fp + position;
 
     if (pos < 0 || pos >= stackSize) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Local variable outside of stack index range!\n");
         printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_STF_INDEX);
     }
 
     slot = stack[pos];
     if (slot.isObjRef == FALSE) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Tried to access stackslot as object, but it contains a number!\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_ST_NO_OBJ);
     }
     pushObjRef(slot.u.objRef);
@@ -168,8 +186,10 @@ void popLocal(int position) {
     pos = fp + position;
 
     if (pos < 0 || pos >= stackSize) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Local variable outside of stack index range!\n");
         printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_STF_INDEX);
     }
 
@@ -192,15 +212,19 @@ void allocateStackFrame(int size) {
     int i;
 
     if (size < 0) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Can't allocate stack frame with negative size!\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_STF_ALLOC);
     }
 
     if (sp + (size + 1) > maxElements) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf(
             "ERROR: Can't allocate stack frame with size %d: Stack overflow\n",
             size
         );
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_STF_ALLOC);
     }
 
@@ -224,7 +248,9 @@ void allocateStackFrame(int size) {
  */
 void releaseStackFrame(void) {
     if (fp == 0) {
+        changeTextColor(RED, BLACK, BRIGHT);
         printf("ERROR: Can't release stack frame that doesn't exist!\n");
+        changeTextColor(WHITE, BLACK, RESET);
         exit(E_ERR_STF_FREE);
     }
 
