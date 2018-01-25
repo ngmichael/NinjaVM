@@ -1,12 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "headers/njvm.h"
 #include "headers/sda.h"
 #include "headers/stack.h"
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
+/* The amount of ObjRefs that the static data area can hold*/
 unsigned int sdaSize;
+
+/* The static data area itself*/
 ObjRef* sda;
 
 /**
@@ -24,10 +28,12 @@ void initSda(unsigned int size) {
     sdaSize = size;
     sda = calloc(size, sizeof(ObjRef));
     if (sda == NULL && size > 0) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf(
-            "Error: Can't initialize sda with %lu Bytes of memory.\n",
+            "ERROR: Can't initialize sda with %lu Bytes of memory.\n",
             sizeof(int) * size
         );
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_SYS_MEM);
     }
 }
@@ -46,10 +52,12 @@ void popGlobal(unsigned int position) {
     ObjRef value;
 
     if (position >= sdaSize) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf(
-            "Error: Can't save global variable '%d'! Index out of bounds!\n",
+            "ERROR: Can't save global variable '%d'! Index out of bounds!\n",
             position
         );
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_SDA_INDEX);
     }
     
@@ -71,10 +79,12 @@ void pushGlobal(unsigned int position) {
     ObjRef value;
 
     if (position >= sdaSize) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf(
-            "Error: Can't read global variable '%d'! Index out of bounds!\n",
+            "ERROR: Can't read global variable '%d'! Index out of bounds!\n",
             position
         );
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_SDA_INDEX);
     }
 
@@ -82,6 +92,13 @@ void pushGlobal(unsigned int position) {
     pushObjRef(value);
 }
 
+/**
+ * Prints the content of the static data are to the specified
+ * stream. If an object is not NIL, its size and type will also
+ * be printed appart from its address on the heap.
+ * 
+ * @param stream - The destination stream for the output
+ */
 void printStaticDataAreaTo(FILE* stream) {
     unsigned int i;
 
@@ -95,10 +112,6 @@ void printStaticDataAreaTo(FILE* stream) {
             fprintf(stream, "Address: %p\n", (void*) sda[i]);
             fprintf(stream, "\tType: Primitive\n");
             fprintf(stream, "\tSize: %u Bytes\n", sda[i]->size);
-            fprintf(stream, "\tValue (in Base10): ");
-            bip.op1 = sda[i];
-            bigPrint(stream);
-            fprintf(stream, "\n");
         }
         else { /* Complex Object */
             fprintf(stream, "Address: %p\n", (void*) sda[i]);
@@ -119,26 +132,8 @@ void printStaticDataArea(void) {
 }
 
 /**
- * Checks if the static data area has the specified index.
- * 
- * @param n the index to be checked
- * @return TRUE if index is valid, FALSE otherwise
+ * Overrides the entire static data areas memory with zeros.
  */
-int hasIndex(unsigned int n) {
-    return n < sdaSize ? TRUE : FALSE;
-}
-
-/**
- * Directly alters the specified variable to the specified value.
- * 
- * @param variable - the index of the global variable
- * @param value - the new value
- * @return TRUE if variable exists, FALSE otherwise
- */
-int setVariable(unsigned int varnum, ObjRef value) {
-
-    if (hasIndex(varnum) == FALSE) return FALSE;
-
-    sda[varnum] = value;
-    return TRUE;
+void purgeSda(void) {
+    memset((void *) sda, 0, sdaSize * sizeof(ObjRef));
 }

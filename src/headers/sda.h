@@ -4,15 +4,14 @@
 #include "../../lib/support.h"
 
 extern unsigned int sdaSize;
+extern ObjRef* sda;
 
 void initSda(unsigned int size);
 void pushGlobal(unsigned int size);
 void popGlobal(unsigned int size);
 
+void purgeSda(void);
 void printStaticDataArea(void);
 void printStaticDataAreaTo(FILE* stream);
-
-int hasIndex(unsigned int n);
-int setVariable(unsigned int varnum, ObjRef value);
 
 #endif /* KSP_WS17_18_SDA_H */

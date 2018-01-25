@@ -1,15 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
+/* Pointer to the stacks memory*/
 StackSlot* stack;
+/* The stack pointer */
 unsigned int sp;
-unsigned int stackSize;
-
+/* The stack frame pointer - points to the first element of the current frame*/
 unsigned int fp;
+/* Size of the stacks memory */
+unsigned int stackSize;
+/* The maximum amount of elements that can be on the stack */
+unsigned int maxElements;
 
 /**
  * Allocates size * 4 Bytes of memory for the stack
@@ -20,16 +26,18 @@ unsigned int fp;
  * 
  * @param size - the number slots for the stack
  */
-void initStack(unsigned int size) {
-    stack = (StackSlot*) calloc(size, sizeof(StackSlot));
+void initStack(void) {
+    stack = (StackSlot*) calloc(stackSize, sizeof(unsigned char));
     if (stack == NULL) {
-        printf("Error: Failed to initialize stack with size %lu Bytes.\n", sizeof(unsigned int) * size);
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Failed to initialize stack with size %u Bytes.\n", stackSize);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_SYS_MEM);
     }
 
     sp = 0;
     fp = 0;
-    stackSize = size;
+    maxElements = stackSize / sizeof(StackSlot);
 }
 
 /**
@@ -41,8 +49,10 @@ void initStack(unsigned int size) {
  * @param value - the value to be pushed onto the stack
  */
 void push(int value) {
-    if (sp >= stackSize) {
-        printf("Error: Stack overflow\n");
+    if (sp >= maxElements) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Stack overflow\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_ST_OVER);
     }
 
@@ -60,15 +70,15 @@ void push(int value) {
  * @param value - the value to be pushed onto the stack
  */
 void pushObjRef(ObjRef obj) {
-
-    if (sp >= stackSize) {
-        printf("Error: Stack overflow\n");
+    if (sp >= maxElements) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Stack overflow\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_ST_OVER);
     }
 
     stack[sp].isObjRef = TRUE;
     stack[sp].u.objRef = obj;
-
     sp = sp + 1;
 }
 
@@ -81,11 +91,12 @@ void pushObjRef(ObjRef obj) {
  * @return value - the top most value from the stack as an integer
  */
 int pop(void) {
-
     StackSlot value;
 
     if (sp == 0) {
-        printf("Error: Stack underflow\n");
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Stack underflow\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_ST_UNDER);
     }
 
@@ -93,7 +104,9 @@ int pop(void) {
     value = stack[sp];
 
     if (value.isObjRef == TRUE) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf("ERROR: Tried to access stackslot as number, but it contains object!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_ST_NO_NUM);
     }
 
@@ -110,7 +123,9 @@ ObjRef popObjRef(void) {
     StackSlot value;
 
     if (sp == 0) {
-        printf("Error: Stack underflow\n");
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Stack underflow\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_ST_UNDER);
     }
 
@@ -118,7 +133,9 @@ ObjRef popObjRef(void) {
     value = stack[sp];
     
     if (value.isObjRef == FALSE) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf("ERROR: Tried to access stackslot as object, but it contains a number!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_ST_NO_OBJ);
     }
 
@@ -133,17 +150,27 @@ ObjRef popObjRef(void) {
  * function will display an error message and terminate the VM.
  */
 void pushLocal(int position) {
+    StackSlot slot;
     int pos;
 
     pos = fp + position;
 
     if (pos < 0 || pos >= stackSize) {
-        printf("Error: Local variable outside of stack index range!\n");
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Local variable outside of stack index range!\n");
         printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_STF_INDEX);
     }
 
-    pushObjRef(stack[pos].u.objRef);
+    slot = stack[pos];
+    if (slot.isObjRef == FALSE) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Tried to access stackslot as object, but it contains a number!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
+        exit(E_ERR_ST_NO_OBJ);
+    }
+    pushObjRef(slot.u.objRef);
 }
 
 /**
@@ -159,12 +186,15 @@ void popLocal(int position) {
     pos = fp + position;
 
     if (pos < 0 || pos >= stackSize) {
-        printf("Error: Local variable outside of stack index range!\n");
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Local variable outside of stack index range!\n");
         printf("Range: 0 ... %d, Variable position: %d\n", stackSize-1, pos);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_STF_INDEX);
     }
 
     stack[pos].u.objRef = popObjRef();
+    stack[pos].isObjRef = TRUE;
 }
 
 /**
@@ -182,15 +212,19 @@ void allocateStackFrame(int size) {
     int i;
 
     if (size < 0) {
-        printf("Error: Can't allocate stack frame with negative size!\n");
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Can't allocate stack frame with negative size!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_STF_ALLOC);
     }
 
-    if (sp + (size + 1) > stackSize) {
+    if (sp + (size + 1) > maxElements) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf(
-            "Error: Can't allocate stack frame with size %d: Stack overflow\n",
+            "ERROR: Can't allocate stack frame with size %d: Stack overflow\n",
             size
         );
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_STF_ALLOC);
     }
 
@@ -200,7 +234,7 @@ void allocateStackFrame(int size) {
 
     for (i = 0; i < sp - fp; i++) {
         stack[fp+i].isObjRef = TRUE;
-        stack[fp+i].u.objRef = NULL;
+        stack[fp+i].u.objRef = (ObjRef) NULL;
     }
 }
 
@@ -214,7 +248,9 @@ void allocateStackFrame(int size) {
  */
 void releaseStackFrame(void) {
     if (fp == 0) {
-        printf("Error: Can't release stack frame that doesn't exist!\n");
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("ERROR: Can't release stack frame that doesn't exist!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_STF_FREE);
     }
 
@@ -222,6 +258,18 @@ void releaseStackFrame(void) {
     fp = pop();
 }
 
+/**
+ * Overrides the stacks entire memory with zeros
+ * and resets stackpointer and framepointer
+ */
+void purgeStack(void) {
+    memset((void*) stack, 0, stackSize);
+    sp = fp = 0;
+}
+
+/**
+ * Prints the content of the stack to the specified stream.
+ */
 void printStackTo(FILE* stream) {
     int i;
     for (i = sp; i >= 0; i--) {
@@ -265,10 +313,6 @@ void printStackTo(FILE* stream) {
                 else if (IS_PRIM(slot.u.objRef)) { /* Primitive-Object (BigInt) */
                     fprintf(stream, "              Type: Primitive\n");
                     fprintf(stream, "              Size: %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "              Value (in Base10): ");
-                    bip.op1 = slot.u.objRef;
-                    bigPrint(stream);
-                    fprintf(stream, "\n");
                 }
                 else { /* Complex Object */
                     fprintf(stream, "              Type: Complex\n");
@@ -286,10 +330,6 @@ void printStackTo(FILE* stream) {
                 else if (IS_PRIM(slot.u.objRef)) { /* Primitive-Object (BigInt) */
                     fprintf(stream, "              Type: Primitive\n");
                     fprintf(stream, "              Size: %u Bytes\n", slot.u.objRef->size);
-                    fprintf(stream, "              Value (in Base10): ");
-                    bip.op1 = slot.u.objRef;
-                    bigPrint(stream);
-                    fprintf(stream, "\n");
                 }
                 else { /* Complex Object */
                     fprintf(stream, "              Type: Complex\n");
@@ -307,42 +347,4 @@ void printStackTo(FILE* stream) {
  */
 void printStack(void) {
     printStackTo(stdout);
-}
-
-/**
- * Checks if value n is within the stack boundaries
- *
- * @param n - the value to be checked
- * @return TRUE if n lies within stack boundaries, FALSE otherwise
- */
-int isAccessibleStackSlot(int n) {
-    return n >= 0 && n < sp ? TRUE : FALSE;
-}
-
-
-/**
- * Sets the specified value at the specified position in the stack.
- * 
- * @param slot - the slot that should be set
- * @param value - the value to set
- */
-void replaceStackSlotValue(unsigned int slot, int isObjRef, int value) {
-    if (isAccessibleStackSlot(slot) == FALSE) {
-        printf("Warning: %u is not an accessible stack slot!\n", slot);
-        return;
-    }
-
-    if (isObjRef == TRUE) {
-        bigFromInt(value);
-
-        stack[slot].isObjRef = TRUE;
-        stack[slot].u.objRef = bip.res;
-    }
-    else if (isObjRef == FALSE) {
-        stack[slot].isObjRef = FALSE;
-        stack[slot].u.number = value;
-    }
-    else {
-        stack[slot].isObjRef = -1;
-    }
 }

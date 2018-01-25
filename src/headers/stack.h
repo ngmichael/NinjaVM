@@ -7,7 +7,7 @@ extern unsigned int sp;
 extern unsigned int fp;
 extern unsigned int stackSize;
 
-void initStack(unsigned int size);
+void initStack(void);
 
 void push(int value);
 void pushObjRef(ObjRef value);
@@ -21,11 +21,9 @@ void releaseStackFrame(void);
 void popLocal(int position);
 void pushLocal(int position);
 
+void purgeStack(void);
 void printStackTo(FILE* stream);
 void printStack(void);
-
-int isAccessibleStackSlot(int n);
-void replaceStackSlotValue(unsigned int slot, int isObjRef, int value);
 
 typedef struct {
 	int isObjRef;
@@ -34,5 +32,7 @@ typedef struct {
 		int number;
 	} u;
 } StackSlot;
+
+extern StackSlot* stack;
 
 #endif /* KSP_WS17_18_STACK_H */

@@ -2,19 +2,52 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "headers/njvm.h"
 #include "headers/stack.h"
 #include "headers/instructions.h"
 #include "headers/sda.h"
 #include "headers/debugger.h"
+#include "headers/heap.h"
 #include "../lib/support.h"
 
-int halt;
+/* Flag for nominally halting the VM */
+unsigned int halt;
+
+/* Program counter - always points to the next instruction in program memory */
 unsigned int pc;
+
+/* Program memory - pointer to the memory region that holds the instructions */
 unsigned int* programMemory;
+
+/* Total amount of instructions in program memory */
 unsigned int instructionCount;
 
+/* Flag for determinig if the signal handler was called recursively */
+volatile sig_atomic_t signalFlag;
+
+/* The return value register of the VM*/
 ObjRef returnValueRegister;
+
+/**
+ * This function is responsible for handling a segmentation fault.
+ * It attempts to write out a memory dump to an error log file
+ * and a gracefull exit.
+ * If this causes another segfault, the process simply kills itself.
+ */
+void sigsegvHandler(int signum) {
+    if (signalFlag == TRUE) {
+        raise(SIGKILL);
+    }
+    signalFlag = TRUE;
+    changeTextColor(WHITE, TRANSPARENT, RESET);
+    printf("\nERROR: Caught internal exception SIGSEGV!\n");
+    memoryDump("njvm_err.log");
+    printf("Dump completed! Exiting gracefully...\n");
+    exit(E_ERR_SYS_MEM);
+}
 
 /**
  * Main entry point - called at program launch
@@ -25,18 +58,23 @@ ObjRef returnValueRegister;
  */
 int main(int argc, char* argv[]) {
 
-    FILE* code;
-    int args;
-    int fileClose;
-    char* formatIdentifier;
-    unsigned int njvmVersion;
-    unsigned int globalVariableCount;
+    FILE* code; /* Pointer to the code file */
+    int args; /* Temporary counter variable for cli argument processing loop */
+    char* formatIdentifier; /* Temp variable for processing format identifier*/
+    unsigned int njvmVersion; /* Temp var for processing program version */
+    unsigned int globalVariableCount; /*Var for storing amount of global vars*/
+    unsigned int runDebugger; /* Flag for launching debugger */
 
-    unsigned int runDebugger;
-
+    signalFlag = FALSE;
+    stackSize = 65536; /* Bytes -> 64 KiB */
+    heapSize = 8388608; /* Bytes -> 8192 KiB */
     runDebugger = FALSE;
     programMemory = NULL;
     code = NULL;
+    gcPurge = FALSE;
+
+    /* Register signal handler for segmentation fault here */
+    signal(SIGSEGV, sigsegvHandler);
 
     /*
      * Interpret command line arguments
@@ -49,6 +87,10 @@ int main(int argc, char* argv[]) {
             printf("\t--help\t\tDisplays this help.\n");
             printf("\t--version\tDisplays version number of the VM.\n");
             printf("\t--debug\t\tLaunches the NinjaVM debugger.\n");
+            printf("\t--stack <n>\tSet Stack size to n KiB. Default: 64 KiB\n");
+            printf("\t--heap <n>\tSet Heap size to n KiB. Default: 8192 KiB\n");
+            printf("\t--gcpurge\tOverrides the cleared heap memory after every GC run.\n");
+            printf("\t--gcstats\tPrint GC statistics to stdout after ever GC run.\n");
             return 0;
         }
         else if (strcmp("--version", argv[args]) == 0) {
@@ -57,7 +99,55 @@ int main(int argc, char* argv[]) {
         }
         else if (strcmp("--debug", argv[args]) == 0) {
             runDebugger = TRUE;
+            changeTextColor(WHITE, TRANSPARENT, BRIGHT);
             printf("%s Launching NinjaVM in debug mode...\n", DEBUGGER);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
+        }
+        else if (strcmp("--stack", argv[args]) == 0) {
+            args++;
+            if (args >= argc) {
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+                printf("ERROR: Size for '--stack' missing!\n");
+                printf("\tUsage: '--stack <n> KiB' -> --stack 64\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_CLI);
+            }
+            stackSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
+            if (stackSize <= 0) {
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+                printf("ERROR: Stack size must be greater than 0!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_CLI);
+            }
+        }
+        else if (strcmp("--heap", argv[args]) == 0) {
+            args++;
+            if (args >= argc) {
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+                printf("ERROR: Size for '--heap' missing!\n");
+                printf("\tUsage: '--heap <n> KiB' -> --heap 8192\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_CLI);
+            }
+            heapSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
+            if (heapSize <= 0) {
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+                printf("ERROR: Heap size must be greater than 0!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_CLI);
+            }
+            if (heapSize > 2146435072) {
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can not allocate more than 2047 MiB of heap!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_CLI);
+            }
+        }
+        else if (strcmp("--gcpurge", argv[args]) == 0) {
+            gcPurge = TRUE;
+        }
+        else if (strcmp("--gcstats", argv[args]) == 0) {
+            gcStats = TRUE;
         }
         /* 
          * If the argument does not start with a "--" it is
@@ -68,20 +158,25 @@ int main(int argc, char* argv[]) {
             code = fopen(argv[args], "r");
             /* Check if the file has been opened successfully... */
             if (code == NULL){
-                printf("Could not open %s: %s\n", argv[args], strerror(errno));
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+                printf("ERROR: Could not open %s: %s\n", argv[args], strerror(errno));
                 return E_ERR_IO_FILE;
             }
         }
         else {
             /* Catch any unknown arguments and terminate */
-            printf("Error: Unrecognized argument '%s'\n", argv[args]);
+            changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+            printf("ERROR: Unrecognized argument '%s'\n", argv[args]);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             return E_ERR_CLI;
         }
     }
 
     /* Check if a codefile has been specified */
     if (code == NULL) {
-        printf("Error: No code file specified!\n"); 
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+        printf("ERROR: No code file specified!\n"); 
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_NO_PROGF;
     }
 
@@ -89,16 +184,26 @@ int main(int argc, char* argv[]) {
     formatIdentifier = calloc(4, sizeof(char));
     fread(formatIdentifier, 4, sizeof(char), code);
     if (strncmp(formatIdentifier, "NJBF", 4) != 0){
-        printf("Not a Ninja program!\n");
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+        printf("ERROR: Not a Ninja program!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_NO_NJPROG;
     }
     free(formatIdentifier);
     
     /* Validate that the Ninja-Program is compiled for this version of the VM. */
     fread(&njvmVersion, 1, sizeof(unsigned int), code);
-    if (njvmVersion != VERSION){
-        printf("Wrong VM version!\n");
-        printf("VM: %02x, PROGRAM: %02x\n", VERSION, njvmVersion);
+    if (njvmVersion > VERSION){
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+        printf("ERROR: Wrong VM version!\n");
+        printf("VM: ");
+        changeTextColor(WHITE, GREEN, BRIGHT);
+        printf("%02x", VERSION);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+        printf(", PROGRAM: ");
+        changeTextColor(WHITE, RED, BRIGHT);
+        printf("%02x\n", njvmVersion);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_VM_VER;
     }
     
@@ -106,36 +211,44 @@ int main(int argc, char* argv[]) {
     fread(&instructionCount, 1, sizeof(unsigned int), code);
     programMemory = calloc(instructionCount, sizeof(unsigned int));
     if (programMemory == NULL) {
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf(
-            "Error: System could not allocate %lu of memory for program\n",
+            "ERROR: System could not allocate %lu of memory for program\n",
             sizeof(unsigned int) * instructionCount
         );
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_SYS_MEM;
     }
 
-    /* Allocate memory for the static data area. */
+    /* Read the amount of global variables. */
     fread(&globalVariableCount, 1, sizeof(int), code);
-    initSda(globalVariableCount);
     
     /* Read all remaining data (instructions) into programMemory. */
     fread(programMemory, instructionCount, sizeof(unsigned int), code);
     
     /* Close the file.*/
-    fileClose = fclose(code);
-    if (fileClose != 0) {
-        printf("Error: Could not close program file after reading:\n");
+    if (fclose(code) != 0) {
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+        printf("ERROR: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_IO_FILE;
     }
 
+    /* Initialize the VM */
     pc = 0;
     halt = FALSE;
-    initStack(10000);
+    initStack();
+    initSda(globalVariableCount);
+    initHeap();
     returnValueRegister = NULL;
 
+    /* Launch the debugger if flag is set */
     if (runDebugger == TRUE) {
+        changeTextColor(WHITE, TRANSPARENT, BRIGHT);
         printf("%s Loaded program successfully: %d instructions | %d global variables\n",
             DEBUGGER, instructionCount, globalVariableCount);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         debug();
         /* We should NEVER reach this part of the function.
            If we do, there is a bug in the debugger.*/
@@ -144,7 +257,9 @@ int main(int argc, char* argv[]) {
 
     printf("Ninja Virtual Machine started\n");
     while (halt != TRUE) {
+        /*Instruction register and variable for storing the decoded opcode */
         unsigned int instruction, opcode;
+        /* Variable for storing the decode immediate value */
         int operand;
 
         /* Load instruction */

@@ -4,6 +4,7 @@
 #include "headers/stack.h"
 #include "headers/njvm.h"
 #include "headers/sda.h"
+#include "headers/heap.h"
 #include "../lib/support.h"
 #include "../lib/bigint.h"
 
@@ -37,6 +38,10 @@ void execute(unsigned int opcode, int operand) {
     switch (opcode) {
         case HALT: {
             halt = TRUE;
+            if (gcStats == TRUE) {
+                gc();
+                gcRunning = FALSE;
+            }
             break;
         }
         case PUSHC: {
@@ -97,7 +102,9 @@ void execute(unsigned int opcode, int operand) {
             int result;
             result = scanf(" %c", &read);
             if (result == 0 || result == EOF) {
-                printf("Error: Something went wrong while taking user input!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Something went wrong while taking user input!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_IO_SHELL);
             }
             
@@ -186,12 +193,24 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case JMP: {
+            if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_JMP);
+            }
             pc = operand;
             break;
         }
         case BRF: {
             int res;
 
+            if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_JMP);
+            }
             bip.op1 = popObjRef();
             res = bigToInt();
             if (res == FALSE) pc = operand;
@@ -200,12 +219,24 @@ void execute(unsigned int opcode, int operand) {
         case BRT: {
             int res;
 
+            if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_JMP);
+            }
             bip.op1 = popObjRef();
             res = bigToInt();
             if (res == TRUE) pc = operand;
             break;
         }
         case CALL: {
+            if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_JMP);
+            }
             push(pc);
             pc = operand;
             break;
@@ -216,7 +247,9 @@ void execute(unsigned int opcode, int operand) {
         }
         case DROP: {
             if (((int)sp - operand) < 0) {
-                printf("Error: Stack underflow!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Stack underflow!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_ST_UNDER);
             }
             sp = sp - operand;
@@ -240,8 +273,14 @@ void execute(unsigned int opcode, int operand) {
         }
         case NEW: {
             ObjRef object;
+            ObjRef* refs;
+            int i;
 
             object = newComplexObject(operand);
+            refs = GET_REFS(object);
+            for (i = 0; i < operand; i++) {
+                refs[i] = (ObjRef) NULL;
+            }
             pushObjRef(object);
             break;
         }
@@ -250,17 +289,29 @@ void execute(unsigned int opcode, int operand) {
             ObjRef* fields;
             int size;
 
-            /* Check if the object is not primitive */
             object = popObjRef();
+            /* Check that the object is not a NULL-Pointer */
+            if (object == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_NIL_REF);
+            }
+
+            /* Check that the object is not primitive */
             if (IS_PRIM(object)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(object);
             if (operand < 0 || operand > size-1) {
-                printf("Error: Record index out of bounds!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Record index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_REC_INDEX);
             }
 
@@ -276,17 +327,28 @@ void execute(unsigned int opcode, int operand) {
 
             value = popObjRef();
             object = popObjRef();
+            /* Check that the object is not a NULL-Pointer */
+            if (object == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_NIL_REF);
+            }
 
             /* Check if the object is not primitive */
             if (IS_PRIM(object)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(object);
             if (operand < 0 || operand > size-1) {
-                printf("Error: Record index out of bounds!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Record index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_REC_INDEX);
             }
 
@@ -296,13 +358,22 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         case NEWA: {
-            int size;
+            int size, i;
             ObjRef array;
+            ObjRef* refs;
 
+            /* Calculate size for array */
             bip.op1 = popObjRef();
             size = bigToInt();
 
+            /* Create the array */
             array = newComplexObject(size);
+            refs = GET_REFS(array);
+            
+            /* Initialize the array */
+            for(i = 0; i < size; i++) {
+                refs[i] = (ObjRef) NULL;
+            }
             pushObjRef(array);
             break;
         }
@@ -312,18 +383,30 @@ void execute(unsigned int opcode, int operand) {
             ObjRef* fields;
 
             bip.op1 = popObjRef();
+            array = popObjRef();
             index = bigToInt();
 
-            array = popObjRef();
+            /* Check that the object is not a NULL-Pointer */
+            if (array == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_NIL_REF);
+            }
+
             if (IS_PRIM(array)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of array */
             size = GET_SIZE(array);
             if (index < 0 || index > size-1) {
-                printf("Error: Array index out of bounds!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Array index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_ARR_INDEX);
             }
 
@@ -339,20 +422,31 @@ void execute(unsigned int opcode, int operand) {
 
             value = popObjRef();
             bip.op1 = popObjRef();
+            array = popObjRef();
             index = bigToInt();
 
-            array = popObjRef();
+            /* Check that the object is not a NULL-Pointer */
+            if (array == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_NIL_REF);
+            }
             
             /* Check if the object is not primitive */
             if (IS_PRIM(array)) {
-                printf("Error: Can't access fields on primitive objects!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(array);
             if (index < 0 || index > size-1) {
-                printf("Error: Array index out of bounds!\n");
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Array index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_ARR_INDEX);
             }
 
@@ -365,6 +459,12 @@ void execute(unsigned int opcode, int operand) {
             ObjRef object;
 
             object = popObjRef();
+            if (object == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
+                printf("ERROR: Can't get size from NIL-Reference!");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
+                exit(E_ERR_NIL_REF);
+            }
             if (IS_PRIM(object)) {
                 bigFromInt(-1);
                 pushObjRef(bip.res);
@@ -404,7 +504,11 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         default: {
-            printf("Error: Illegal opcode: %u\n", opcode);
+            changeTextColor(RED, TRANSPARENT, BRIGHT);
+            printf("ERROR: Illegal opcode: ");
+            changeTextColor(WHITE, TRANSPARENT, BRIGHT);
+            printf("%u\n", opcode);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             exit(E_ERR_OPCODE);
         }
     }

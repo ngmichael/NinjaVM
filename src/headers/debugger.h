@@ -6,12 +6,12 @@
 
 #define DEBUG_BREAKPOINT "[Debugger/Breakpoint]:"
 #define DEBUG_INSPECT "[Debugger/Inspect]:"
-#define DEBUG_EDIT "[Debugger/Editor]:"
 #define DEBUG_DUMP "[Debugger/MemoryDump]:"
 #define DEBUG_EXEC "[Debugger/Execute]:"
 
 #define ERROR "[Debugger]: An error has occurred:\n[Debugger]:"
 
 void debug(void);
+void memoryDump(char* path);
 
 #endif

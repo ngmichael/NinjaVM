@@ -1,0 +1,2580 @@
+// -------------------------------------------------------------
+//
+// njlisp.nj -- Ninja LISP
+//
+// This is a re-implementation of the old muLISP-80 system,
+// developed in 1980 by Albert D. Rich and David Stoutemyer
+// of The Soft Warehouse in Honolulu, Hawaii.
+//
+// -------------------------------------------------------------
+
+// -------------------------------------------------------------
+// Cell Definition
+// -------------------------------------------------------------
+
+type Cell = record {
+  Integer typ;		// one of NAME, NUMBER, or NODE
+  Cell car;		// valid for typ in { NAME, NUMBER, NODE }
+			//   typ = NAME   : the name's value
+			//   typ = NUMBER : the number itself
+			//   typ = NODE   : the node's left subtree
+  Cell cdr;		// valid for typ in { NAME, NUMBER, NODE }
+			//   typ = NAME   : the name's property list
+			//   typ = NUMBER : the number's sign
+			//   typ = NODE   : the node's right subtree
+  Cell func;		// valid only for typ = NAME
+			//   the name's functional binding
+  String name;		// valid only for typ = NAME
+			//   the name's external representation
+  Integer val;		// valid only for typ = NUMBER
+			//   the number's value (signed integer)
+};
+
+// -------------------------------------------------------------
+// Global Constants
+// -------------------------------------------------------------
+
+global Integer NAME;	// name cell
+global Integer NUMBER;	// number cell
+global Integer NODE;	// node cell
+
+global Boolean[] RAS;	// ratom separator character
+global Boolean[] RAB;	// ratom break character
+global Boolean[] RES;	// read separator character
+global Boolean[] REB;	// read break character
+global Boolean[] OSP;	// other special character (% and ")
+
+// -------------------------------------------------------------
+// Global Variables
+// -------------------------------------------------------------
+
+global Cell objectList;
+global Cell argStack;
+
+global Cell nilAtom;
+global Cell tAtom;
+global Cell subrAtom;
+global Cell nsubrAtom;
+global Cell lambdaAtom;
+global Cell nlambdaAtom;
+global Cell carAtom;
+global Cell cdrAtom;
+global Cell caarAtom;
+global Cell cadrAtom;
+global Cell cdarAtom;
+global Cell cddrAtom;
+global Cell caaarAtom;
+global Cell caadrAtom;
+global Cell cadarAtom;
+global Cell caddrAtom;
+global Cell cdaarAtom;
+global Cell cdadrAtom;
+global Cell cddarAtom;
+global Cell cdddrAtom;
+global Cell consAtom;
+global Cell listAtom;
+global Cell reverseAtom;
+global Cell oblistAtom;
+global Cell rplacaAtom;
+global Cell rplacdAtom;
+global Cell nconcAtom;
+global Cell nameAtom;
+global Cell numberpAtom;
+global Cell atomAtom;
+global Cell nullAtom;
+global Cell pluspAtom;
+global Cell minuspAtom;
+global Cell zeropAtom;
+global Cell evenAtom;
+global Cell eqAtom;
+global Cell equalAtom;
+global Cell memberAtom;
+global Cell greaterpAtom;
+global Cell lesspAtom;
+global Cell orderpAtom;
+global Cell orderedAtom;
+global Cell notAtom;
+global Cell andAtom;
+global Cell orAtom;
+global Cell setAtom;
+global Cell setqAtom;
+global Cell popAtom;
+global Cell pushAtom;
+global Cell assocAtom;
+global Cell getAtom;
+global Cell putAtom;
+global Cell rempropAtom;
+global Cell flagpAtom;
+global Cell flagAtom;
+global Cell remflagAtom;
+global Cell getdAtom;
+global Cell putdAtom;
+global Cell movdAtom;
+global Cell packAtom;
+global Cell unpackAtom;
+global Cell lengthAtom;
+global Cell minusAtom;
+global Cell plusAtom;
+global Cell differenceAtom;
+global Cell timesAtom;
+global Cell quotientAtom;
+global Cell remainderAtom;
+global Cell divideAtom;
+global Cell rdsAtom;
+global Cell ratomAtom;
+global Cell readAtom;
+global Cell readchAtom;
+global Cell echoAtom;
+global Cell wrsAtom;
+global Cell printAtom;
+global Cell prin1Atom;
+global Cell terpriAtom;
+global Cell spacesAtom;
+global Cell linelengthAtom;
+global Cell radixAtom;
+global Cell quoteAtom;
+global Cell evalAtom;
+global Cell applyAtom;
+global Cell condAtom;
+global Cell loopAtom;
+global Cell prog1Atom;
+global Cell driverAtom;
+global Cell reclaimAtom;
+global Cell saveAtom;
+global Cell loadAtom;
+global Cell systemAtom;
+global Cell xchgpnameAtom;
+global Cell purgenameAtom;
+
+global Integer cursPos;
+global Integer lineLen;
+global Integer numBase;
+
+// -------------------------------------------------------------
+// Debugging
+// -------------------------------------------------------------
+
+void debug(Integer n) {
+  writeString("DEBUG: ");
+  writeInteger(n);
+  writeString("\n");
+}
+
+// -------------------------------------------------------------
+// Library Functions
+// -------------------------------------------------------------
+
+Boolean isAlpha(Character ch) {
+  return ch >= 'A' && ch <= 'Z' ||
+         ch >= 'a' && ch <= 'z';
+}
+
+Boolean isDigit(Character ch) {
+  return ch >= '0' && ch <= '9';
+}
+
+Character toLower(Character ch) {
+  if (ch >= 'A' && ch <= 'Z') {
+    ch = int2char(char2int(ch) + 0x20);
+  }
+  return ch;
+}
+
+Character toUpper(Character ch) {
+  if (ch >= 'a' && ch <= 'z') {
+    ch = int2char(char2int(ch) - 0x20);
+  }
+  return ch;
+}
+
+String toString(Character ch) {
+  local String str;
+  str = new(Character[1]);
+  str[0] = ch;
+  return str;
+}
+
+Integer stringCompare(String s1, String s2) {
+  local Integer n1;
+  local Integer n2;
+  local Integer i;
+  n1 = sizeof(s1);
+  n2 = sizeof(s2);
+  i = 0;
+  while (i < n1 && i < n2) {
+    if (s1[i] != s2[i]) {
+      return char2int(s1[i]) - char2int(s2[i]);
+    }
+    i = i + 1;
+  }
+  return n1 - n2;
+}
+
+type StringBuffer = record {
+  String str;
+  Integer len;
+};
+
+StringBuffer newStringBuffer(Integer size) {
+  local StringBuffer strBuf;
+  strBuf = new(StringBuffer);
+  strBuf.str = new(Character[size]);
+  strBuf.len = 0;
+  return strBuf;
+}
+
+void addCharToStringBuffer(StringBuffer strBuf, Character ch) {
+  local String newStr;
+  local Integer i;
+  if (strBuf.len + 1 > sizeof(strBuf.str)) {
+    newStr = new(Character[2 * sizeof(strBuf.str)]);
+    i = 0;
+    while (i < strBuf.len) {
+      newStr[i] = strBuf.str[i];
+      i = i + 1;
+    }
+    strBuf.str = newStr;
+  }
+  strBuf.str[strBuf.len] = ch;
+  strBuf.len = strBuf.len + 1;
+}
+
+void addStringToStringBuffer(StringBuffer strBuf, String str) {
+  local Integer n;
+  local Integer i;
+  n = sizeof(str);
+  i = 0;
+  while (i < n) {
+    addCharToStringBuffer(strBuf, str[i]);
+    i = i + 1;
+  }
+}
+
+String stringBufferToString(StringBuffer strBuf) {
+  local String str;
+  local Integer i;
+  str = new(Character[strBuf.len]);
+  i = 0;
+  while (i < strBuf.len) {
+    str[i] = strBuf.str[i];
+    i = i + 1;
+  }
+  return str;
+}
+
+// -------------------------------------------------------------
+// Auxiliary Functions
+// -------------------------------------------------------------
+
+void error(String message, Boolean fatal) {
+  writeString("\n");
+  writeString(message);
+  writeString("\n\n");
+  if (fatal) {
+    exit();
+  }
+}
+
+Cell makeNil() {
+  local Cell aux;
+  aux = new(Cell);
+  aux.typ = NAME;	// NAME
+  aux.car = aux;	// auto-quoting
+  aux.cdr = aux;	// empty property list
+  aux.func = aux;	// no functional binding
+  aux.name = "NIL";	// name is NIL
+  return aux;
+}
+
+Cell makeName(String name) {
+  local Cell aux;
+  aux = new(Cell);
+  aux.typ = NAME;	// NAME
+  aux.car = aux;	// auto-quoting
+  aux.cdr = nilAtom;	// empty property list
+  aux.func = nilAtom;	// no functional binding
+  aux.name = name;	// name as given in parameter
+  return aux;
+}
+
+Cell makeNumber(Integer n) {
+  local Cell aux;
+  aux = new(Cell);
+  aux.typ = NUMBER;	// NUMBER
+  aux.car = aux;	// auto-quoting
+  if (n < 0) {
+    aux.cdr = tAtom;	// number is negative
+  } else {
+    aux.cdr = nilAtom;	// number is non-negative
+  }
+  aux.val = n;		// value as given in parameter
+  return aux;
+}
+
+Cell makeNode(Cell x, Cell y) {
+  local Cell aux;
+  aux = new(Cell);
+  aux.typ = NODE;	// NODE
+  aux.car = x;		// car as given in parameter
+  aux.cdr = y;		// cdr as given in parameter
+  return aux;
+}
+
+void addOblist(Cell x) {
+  objectList = makeNode(x, objectList);
+}
+
+Cell makeObject(String name) {
+  local Cell aux;
+  aux = makeName(name);
+  addOblist(aux);
+  return aux;
+}
+
+Cell makeBuiltin(String name, Cell kind, Integer n) {
+  local Cell aux;
+  aux = makeObject(name);
+  aux.func = makeNode(kind, makeNumber(n));
+  return aux;
+}
+
+Cell searchOblist(String name) {
+  local Cell aux;
+  aux = objectList;
+  while (aux.typ == NODE) {
+    if (stringCompare(aux.car.name, name) == 0) {
+      return aux.car;
+    }
+    aux = aux.cdr;
+  }
+  return makeObject(name);
+}
+
+Cell copyTree(Cell x) {
+  local Cell anchor;
+  local Cell aux;
+  anchor = makeNode(nilAtom, nilAtom);
+  anchor.car = anchor;
+  while (x.typ == NODE) {
+    aux = copyTree(x.car);
+    anchor.car.cdr = makeNode(aux, nilAtom);
+    anchor.car = anchor.car.cdr;
+    x = x.cdr;
+  }
+  anchor.car.cdr = x;
+  return anchor.cdr;
+}
+
+Cell execErr(Integer funcNum) {
+  writeString("exec: function ");
+  writeInteger(funcNum);
+  writeString(" not implemented\n");
+  exit();
+  // never reached
+  return nilAtom;
+}
+
+Cell exec(Integer n, Cell x, Cell y, Cell z) {
+  if (n < 0 || n >= 128) {
+    error("Internal Exec Error", false);
+    return nilAtom;
+  }
+  if (n < 64) {
+    if (n < 32) {
+      if (n < 16) {
+        if (n < 8) {
+          if (n < 4) {
+            if (n < 2) {
+              if (n < 1) {
+                // n = 0
+                return car(x);
+              } else {
+                // n = 1
+                return cdr(x);
+              }
+            } else {
+              if (n < 3) {
+                // n = 2
+                return caar(x);
+              } else {
+                // n = 3
+                return cadr(x);
+              }
+            }
+          } else {
+            if (n < 6) {
+              if (n < 5) {
+                // n = 4
+                return cdar(x);
+              } else {
+                // n = 5
+                return cddr(x);
+              }
+            } else {
+              if (n < 7) {
+                // n = 6
+                return caaar(x);
+              } else {
+                // n = 7
+                return caadr(x);
+              }
+            }
+          }
+        } else {
+          if (n < 12) {
+            if (n < 10) {
+              if (n < 9) {
+                // n = 8
+                return cadar(x);
+              } else {
+                // n = 9
+                return caddr(x);
+              }
+            } else {
+              if (n < 11) {
+                // n = 10
+                return cdaar(x);
+              } else {
+                // n = 11
+                return cdadr(x);
+              }
+            }
+          } else {
+            if (n < 14) {
+              if (n < 13) {
+                // n = 12
+                return cddar(x);
+              } else {
+                // n = 13
+                return cdddr(x);
+              }
+            } else {
+              if (n < 15) {
+                // n = 14
+                return cons(x, y);
+              } else {
+                // n = 15
+                return list(x);
+              }
+            }
+          }
+        }
+      } else {
+        if (n < 24) {
+          if (n < 20) {
+            if (n < 18) {
+              if (n < 17) {
+                // n = 16
+                return reverse(x, y);
+              } else {
+                // n = 17
+                return oblist();
+              }
+            } else {
+              if (n < 19) {
+                // n = 18
+                return rplaca(x, y);
+              } else {
+                // n = 19
+                return rplacd(x, y);
+              }
+            }
+          } else {
+            if (n < 22) {
+              if (n < 21) {
+                // n = 20
+                return nconc(x, y);
+              } else {
+                // n = 21
+                return name(x);
+              }
+            } else {
+              if (n < 23) {
+                // n = 22
+                return numberp(x);
+              } else {
+                // n = 23
+                return atom(x);
+              }
+            }
+          }
+        } else {
+          if (n < 28) {
+            if (n < 26) {
+              if (n < 25) {
+                // n = 24
+                return null(x);
+              } else {
+                // n = 25
+                return plusp(x);
+              }
+            } else {
+              if (n < 27) {
+                // n = 26
+                return minusp(x);
+              } else {
+                // n = 27
+                return zerop(x);
+              }
+            }
+          } else {
+            if (n < 30) {
+              if (n < 29) {
+                // n = 28
+                return even(x);
+              } else {
+                // n = 29
+                return eq(x, y);
+              }
+            } else {
+              if (n < 31) {
+                // n = 30
+                return equal(x, y);
+              } else {
+                // n = 31
+                return member(x, y);
+              }
+            }
+          }
+        }
+      }
+    } else {
+      if (n < 48) {
+        if (n < 40) {
+          if (n < 36) {
+            if (n < 34) {
+              if (n < 33) {
+                // n = 32
+                return greaterp(x, y);
+              } else {
+                // n = 33
+                return lessp(x, y);
+              }
+            } else {
+              if (n < 35) {
+                // n = 34
+                return orderp(x, y);
+              } else {
+                // n = 35
+                return not(x);
+              }
+            }
+          } else {
+            if (n < 38) {
+              if (n < 37) {
+                // n = 36
+                return and(x);
+              } else {
+                // n = 37
+                return or(x);
+              }
+            } else {
+              if (n < 39) {
+                // n = 38
+                return set(x, y);
+              } else {
+                // n = 39
+                return setq(x);
+              }
+            }
+          }
+        } else {
+          if (n < 44) {
+            if (n < 42) {
+              if (n < 41) {
+                // n = 40
+                return pop(x);
+              } else {
+                // n = 41
+                return push(x);
+              }
+            } else {
+              if (n < 43) {
+                // n = 42
+                return assoc(x, y);
+              } else {
+                // n = 43
+                return get(x, y);
+              }
+            }
+          } else {
+            if (n < 46) {
+              if (n < 45) {
+                // n = 44
+                return put(x, y, z);
+              } else {
+                // n = 45
+                return remprop(x, y);
+              }
+            } else {
+              if (n < 47) {
+                // n = 46
+                return flagp(x, y);
+              } else {
+                // n = 47
+                return flag(x, y);
+              }
+            }
+          }
+        }
+      } else {
+        if (n < 56) {
+          if (n < 52) {
+            if (n < 50) {
+              if (n < 49) {
+                // n = 48
+                return remflag(x, y);
+              } else {
+                // n = 49
+                return getd(x);
+              }
+            } else {
+              if (n < 51) {
+                // n = 50
+                return putd(x, y);
+              } else {
+                // n = 51
+                return movd(x, y);
+              }
+            }
+          } else {
+            if (n < 54) {
+              if (n < 53) {
+                // n = 52
+                return pack(x);
+              } else {
+                // n = 53
+                return unpack(x);
+              }
+            } else {
+              if (n < 55) {
+                // n = 54
+                return length(x);
+              } else {
+                // n = 55
+                return minus(x);
+              }
+            }
+          }
+        } else {
+          if (n < 60) {
+            if (n < 58) {
+              if (n < 57) {
+                // n = 56
+                return plus(x, y);
+              } else {
+                // n = 57
+                return difference(x, y);
+              }
+            } else {
+              if (n < 59) {
+                // n = 58
+                return times(x, y);
+              } else {
+                // n = 59
+                return quotient(x, y);
+              }
+            }
+          } else {
+            if (n < 62) {
+              if (n < 61) {
+                // n = 60
+                return remainder(x, y);
+              } else {
+                // n = 61
+                return divide(x, y);
+              }
+            } else {
+              if (n < 63) {
+                // n = 62
+                return rds(x, y, z);
+              } else {
+                // n = 63
+                return ratom();
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    if (n < 96) {
+      if (n < 80) {
+        if (n < 72) {
+          if (n < 68) {
+            if (n < 66) {
+              if (n < 65) {
+                // n = 64
+                return read();
+              } else {
+                // n = 65
+                return readch();
+              }
+            } else {
+              if (n < 67) {
+                // n = 66
+                return wrs(x, y, z);
+              } else {
+                // n = 67
+                return print(x);
+              }
+            }
+          } else {
+            if (n < 70) {
+              if (n < 69) {
+                // n = 68
+                return prin1(x);
+              } else {
+                // n = 69
+                return terpri(x);
+              }
+            } else {
+              if (n < 71) {
+                // n = 70
+                return spaces(x);
+              } else {
+                // n = 71
+                return linelength(x);
+              }
+            }
+          }
+        } else {
+          if (n < 76) {
+            if (n < 74) {
+              if (n < 73) {
+                // n = 72
+                return radix(x);
+              } else {
+                // n = 73
+                return quote(x);
+              }
+            } else {
+              if (n < 75) {
+                // n = 74
+                return eval(x);
+              } else {
+                // n = 75
+                return apply(x, y);
+              }
+            }
+          } else {
+            if (n < 78) {
+              if (n < 77) {
+                // n = 76
+                return cond(x);
+              } else {
+                // n = 77
+                return loop(x);
+              }
+            } else {
+              if (n < 79) {
+                // n = 78
+                return prog1(x);
+              } else {
+                // n = 79
+                return driver();
+              }
+            }
+          }
+        }
+      } else {
+        if (n < 88) {
+          if (n < 84) {
+            if (n < 82) {
+              if (n < 81) {
+                // n = 80
+                return reclaim();
+              } else {
+                // n = 81
+                return save(x, y);
+              }
+            } else {
+              if (n < 83) {
+                // n = 82
+                return load(x, y);
+              } else {
+                // n = 83
+                return system();
+              }
+            }
+          } else {
+            if (n < 86) {
+              if (n < 85) {
+                // n = 84
+                return xchgpname(x, y);
+              } else {
+                // n = 85
+                return purgename(x);
+              }
+            } else {
+              if (n < 87) {
+                // n = 86
+                return execErr(86);
+              } else {
+                // n = 87
+                return execErr(87);
+              }
+            }
+          }
+        } else {
+          if (n < 92) {
+            if (n < 90) {
+              if (n < 89) {
+                // n = 88
+                return execErr(88);
+              } else {
+                // n = 89
+                return execErr(89);
+              }
+            } else {
+              if (n < 91) {
+                // n = 90
+                return execErr(90);
+              } else {
+                // n = 91
+                return execErr(91);
+              }
+            }
+          } else {
+            if (n < 94) {
+              if (n < 93) {
+                // n = 92
+                return execErr(92);
+              } else {
+                // n = 93
+                return execErr(93);
+              }
+            } else {
+              if (n < 95) {
+                // n = 94
+                return execErr(94);
+              } else {
+                // n = 95
+                return execErr(95);
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // n = 96..127
+      execErr(n);
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// A. Selector Functions
+// -------------------------------------------------------------
+
+Cell car(Cell x) {
+  return x.car;
+}
+
+Cell cdr(Cell x) {
+  return x.cdr;
+}
+
+Cell caar(Cell x) {
+  return x.car.car;
+}
+
+Cell cadr(Cell x) {
+  return x.cdr.car;
+}
+
+Cell cdar(Cell x) {
+  return x.car.cdr;
+}
+
+Cell cddr(Cell x) {
+  return x.cdr.cdr;
+}
+
+Cell caaar(Cell x) {
+  return x.car.car.car;
+}
+
+Cell caadr(Cell x) {
+  return x.cdr.car.car;
+}
+
+Cell cadar(Cell x) {
+  return x.car.cdr.car;
+}
+
+Cell caddr(Cell x) {
+  return x.cdr.cdr.car;
+}
+
+Cell cdaar(Cell x) {
+  return x.car.car.cdr;
+}
+
+Cell cdadr(Cell x) {
+  return x.cdr.car.cdr;
+}
+
+Cell cddar(Cell x) {
+  return x.car.cdr.cdr;
+}
+
+Cell cdddr(Cell x) {
+  return x.cdr.cdr.cdr;
+}
+
+// -------------------------------------------------------------
+// B. Constructor Functions
+// -------------------------------------------------------------
+
+Cell cons(Cell x, Cell y) {
+  return makeNode(x, y);
+}
+
+Cell list(Cell x) {
+  // ATTENTION: CBN
+  local Cell anchor;
+  local Cell aux;
+  anchor = makeNode(nilAtom, nilAtom);
+  anchor.car = anchor;
+  while (x.typ == NODE) {
+    aux = eval(x.car);
+    anchor.car.cdr = makeNode(aux, nilAtom);
+    anchor.car = anchor.car.cdr;
+    x = x.cdr;
+  }
+  anchor.car.cdr = x;
+  return anchor.cdr;
+}
+
+Cell reverse(Cell x, Cell y) {
+  local Cell aux;
+  aux = y;
+  while (x.typ == NODE) {
+    aux = makeNode(x.car, aux);
+    x = x.cdr;
+  }
+  return aux;
+}
+
+Cell oblist() {
+  return copyTree(objectList);
+}
+
+// -------------------------------------------------------------
+// C. Modifier Functions
+// -------------------------------------------------------------
+
+Cell rplaca(Cell x, Cell y) {
+  x.car = y;
+  return x;
+}
+
+Cell rplacd(Cell x, Cell y) {
+  x.cdr = y;
+  return x;
+}
+
+Cell nconc(Cell x, Cell y) {
+  local Cell t;
+  if (x.typ != NODE) {
+    return y;
+  }
+  t = x;
+  while (t.cdr.typ == NODE) {
+    t = t.cdr;
+  }
+  t.cdr = y;
+  return x;
+}
+
+// -------------------------------------------------------------
+// D. Recognizer Functions
+// -------------------------------------------------------------
+
+Cell name(Cell x) {
+  if (x.typ == NAME) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell numberp(Cell x) {
+  if (x.typ == NUMBER) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell atom(Cell x) {
+  if (x.typ != NODE) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell null(Cell x) {
+  if (x == nilAtom) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell plusp(Cell x) {
+  if (x.typ == NUMBER && x.val > 0) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell minusp(Cell x) {
+  if (x.typ == NUMBER && x.val < 0) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell zerop(Cell x) {
+  if (x.typ == NUMBER && x.val == 0) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell even(Cell x) {
+  if (x.typ == NUMBER && x.val % 2 == 0) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// E. Comparator Functions
+// -------------------------------------------------------------
+
+Cell eq(Cell x, Cell y) {
+  if (x == y) {
+    return tAtom;
+  }
+  if (x.typ == NUMBER && y.typ == NUMBER && x.val == y.val) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell equal(Cell x, Cell y) {
+  while (x.typ == NODE && y.typ == NODE) {
+    if (equal(x.car, y.car) == nilAtom) {
+      return nilAtom;
+    }
+    x = x.cdr;
+    y = y.cdr;
+  }
+  return eq(x, y);
+}
+
+Cell member(Cell x, Cell y) {
+  while (y.typ == NODE) {
+    if (equal(x, y.car) == tAtom) {
+      return tAtom;
+    }
+    y = y.cdr;
+  }
+  return y;
+}
+
+Cell greaterp(Cell x, Cell y) {
+  if (x.typ == NUMBER && y.typ == NUMBER && x.val > y.val) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell lessp(Cell x, Cell y) {
+  if (x.typ == NUMBER && y.typ == NUMBER && x.val < y.val) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell orderp(Cell x, Cell y) {
+  local Cell aux;
+  if (x.typ == NODE) {
+    return nilAtom;
+  }
+  if (y.typ == NODE) {
+    return tAtom;
+  }
+  if (x.typ == NUMBER && y.typ == NUMBER) {
+    if (x.val < y.val) {
+      return tAtom;
+    }
+    return nilAtom;
+  }
+  if (x.typ == NUMBER) {
+    return tAtom;
+  }
+  if (y.typ == NUMBER) {
+    return nilAtom;
+  }
+  // both x and y are names
+  aux = objectList;
+  while (aux.typ == NODE) {
+    if (aux.car == x) {
+      return nilAtom;
+    }
+    if (aux.car == y) {
+      return tAtom;
+    }
+    aux = aux.cdr;
+  }
+  // this should never be reached
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// F. Logical Functions
+// -------------------------------------------------------------
+
+Cell not(Cell x) {
+  if (x == nilAtom) {
+    return tAtom;
+  }
+  return nilAtom;
+}
+
+Cell and(Cell x) {
+  // ATTENTION: CBN
+  while (x.typ == NODE) {
+    if (eval(x.car) == nilAtom) {
+      return nilAtom;
+    }
+    x = x.cdr;
+  }
+  return tAtom;
+}
+
+Cell or(Cell x) {
+  // ATTENTION: CBN
+  while (x.typ == NODE) {
+    if (eval(x.car) != nilAtom) {
+      return tAtom;
+    }
+    x = x.cdr;
+  }
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// G. Assignment Functions
+// -------------------------------------------------------------
+
+Cell set(Cell x, Cell y) {
+  x.car = y;
+  return y;
+}
+
+Cell setq(Cell x) {
+  // ATTENTION: CBN
+  local Cell aux;
+  aux = eval(x.cdr.car);
+  x.car.car = aux;
+  return aux;
+}
+
+Cell pop(Cell x) {
+  // ATTENTION: CBN
+  local Cell aux;
+  aux = eval(x.car);
+  x.car.car = aux.cdr;
+  return aux.car;
+}
+
+Cell push(Cell x) {
+  // ATTENTION: CBN
+  local Cell aux1;
+  local Cell aux2;
+  local Cell aux3;
+  aux1 = eval(x.car);
+  aux2 = eval(x.cdr.car);
+  aux3 = makeNode(aux1, aux2);
+  x.cdr.car.car = aux3;
+  return aux3;
+}
+
+// -------------------------------------------------------------
+// H. Property Functions
+// -------------------------------------------------------------
+
+Cell assoc(Cell x, Cell y) {
+  while (y.typ == NODE) {
+    if (y.car.typ == NODE && equal(y.car.car, x) == tAtom) {
+      return y.car;
+    }
+    y = y.cdr;
+  }
+  return y;
+}
+
+Cell get(Cell x, Cell y) {
+  local Cell aux;
+  aux = assoc(y, x.cdr);
+  if (aux.typ != NODE) {
+    return nilAtom;
+  }
+  return aux.cdr;
+}
+
+Cell put(Cell x, Cell y, Cell z) {
+  local Cell aux;
+  aux = assoc(y, x.cdr);
+  if (aux.typ != NODE) {
+    aux = makeNode(y, z);
+    x.cdr = makeNode(aux, x.cdr);
+    return z;
+  }
+  aux.cdr = z;
+  return z;
+}
+
+Cell remprop(Cell x, Cell y) {
+  while (x.cdr.typ == NODE) {
+    if (equal(x.cdr.car.car, y) == tAtom) {
+      y = x.cdr.car.cdr;
+      x.cdr = x.cdr.cdr;
+      return y;
+    }
+    x = x.cdr;
+  }
+  return x.cdr;
+}
+
+// -------------------------------------------------------------
+// I. Flag Functions
+// -------------------------------------------------------------
+
+Cell flagp(Cell x, Cell y) {
+  return member(y, x.cdr);
+}
+
+Cell flag(Cell x, Cell y) {
+  if (member(y, x.cdr) == tAtom) {
+    return y;
+  }
+  x.cdr = makeNode(y, x.cdr);
+  return y;
+}
+
+Cell remflag(Cell x, Cell y) {
+  while (x.cdr.typ == NODE) {
+    if (equal(y, x.cdr.car) == tAtom) {
+      x.cdr = x.cdr.cdr;
+      return y;
+    }
+    x = x.cdr;
+  }
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// J. Definition Functions
+// -------------------------------------------------------------
+
+Cell getd(Cell x) {
+  if (x.typ != NAME) {
+    return nilAtom;
+  }
+  return copyTree(x.func);
+}
+
+Cell putd(Cell x, Cell y) {
+  if (x.typ != NAME) {
+    return nilAtom;
+  }
+  x.func = copyTree(y);
+  return y;
+}
+
+Cell movd(Cell x, Cell y) {
+  if (x.typ != NAME || y.typ != NAME) {
+    return nilAtom;
+  }
+  y.func = x.func;
+  return copyTree(y.func);
+}
+
+// -------------------------------------------------------------
+// K. Sub-atomic Functions
+// -------------------------------------------------------------
+
+//
+// auxiliary stuff
+//
+
+void addNumberToStringBuffer(StringBuffer strBuf, Integer n) {
+  local Integer a;
+  local Integer b;
+  if (n < 0) {
+    addCharToStringBuffer(strBuf, '-');
+    n = -n;
+  }
+  a = n / numBase;
+  if (a != 0) {
+    addNumberToStringBuffer(strBuf, a);
+  }
+  b = n % numBase;
+  if (b < 10) {
+    addCharToStringBuffer(strBuf, int2char(char2int('0') + b));
+  } else {
+    if (a == 0) {
+      // this is the first digit printed, and it is >= 10
+      // prepend a single zero to distinguish number from name
+      addCharToStringBuffer(strBuf, '0');
+    }
+    addCharToStringBuffer(strBuf, int2char(char2int('A') + (b - 10)));
+  }
+}
+
+Integer countName(String s) {
+  local Integer k;
+  local Integer n;
+  local Integer i;
+  local Character ch;
+  local Boolean quoted;
+  k = 0;
+  n = sizeof(s);
+  i = 0;
+  quoted = false;
+  while (i < n) {
+    ch = s[i];
+    if (prin1Atom.car == nilAtom && isSpecial(ch) && !quoted) {
+      quoted = true;
+      k = k + 1;
+    }
+    k = k + 1;
+    if (ch == '\"' && quoted) {
+      k = k + 1;
+    }
+    i = i + 1;
+  }
+  if (quoted) {
+    k = k + 1;
+  }
+  return k;
+}
+
+Integer countNumber(Integer n) {
+  local Integer k;
+  local Integer a;
+  local Integer b;
+  k = 0;
+  if (n < 0) {
+    k = k + 1;
+    n = -n;
+  }
+  a = n / numBase;
+  if (a != 0) {
+    k = k + countNumber(a);
+  }
+  b = n % numBase;
+  if (a == 0 && b >= 10) {
+    // leading zero, see printNumber()
+    k = k + 1;
+  }
+  k = k + 1;
+  return k;
+}
+
+//
+// end of auxiliary stuff
+//
+
+Cell pack(Cell x) {
+  local StringBuffer strBuf;
+  local String str;
+  strBuf = newStringBuffer(20);
+  while (x.typ == NODE) {
+    if (x.car.typ == NAME) {
+      addStringToStringBuffer(strBuf, x.car.name);
+    } else
+    if (x.car.typ == NUMBER) {
+      addNumberToStringBuffer(strBuf, x.car.val);
+    }
+    x = x.cdr;
+  }
+  str = stringBufferToString(strBuf);
+  return searchOblist(str);
+}
+
+Cell unpack(Cell x) {
+  local StringBuffer strBuf;
+  local String str;
+  local Integer i;
+  local Cell anchor;
+  local Cell aux;
+  strBuf = newStringBuffer(20);
+  if (x.typ == NAME) {
+    addStringToStringBuffer(strBuf, x.name);
+  } else
+  if (x.typ == NUMBER) {
+    addNumberToStringBuffer(strBuf, x.val);
+  } else {
+    return nilAtom;
+  }
+  str = stringBufferToString(strBuf);
+  anchor = makeNode(nilAtom, nilAtom);
+  anchor.car = anchor;
+  i = 0;
+  while (i < sizeof(str)) {
+    aux = searchOblist(toString(str[i]));
+    anchor.car.cdr = makeNode(aux, nilAtom);
+    anchor.car = anchor.car.cdr;
+    i = i + 1;
+  }
+  return anchor.cdr;
+}
+
+Cell length(Cell x) {
+  local Integer n;
+  if (x.typ == NAME) {
+    return makeNumber(countName(x.name));
+  }
+  if (x.typ == NUMBER) {
+    return makeNumber(countNumber(x.val));
+  }
+  n = 0;
+  while (x.typ == NODE) {
+    n = n + 1;
+    x = x.cdr;
+  }
+  return makeNumber(n);
+}
+
+// -------------------------------------------------------------
+// L. Numerical Functions
+// -------------------------------------------------------------
+
+//
+// auxiliary stuff
+//
+
+void zeroDivideError() {
+  error("ZERO Divide Error", false);
+}
+
+//
+// end of auxiliary stuff
+//
+
+Cell minus(Cell x) {
+  if (x.typ != NUMBER) {
+    return nilAtom;
+  }
+  return makeNumber(-x.val);
+}
+
+Cell plus(Cell x, Cell y) {
+  if (x.typ != NUMBER || y.typ != NUMBER) {
+    return nilAtom;
+  }
+  return makeNumber(x.val + y.val);
+}
+
+Cell difference(Cell x, Cell y) {
+  if (x.typ != NUMBER || y.typ != NUMBER) {
+    return nilAtom;
+  }
+  return makeNumber(x.val - y.val);
+}
+
+Cell times(Cell x, Cell y) {
+  if (x.typ != NUMBER || y.typ != NUMBER) {
+    return nilAtom;
+  }
+  return makeNumber(x.val * y.val);
+}
+
+Cell quotient(Cell x, Cell y) {
+  local Integer q;
+  local Integer r;
+  if (x.typ != NUMBER || y.typ != NUMBER) {
+    return nilAtom;
+  }
+  if (y.val == 0) {
+    zeroDivideError();
+    return nilAtom;
+  }
+  q = x.val / y.val;
+  r = x.val % y.val;
+  if (r < 0) {
+    if (q < 0) {
+      q = q - 1;
+    } else {
+      q = q + 1;
+    }
+  }
+  return makeNumber(q);
+}
+
+Cell remainder(Cell x, Cell y) {
+  local Integer q;
+  local Integer r;
+  if (x.typ != NUMBER || y.typ != NUMBER) {
+    return nilAtom;
+  }
+  if (y.val == 0) {
+    zeroDivideError();
+    return nilAtom;
+  }
+  q = x.val / y.val;
+  r = x.val % y.val;
+  if (r < 0) {
+    if (q < 0) {
+      r = r + y.val;
+    } else {
+      r = r - y.val;
+    }
+  }
+  return makeNumber(r);
+}
+
+Cell divide(Cell x, Cell y) {
+  local Integer q;
+  local Integer r;
+  if (x.typ != NUMBER || y.typ != NUMBER) {
+    return nilAtom;
+  }
+  if (y.val == 0) {
+    zeroDivideError();
+    return nilAtom;
+  }
+  q = x.val / y.val;
+  r = x.val % y.val;
+  if (r < 0) {
+    if (q < 0) {
+      q = q - 1;
+      r = r + y.val;
+    } else {
+      q = q + 1;
+      r = r - y.val;
+    }
+  }
+  return makeNode(makeNumber(q), makeNumber(r));
+}
+
+// -------------------------------------------------------------
+// M. Reader Functions and Control Variables
+// -------------------------------------------------------------
+
+//
+// auxiliary stuff
+//
+
+global Boolean singleBreak;
+
+global Boolean unreadPresent;
+global Character unreadChar;
+
+void unread(Character ch) {
+  unreadPresent = true;
+  unreadChar = ch;
+}
+
+Character readChar() {
+  local Character ch;
+  if (unreadPresent) {
+    unreadPresent = false;
+    return unreadChar;
+  }
+  if (rdsAtom.car == nilAtom) {
+    if (readchAtom.car == nilAtom) {
+      ch = readCharacter();
+    } else {
+      ch = readCharacter();
+    }
+  } else {
+    // file input not implemented
+    ch = ' ';
+    if (echoAtom.car != nilAtom) {
+      printChar(ch);
+    }
+  }
+  if (readAtom.car == nilAtom) {
+    ch = toUpper(ch);
+  }
+  return ch;
+}
+
+String readToken(Boolean[] sep, Boolean[] brk) {
+  local Boolean quoted;
+  local Character ch;
+  local StringBuffer strBuf;
+  quoted = false;
+  ch = readChar();
+  while (ch == '%' || sep[char2int(ch)]) {
+    if (ch == '%') {
+      while (readChar() != '%') ;
+    }
+    ch = readChar();
+  }
+  if (brk[char2int(ch)]) {
+    singleBreak = true;
+    return toString(ch);
+  }
+  strBuf = newStringBuffer(20);
+  while (true) {
+    if (quoted) {
+      if (ch == '\"') {
+        ch = readChar();
+        if (ch == '\"') {
+          addCharToStringBuffer(strBuf, ch);
+          ch = readChar();
+        } else {
+          quoted = false;
+        }
+      } else {
+        addCharToStringBuffer(strBuf, ch);
+        ch = readChar();
+      }
+    } else {
+      if (ch == '\"') {
+        quoted = true;
+        ch = readChar();
+      } else
+      if (ch == '%') {
+        while (readChar() != '%') ;
+        ch = readChar();
+      } else
+      if (sep[char2int(ch)] || brk[char2int(ch)]) {
+        unread(ch);
+        singleBreak = false;
+        return stringBufferToString(strBuf);
+      } else {
+        addCharToStringBuffer(strBuf, ch);
+        ch = readChar();
+      }
+    }
+  }
+}
+
+Cell tokenToAtom(String token) {
+  local Boolean couldConvert;
+  local Boolean isNegative;
+  local Integer number;
+  local Integer i;
+  local Character ch;
+  local Integer d;
+  local Cell aux;
+  couldConvert = true;
+  isNegative = false;
+  number = 0;
+  i = 0;
+  if (i < sizeof(token) && token[i] == '-') {
+    isNegative = true;
+    i = i + 1;
+  }
+  if (i < sizeof(token) && isDigit(token[i])) {
+    while (i < sizeof(token)) {
+      ch = token[i];
+      i = i + 1;
+      if (isDigit(ch)) {
+        d = char2int(ch) - char2int('0');
+        if (d < numBase) {
+          number = number * numBase + d;
+        } else {
+          couldConvert = false;
+          break;
+        }
+      } else
+      if (isAlpha(ch)) {
+        ch = toUpper(ch);
+        d = char2int(ch) - char2int('A');
+        if (d < numBase) {
+          number = number * numBase + d;
+        } else {
+          couldConvert = false;
+          break;
+        }
+      } else {
+        couldConvert = false;
+        break;
+      }
+    }
+  } else {
+    couldConvert = false;
+  }
+  if (couldConvert) {
+    if (isNegative) {
+      number = -number;
+    }
+    aux = makeNumber(number);
+  } else {
+    aux = searchOblist(token);
+  }
+  ratomAtom.car = aux;
+  return aux;
+}
+
+Cell read0(String token) {
+  local Character ch;
+  while (true) {
+    if (!singleBreak) {
+      return tokenToAtom(token);
+    }
+    ch = token[0];
+    if (ch == '(') {
+      token = readToken(RES, REB);
+      return readList(token);
+    } else
+    if (ch == '[') {
+      token = readToken(RES, REB);
+      return readBracket(token);
+    } else
+    if (ch == ')' || ch == ']' || ch == '.') {
+      token = readToken(RES, REB);
+    } else {
+      error("internal read0 error", true);
+    }
+  }
+}
+
+Cell readList(String token) {
+  local Cell anchor;
+  local Cell aux;
+  anchor = makeNode(nilAtom, nilAtom);
+  anchor.car = anchor;
+  while (true) {
+    if (singleBreak && token[0] == ')') {
+      return anchor.cdr;
+    } else
+    if (singleBreak && token[0] == ']') {
+      unread(']');
+      return anchor.cdr;
+    } else
+    if (singleBreak && token[0] == '.') {
+      token = readToken(RES, REB);
+      aux = read0(token);
+      token = readToken(RES, REB);
+      if (singleBreak && token[0] == ')') {
+        anchor.car.cdr = aux;
+        return anchor.cdr;
+      } else
+      if (singleBreak && token[0] == ']') {
+        unread(']');
+        anchor.car.cdr = aux;
+        return anchor.cdr;
+      } else {
+        anchor.car.cdr = makeNode(aux, nilAtom);
+        anchor.car = anchor.car.cdr;
+      }
+    } else {
+      aux = read0(token);
+      anchor.car.cdr = makeNode(aux, nilAtom);
+      anchor.car = anchor.car.cdr;
+      token = readToken(RES, REB);
+    }
+  }
+}
+
+Cell readBracket(String token) {
+  local Cell aux1;
+  local Cell aux2;
+  aux1 = readList(token);
+  while (true) {
+    token = readToken(RES, REB);
+    if (singleBreak && token[0] == ')') {
+      return aux1;
+    } else
+    if (singleBreak && token[0] == ']') {
+      return aux1;
+    } else {
+      aux2 = readList(token);
+      aux1 = makeNode(aux1, aux2);
+    }
+  }
+}
+
+//
+// end of auxiliary stuff
+//
+
+Cell rds(Cell x, Cell y, Cell z) {
+  // file handling not implemented
+  // error("RDS not implemented", false);
+  return nilAtom;
+}
+
+Cell ratom() {
+  local String token;
+  token = readToken(RAS, RAB);
+  return tokenToAtom(token);
+}
+
+Cell read() {
+  local String token;
+  token = readToken(RES, REB);
+  return read0(token);
+}
+
+Cell readch() {
+  local Character ch;
+  local Integer n;
+  local String s;
+  local Cell aux;
+  ch = readChar();
+  if (isDigit(ch)) {
+    n = char2int(ch) - char2int('0');
+    if (n < numBase) {
+      aux = makeNumber(n);
+    } else {
+      s = toString(ch);
+      aux = searchOblist(s);
+    }
+  } else {
+    s = toString(ch);
+    aux = searchOblist(s);
+  }
+  ratomAtom.car = aux;
+  return aux;
+}
+
+// -------------------------------------------------------------
+// N. Printer Functions and Control Variables
+// -------------------------------------------------------------
+
+//
+// auxiliary stuff
+//
+
+void putConsole(Character ch) {
+  // do any terminal-specific character translations here
+  writeCharacter(ch);
+}
+
+void printChar(Character ch) {
+  local Integer ascii;
+  // handle case conversion
+  if (printAtom.car == nilAtom) {
+    ch = toLower(ch);
+  }
+  // determine output sink
+  if (wrsAtom.car == nilAtom) {
+    putConsole(ch);
+  } else {
+    // file output not implemented
+    if (echoAtom.car != nilAtom) {
+      putConsole(ch);
+    }
+  }
+  // update cursor position
+  ascii = char2int(ch);
+  if (ascii == 8) {
+    // CTRL-H, backspace
+    cursPos = cursPos - 1;
+  } else
+  if (ascii == 9) {
+    // CTRL-I, tab
+    cursPos = ((cursPos + 8) / 8) * 8;
+  } else
+  if (ascii == 10) {
+    // CTRL-J, begin of next line
+    cursPos = 0;
+  } else
+  if (ascii == 11) {
+    // CTRL-K, begin of previous line
+    cursPos = 0;
+  } else
+  if (ascii == 12) {
+    // CTRL-L, begin of screen
+    cursPos = 0;
+  } else
+  if (ascii == 13) {
+    // CTRL-M, begin of current line
+    cursPos = 0;
+  } else {
+    // all other characters
+    cursPos = cursPos + 1;
+  }
+}
+
+Boolean isSpecial(Character ch) {
+  local Integer index;
+  index = char2int(ch);
+  return OSP[index] || REB[index] || RES[index];
+}
+
+void printName(String s) {
+  local Integer n;
+  local Integer i;
+  local Character ch;
+  local Boolean quoted;
+  n = sizeof(s);
+  i = 0;
+  quoted = false;
+  while (i < n) {
+    ch = s[i];
+    if (prin1Atom.car == nilAtom && isSpecial(ch) && !quoted) {
+      quoted = true;
+      printChar('\"');
+    }
+    printChar(ch);
+    if (ch == '\"' && quoted) {
+      printChar('\"');
+    }
+    i = i + 1;
+  }
+  if (quoted) {
+    printChar('\"');
+  }
+}
+
+void printNumber(Integer n) {
+  local Integer a;
+  local Integer b;
+  if (n < 0) {
+    printChar('-');
+    n = -n;
+  }
+  a = n / numBase;
+  if (a != 0) {
+    printNumber(a);
+  }
+  b = n % numBase;
+  if (b < 10) {
+    printChar(int2char(char2int('0') + b));
+  } else {
+    if (a == 0) {
+      // this is the first digit printed, and it is >= 10
+      // prepend a single zero to distinguish number from name
+      printChar('0');
+    }
+    printChar(int2char(char2int('A') + (b - 10)));
+  }
+}
+
+//
+// end of auxiliary stuff
+//
+
+Cell wrs(Cell x, Cell y, Cell z) {
+  // file handling not implemented
+  // error("WRS not implemented", false);
+  return nilAtom;
+}
+
+Cell print(Cell x) {
+  prin1(x);
+  printChar('\n');
+  return x;
+}
+
+Cell prin1(Cell x) {
+  if (x.typ == NAME) {
+    printName(x.name);
+    return x;
+  }
+  if (x.typ == NUMBER) {
+    printNumber(x.val);
+    return x;
+  }
+  printChar('(');
+  prin1(x.car);
+  x = x.cdr;
+  while (x.typ == NODE) {
+    printChar(' ');
+    prin1(x.car);
+    x = x.cdr;
+  }
+  if (x != nilAtom) {
+    printChar(' ');
+    printChar('.');
+    printChar(' ');
+    prin1(x);
+  }
+  printChar(')');
+  return x;
+}
+
+Cell terpri(Cell x) {
+  local Integer n;
+  if (x.typ == NUMBER) {
+    n = x.val;
+    if (n < 0 || n > 255) {
+      printChar('\n');
+      return nilAtom;
+    }
+    while (n > 0) {
+      printChar('\n');
+      n = n - 1;
+    }
+    return nilAtom;
+  }
+  printChar('\n');
+  return nilAtom;
+}
+
+Cell spaces(Cell x) {
+  local Integer n;
+  if (x.typ == NUMBER) {
+    n = x.val;
+    if (n < 0 || n > 255) {
+      return makeNumber(cursPos);
+    }
+    while (n > 0) {
+      printChar(' ');
+      n = n - 1;
+    }
+    return makeNumber(cursPos);
+  }
+  return makeNumber(cursPos);
+}
+
+Cell linelength(Cell x) {
+  local Integer n;
+  local Cell aux;
+  if (x.typ == NUMBER) {
+    n = x.val;
+    if (n > 11 && n < 256) {
+      aux = makeNumber(lineLen);
+      lineLen = n;
+      return aux;
+    }
+    return makeNumber(lineLen);
+  }
+  return makeNumber(lineLen);
+}
+
+Cell radix(Cell x) {
+  local Integer n;
+  local Cell aux;
+  if (x.typ == NUMBER) {
+    n = x.val;
+    if (n > 1 && n < 37) {
+      aux = makeNumber(numBase);
+      numBase = n;
+      return aux;
+    }
+    return makeNumber(numBase);
+  }
+  return makeNumber(numBase);
+}
+
+// -------------------------------------------------------------
+// O. Evaluation Functions
+// -------------------------------------------------------------
+
+//
+// auxiliary stuff
+//
+
+Cell evlis(Cell x) {
+  local Cell anchor;
+  local Cell aux;
+  anchor = makeNode(nilAtom, nilAtom);
+  anchor.car = anchor;
+  while (x.typ == NODE) {
+    aux = eval(x.car);
+    anchor.car.cdr = makeNode(aux, nilAtom);
+    anchor.car = anchor.car.cdr;
+    x = x.cdr;
+  }
+  anchor.car.cdr = x;
+  return anchor.cdr;
+}
+
+Cell evalbody(Cell x, Cell y) {
+  local Cell aux;
+  aux = x;
+  while (y.typ == NODE) {
+    if (y.car.typ != NODE || y.car.car.typ != NODE) {
+      aux = eval(y.car);
+      y = y.cdr;
+    } else
+    if (y.car.car.car.typ != NODE) {
+      aux = eval(y.car.car);
+      if (aux == nilAtom) {
+        y = y.cdr;
+      } else {
+        y = y.car.cdr;
+      }
+    } else {
+      aux = evalbody(aux, y.car);
+      y = y.cdr;
+    }
+  }
+  return aux;
+}
+
+void bind(Cell x, Cell y) {
+  if (x.typ != NODE) {
+    if (x != nilAtom) {
+      argStack = makeNode(x.car, argStack);
+      x.car = y;
+    }
+    return;
+  }
+  while (x.typ == NODE && y.typ == NODE) {
+    argStack = makeNode(x.car.car, argStack);
+    x.car.car = y.car;
+    x = x.cdr;
+    y = y.cdr;
+  }
+  while (x.typ == NODE) {
+    argStack = makeNode(x.car.car, argStack);
+    x.car.car = nilAtom;
+    x = x.cdr;
+  }
+}
+
+void unbind(Cell x) {
+  local Cell aux;
+  if (x.typ != NODE) {
+    if (x != nilAtom) {
+      x.car = argStack.car;
+      argStack = argStack.cdr;
+    }
+    return;
+  }
+  aux = nilAtom;
+  while (x.typ == NODE) {
+    aux = makeNode(x.car, aux);
+    x = x.cdr;
+  }
+  while (aux.typ == NODE) {
+    aux.car.car = argStack.car;
+    argStack = argStack.cdr;
+    aux = aux.cdr;
+  }
+}
+
+//
+// end of auxiliary stuff
+//
+
+Cell quote(Cell x) {
+  // ATTENTION: CBN
+  return x.car;
+}
+
+Cell eval(Cell x) {
+  local Cell aux;
+  if (x.typ != NODE) {
+    return x.car;
+  }
+  if (x.car.typ == NAME) {
+    if (x.car.func == nilAtom) {
+      if (x.car == x.car.car) {
+        return evlis(x);
+      }
+      aux = makeNode(x.car.car, x.cdr);
+      return eval(aux);
+    }
+    if (x.car.func.car == subrAtom ||
+        x.car.func.car == lambdaAtom) {
+      aux = evlis(x.cdr);
+      return apply(x.car, aux);
+    }
+    if (x.car.func.car == nsubrAtom ||
+        x.car.func.car == nlambdaAtom) {
+      return apply(x.car, x.cdr);
+    }
+    return evlis(x);
+  }
+  if (x.car.car == lambdaAtom) {
+    aux = evlis(x.cdr);
+    return apply(x.car, aux);
+  }
+  if (x.car.car == nlambdaAtom) {
+    return apply(x.car, x.cdr);
+  }
+  return evlis(x);
+}
+
+Cell apply(Cell x, Cell y) {
+  local Cell aux;
+  if (x.typ == NAME) {
+    if (x.func == nilAtom) {
+      if (x == x.car) {
+        return nilAtom;
+      }
+      return apply(x.car, y);
+    }
+    if (x.func.car == subrAtom) {
+      if (y.typ != NODE) {
+        return exec(x.func.cdr.val, nilAtom, nilAtom, nilAtom);
+      }
+      if (y.cdr.typ != NODE) {
+        return exec(x.func.cdr.val, y.car, nilAtom, nilAtom);
+      }
+      if (y.cdr.cdr.typ != NODE) {
+        return exec(x.func.cdr.val, y.car, y.cdr.car, nilAtom);
+      }
+      return exec(x.func.cdr.val, y.car, y.cdr.car, y.cdr.cdr.car);
+    }
+    if (x.func.car == nsubrAtom) {
+      return exec(x.func.cdr.val, y, nilAtom, nilAtom);
+    }
+    if (x.func.car == lambdaAtom || x.func.car == nlambdaAtom) {
+      bind(x.func.cdr.car, y);
+      aux = evalbody(nilAtom, x.func.cdr.cdr);
+      unbind(x.func.cdr.car);
+      return aux;
+    }
+    return nilAtom;
+  }
+  if (x.car == lambdaAtom || x.car == nlambdaAtom) {
+    bind(x.cdr.car, y);
+    aux = evalbody(nilAtom, x.cdr.cdr);
+    unbind(x.cdr.car);
+    return aux;
+  }
+  return nilAtom;
+}
+
+Cell cond(Cell x) {
+  // ATTENTION: CBN
+  local Cell aux;
+  while (x.typ == NODE) {
+    aux = eval(x.car.car);
+    if (aux != nilAtom) {
+      return evalbody(aux, x.car.cdr);
+    }
+    x = x.cdr;
+  }
+  return nilAtom;
+}
+
+Cell loop(Cell x) {
+  // ATTENTION: CBN
+  local Cell aux1;
+  local Cell aux2;
+  while (true) {
+    aux1 = x;
+    while (aux1.typ == NODE) {
+      if (aux1.car.typ != NODE || aux1.car.car.typ != NODE) {
+        eval(aux1.car);
+        aux1 = aux1.cdr;
+      } else
+      if (aux1.car.car.car.typ != NODE) {
+        aux2 = eval(aux1.car.car);
+        if (aux2 != nilAtom) {
+          return evalbody(aux2, aux1.car.cdr);
+        }
+        aux1 = aux1.cdr;
+      } else {
+        evalbody(nilAtom, aux1.car);
+        aux1 = aux1.cdr;
+      }
+    }
+  }
+}
+
+Cell prog1(Cell x) {
+  // ATTENTION: CBN
+  local Cell aux;
+  aux = eval(x.car);
+  x = x.cdr;
+  while (x.typ == NODE) {
+    eval(x.car);
+    x = x.cdr;
+  }
+  return aux;
+}
+
+Cell driver() {
+  local Cell aux1;
+  local Cell aux2;
+  rdsAtom.car = nilAtom;
+  wrsAtom.car = nilAtom;
+  echoAtom.car = nilAtom;
+  readchAtom.car = readchAtom;
+  while (true) {
+    printChar('\n');
+    printChar('$');
+    printChar('\n');
+    //printChar('\n');
+    //printChar('$');
+    //printChar(' ');
+    aux1 = read();
+    aux2 = eval(aux1);
+    print(aux2);
+  }
+  // never reached
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// P. Memory Management Functions
+// -------------------------------------------------------------
+
+Cell reclaim() {
+  // not implemented
+  error("RECLAIM not implemented", false);
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// Q. Environment Functions
+// -------------------------------------------------------------
+
+Cell save(Cell x, Cell y) {
+  error("SAVE not implemented", false);
+  return nilAtom;
+}
+
+Cell load(Cell x, Cell y) {
+  error("LOAD not implemented", false);
+  return nilAtom;
+}
+
+Cell system() {
+  writeString("\nThanks for using Ninja LISP!\n\n");
+  exit();
+  // never reached
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// R. Mutator Functions
+// -------------------------------------------------------------
+
+Cell xchgpname(Cell x, Cell y) {
+  local String name;
+  if (x.typ != NAME || y.typ != NAME) {
+    return nilAtom;
+  }
+  name = x.name;
+  x.name = y.name;
+  y.name = name;
+  return tAtom;
+}
+
+Cell purgename(Cell x) {
+  local Cell aux;
+  if (x.typ != NAME) {
+    return nilAtom;
+  }
+  aux = objectList;
+  if (aux.typ == NODE) {
+    if (aux.car == x) {
+      objectList = aux.cdr;
+      return tAtom;
+    }
+    while (aux.cdr.typ == NODE) {
+      if (aux.cdr.car == x) {
+        aux.cdr = aux.cdr.cdr;
+        return tAtom;
+      }
+      aux = aux.cdr;
+    }
+  }
+  return nilAtom;
+}
+
+// -------------------------------------------------------------
+// Main Program
+// -------------------------------------------------------------
+
+void initConstants() {
+  NAME = 0;
+  NUMBER = 1;
+  NODE = 2;
+}
+
+void initCharTypes() {
+  local Integer i;
+  RAS = new(Boolean[128]);
+  RAB = new(Boolean[128]);
+  RES = new(Boolean[128]);
+  REB = new(Boolean[128]);
+  OSP = new(Boolean[128]);
+  i = 0;
+  while (i < 128) {
+    RAS[i] = false;
+    RAB[i] = false;
+    RES[i] = false;
+    REB[i] = false;
+    OSP[i] = false;
+    i = i + 1;
+  }
+  // ratom separator characters
+  RAS[char2int(' ')] = true;
+  RAS[char2int('\r')] = true;
+  RAS[char2int('\n')] = true;
+  RAS[char2int('\t')] = true;
+  // ratom break characters
+  RAB[char2int('!')] = true;
+  RAB[char2int('$')] = true;
+  RAB[char2int('&')] = true;
+  RAB[char2int('\'')] = true;
+  RAB[char2int('(')] = true;
+  RAB[char2int(')')] = true;
+  RAB[char2int('*')] = true;
+  RAB[char2int('+')] = true;
+  RAB[char2int(',')] = true;
+  RAB[char2int('-')] = true;
+  RAB[char2int('.')] = true;
+  RAB[char2int('/')] = true;
+  RAB[char2int('@')] = true;
+  RAB[char2int(':')] = true;
+  RAB[char2int(';')] = true;
+  RAB[char2int('<')] = true;
+  RAB[char2int('=')] = true;
+  RAB[char2int('>')] = true;
+  RAB[char2int('?')] = true;
+  RAB[char2int('[')] = true;
+  RAB[char2int('\\')] = true;
+  RAB[char2int(']')] = true;
+  RAB[char2int('^')] = true;
+  RAB[char2int('_')] = true;
+  RAB[char2int('`')] = true;
+  RAB[char2int('{')] = true;
+  RAB[char2int('|')] = true;
+  RAB[char2int('}')] = true;
+  RAB[char2int('~')] = true;
+  // read separator characters
+  RES[char2int(' ')] = true;
+  RES[char2int(',')] = true;
+  RES[char2int('\r')] = true;
+  RES[char2int('\n')] = true;
+  RES[char2int('\t')] = true;
+  // read break characters
+  REB[char2int('(')] = true;
+  REB[char2int(')')] = true;
+  REB[char2int('.')] = true;
+  REB[char2int('[')] = true;
+  REB[char2int(']')] = true;
+  // other special characters
+  OSP[char2int('\"')] = true;
+  OSP[char2int('%')] = true;
+}
+
+void initObjects() {
+  // init NIL, objectList, and argStack
+  nilAtom = makeNil();
+  objectList = nilAtom;
+  addOblist(nilAtom);
+  argStack = nilAtom;
+  // init other objects and functions
+  tAtom = makeObject("T");
+  subrAtom = makeObject("SUBR");
+  nsubrAtom = makeObject("NSUBR");
+  lambdaAtom = makeObject("LAMBDA");
+  nlambdaAtom = makeObject("NLAMBDA");
+  echoAtom = makeObject("ECHO");
+  readAtom = makeBuiltin("READ", subrAtom, 64);
+  ratomAtom = makeBuiltin("RATOM", subrAtom, 63);
+  readchAtom = makeBuiltin("READCH", subrAtom, 65);
+  rdsAtom = makeBuiltin("RDS", subrAtom, 62);
+  printAtom = makeBuiltin("PRINT", subrAtom, 67);
+  prin1Atom = makeBuiltin("PRIN1", subrAtom, 68);
+  wrsAtom = makeBuiltin("WRS", subrAtom, 66);
+  driverAtom = makeBuiltin("DRIVER", subrAtom, 79);
+  carAtom = makeBuiltin("CAR", subrAtom, 0);
+  cdrAtom = makeBuiltin("CDR", subrAtom, 1);
+  cadrAtom = makeBuiltin("CADR", subrAtom, 3);
+  cddrAtom = makeBuiltin("CDDR", subrAtom, 5);
+  caddrAtom = makeBuiltin("CADDR", subrAtom, 9);
+  cdddrAtom = makeBuiltin("CDDDR", subrAtom, 13);
+  caarAtom = makeBuiltin("CAAR", subrAtom, 2);
+  cdarAtom = makeBuiltin("CDAR", subrAtom, 4);
+  caaarAtom = makeBuiltin("CAAAR", subrAtom, 6);
+  cdaarAtom = makeBuiltin("CDAAR", subrAtom, 10);
+  cadarAtom = makeBuiltin("CADAR", subrAtom, 8);
+  cddarAtom = makeBuiltin("CDDAR", subrAtom, 12);
+  caadrAtom = makeBuiltin("CAADR", subrAtom, 7);
+  cdadrAtom = makeBuiltin("CDADR", subrAtom, 11);
+  consAtom = makeBuiltin("CONS", subrAtom, 14);
+  rplacaAtom = makeBuiltin("RPLACA", subrAtom, 18);
+  rplacdAtom = makeBuiltin("RPLACD", subrAtom, 19);
+  nconcAtom = makeBuiltin("NCONC", subrAtom, 20);
+  setAtom = makeBuiltin("SET", subrAtom, 38);
+  assocAtom = makeBuiltin("ASSOC", subrAtom, 42);
+  putAtom = makeBuiltin("PUT", subrAtom, 44);
+  getAtom = makeBuiltin("GET", subrAtom, 43);
+  memberAtom = makeBuiltin("MEMBER", subrAtom, 31);
+  rempropAtom = makeBuiltin("REMPROP", subrAtom, 45);
+  flagpAtom = makeBuiltin("FLAGP", subrAtom, 46);
+  flagAtom = makeBuiltin("FLAG", subrAtom, 47);
+  remflagAtom = makeBuiltin("REMFLAG", subrAtom, 48);
+  movdAtom = makeBuiltin("MOVD", subrAtom, 51);
+  putdAtom = makeBuiltin("PUTD", subrAtom, 50);
+  getdAtom = makeBuiltin("GETD", subrAtom, 49);
+  packAtom = makeBuiltin("PACK", subrAtom, 52);
+  unpackAtom = makeBuiltin("UNPACK", subrAtom, 53);
+  lengthAtom = makeBuiltin("LENGTH", subrAtom, 54);
+  reverseAtom = makeBuiltin("REVERSE", subrAtom, 16);
+  oblistAtom = makeBuiltin("OBLIST", subrAtom, 17);
+  atomAtom = makeBuiltin("ATOM", subrAtom, 23);
+  nameAtom = makeBuiltin("NAME", subrAtom, 21);
+  nullAtom = makeBuiltin("NULL", subrAtom, 24);
+  notAtom = makeBuiltin("NOT", subrAtom, 35);
+  orderpAtom = makeBuiltin("ORDERP", subrAtom, 34);
+  orderedAtom = makeObject("ORDERED");
+  eqAtom = makeBuiltin("EQ", subrAtom, 29);
+  equalAtom = makeBuiltin("EQUAL", subrAtom, 30);
+  applyAtom = makeBuiltin("APPLY", subrAtom, 75);
+  evalAtom = makeBuiltin("EVAL", subrAtom, 74);
+  reclaimAtom = makeBuiltin("RECLAIM", subrAtom, 80);
+  terpriAtom = makeBuiltin("TERPRI", subrAtom, 69);
+  spacesAtom = makeBuiltin("SPACES", subrAtom, 70);
+  linelengthAtom = makeBuiltin("LINELENGTH", subrAtom, 71);
+  radixAtom = makeBuiltin("RADIX", subrAtom, 72);
+  loadAtom = makeBuiltin("LOAD", subrAtom, 82);
+  saveAtom = makeBuiltin("SAVE", subrAtom, 81);
+  systemAtom = makeBuiltin("SYSTEM", subrAtom, 83);
+  numberpAtom = makeBuiltin("NUMBERP", subrAtom, 22);
+  greaterpAtom = makeBuiltin("GREATERP", subrAtom, 32);
+  lesspAtom = makeBuiltin("LESSP", subrAtom, 33);
+  pluspAtom = makeBuiltin("PLUSP", subrAtom, 25);
+  minuspAtom = makeBuiltin("MINUSP", subrAtom, 26);
+  zeropAtom = makeBuiltin("ZEROP", subrAtom, 27);
+  evenAtom = makeBuiltin("EVEN", subrAtom, 28);
+  minusAtom = makeBuiltin("MINUS", subrAtom, 55);
+  plusAtom = makeBuiltin("PLUS", subrAtom, 56);
+  differenceAtom = makeBuiltin("DIFFERENCE", subrAtom, 57);
+  timesAtom = makeBuiltin("TIMES", subrAtom, 58);
+  divideAtom = makeBuiltin("DIVIDE", subrAtom, 61);
+  quotientAtom = makeBuiltin("QUOTIENT", subrAtom, 59);
+  remainderAtom = makeBuiltin("REMAINDER", subrAtom, 60);
+  listAtom = makeBuiltin("LIST", nsubrAtom, 15);
+  quoteAtom = makeBuiltin("QUOTE", nsubrAtom, 73);
+  condAtom = makeBuiltin("COND", nsubrAtom, 76);
+  loopAtom = makeBuiltin("LOOP", nsubrAtom, 77);
+  prog1Atom = makeBuiltin("PROG1", nsubrAtom, 78);
+  andAtom = makeBuiltin("AND", nsubrAtom, 36);
+  orAtom = makeBuiltin("OR", nsubrAtom, 37);
+  setqAtom = makeBuiltin("SETQ", nsubrAtom, 39);
+  popAtom = makeBuiltin("POP", nsubrAtom, 40);
+  pushAtom = makeBuiltin("PUSH", nsubrAtom, 41);
+  xchgpnameAtom = makeBuiltin("XCHGPNAME", subrAtom, 84);
+  purgenameAtom = makeBuiltin("PURGENAME", subrAtom, 85);
+}
+
+void initCtlVars() {
+  unreadPresent = false;
+  rdsAtom.car = nilAtom;
+  readAtom.car = readAtom;
+  readchAtom.car = readchAtom;
+  echoAtom.car = nilAtom;
+  wrsAtom.car = nilAtom;
+  printAtom.car = printAtom;
+  prin1Atom.car = prin1Atom;
+  cursPos = 0;
+  lineLen = 79;
+  numBase = 10;
+}
+
+void main() {
+  // write greeting
+  writeString("\nWelcome to Ninja LISP!\n");
+  // initialization
+  initConstants();
+  initCharTypes();
+  initObjects();
+  initCtlVars();
+  // start interpreter
+  while (true) {
+    apply(driverAtom, nilAtom);
+  }
+}
