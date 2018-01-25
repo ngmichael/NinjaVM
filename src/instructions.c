@@ -102,7 +102,9 @@ void execute(unsigned int opcode, int operand) {
             int result;
             result = scanf(" %c", &read);
             if (result == 0 || result == EOF) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Something went wrong while taking user input!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_IO_SHELL);
             }
             
@@ -192,7 +194,9 @@ void execute(unsigned int opcode, int operand) {
         }
         case JMP: {
             if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_JMP);
             }
             pc = operand;
@@ -202,7 +206,9 @@ void execute(unsigned int opcode, int operand) {
             int res;
 
             if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_JMP);
             }
             bip.op1 = popObjRef();
@@ -214,7 +220,9 @@ void execute(unsigned int opcode, int operand) {
             int res;
 
             if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_JMP);
             }
             bip.op1 = popObjRef();
@@ -224,7 +232,9 @@ void execute(unsigned int opcode, int operand) {
         }
         case CALL: {
             if (operand < 0 || operand > instructionCount-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Illegal jump destination!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_JMP);
             }
             push(pc);
@@ -237,7 +247,9 @@ void execute(unsigned int opcode, int operand) {
         }
         case DROP: {
             if (((int)sp - operand) < 0) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Stack underflow!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_ST_UNDER);
             }
             sp = sp - operand;
@@ -280,20 +292,26 @@ void execute(unsigned int opcode, int operand) {
             object = popObjRef();
             /* Check that the object is not a NULL-Pointer */
             if (object == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_NIL_REF);
             }
 
             /* Check that the object is not primitive */
             if (IS_PRIM(object)) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(object);
             if (operand < 0 || operand > size-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Record index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_REC_INDEX);
             }
 
@@ -311,20 +329,26 @@ void execute(unsigned int opcode, int operand) {
             object = popObjRef();
             /* Check that the object is not a NULL-Pointer */
             if (object == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_NIL_REF);
             }
 
             /* Check if the object is not primitive */
             if (IS_PRIM(object)) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(object);
             if (operand < 0 || operand > size-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Record index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_REC_INDEX);
             }
 
@@ -364,19 +388,25 @@ void execute(unsigned int opcode, int operand) {
 
             /* Check that the object is not a NULL-Pointer */
             if (array == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_NIL_REF);
             }
 
             if (IS_PRIM(array)) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of array */
             size = GET_SIZE(array);
             if (index < 0 || index > size-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Array index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_ARR_INDEX);
             }
 
@@ -397,20 +427,26 @@ void execute(unsigned int opcode, int operand) {
 
             /* Check that the object is not a NULL-Pointer */
             if (array == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can not access fields on NIL-Reference!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_NIL_REF);
             }
             
             /* Check if the object is not primitive */
             if (IS_PRIM(array)) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can't access fields on primitive objects!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_PRIM_OBJ);
             }
             
             /* Check that access is within boundaries of object */
             size = GET_SIZE(array);
             if (index < 0 || index > size-1) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Array index out of bounds!\n");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_ARR_INDEX);
             }
 
@@ -424,7 +460,9 @@ void execute(unsigned int opcode, int operand) {
 
             object = popObjRef();
             if (object == NULL) {
+                changeTextColor(RED, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can't get size from NIL-Reference!");
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_NIL_REF);
             }
             if (IS_PRIM(object)) {
@@ -466,11 +504,11 @@ void execute(unsigned int opcode, int operand) {
             break;
         }
         default: {
-            changeTextColor(RED, BLACK, BRIGHT);
+            changeTextColor(RED, TRANSPARENT, BRIGHT);
             printf("ERROR: Illegal opcode: ");
-            changeTextColor(WHITE, BLACK, BRIGHT);
+            changeTextColor(WHITE, TRANSPARENT, BRIGHT);
             printf("%u\n", opcode);
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             exit(E_ERR_OPCODE);
         }
     }

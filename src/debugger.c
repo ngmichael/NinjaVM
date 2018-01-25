@@ -34,13 +34,16 @@ void memoryDump(char* path) {
 
     printf("%s Performing memory dump...\n", DEBUG_DUMP);
     if (path == NULL) {
-        changeTextColor(RED, BLACK, BRIGHT);
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf("%s ERROR: PATH IS NULL!\n", DEBUG_DUMP);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_IO_SHELL);
     }
     out = fopen(path, "w+");
     if (out == NULL) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf("%sERROR: Could not open %s: %s\n", DEBUG_DUMP, path, strerror(errno));
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_IO_FILE);
     }
 
@@ -98,7 +101,7 @@ int getNumber(void) {
     int cleanUp;
 
     if (scanf("%d", &number) != 1) {
-        changeTextColor(RED, BLACK, BRIGHT);
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf("%s ", ERROR);
         if (number == EOF) {
             printf("Input stream closed!\n");
@@ -107,7 +110,7 @@ int getNumber(void) {
         else {
             printf("Could not read a number from input!\n");
         }
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_IO_SHELL);
     }
     while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
@@ -117,9 +120,9 @@ int getNumber(void) {
 
 /**
  * Reads one 'line' from stdin.
- * NOTE: Only the first 12 characters are read, the rest is truncated.
+ * NOTE: Only the first 32 characters are read, the rest is truncated.
  * 
- * @return User input from stdin with a max length of 12 characters.
+ * @return User input from stdin with a max length of 32 characters.
  */
 char* getInput(void) {
     int cleanUp;
@@ -128,18 +131,18 @@ char* getInput(void) {
 
     cleanUp = 0;    
     newLine = NULL;
-    input = calloc(14, sizeof(unsigned char));
+    input = calloc(32, sizeof(unsigned char));
     if (input == NULL) {
-        changeTextColor(RED, BLACK, BRIGHT);
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf("%s ", ERROR);
-        printf("System could not allocate 14 bytes of memory for debugger input.\n");
-        changeTextColor(WHITE, BLACK, RESET);
+        printf("System could not allocate 32 bytes of memory for debugger input.\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_IO_SHELL);
     }
-    if (fgets(input, 14, stdin) == NULL) {
-        changeTextColor(RED, BLACK, BRIGHT);
-        printf("Something went wrong while taking user input!\n");
-        changeTextColor(WHITE, BLACK, RESET);
+    if (fgets(input, 32, stdin) == NULL) {
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
+        printf("Could not take user input!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_IO_SHELL);
     }
     if (strcmp("\n", input) == 0) {
@@ -153,12 +156,12 @@ char* getInput(void) {
     else {
         /* flush stdin */
         printf("%s ", DEBUGGER);
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
 
         printf("*WARNING* ");
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
 
-        printf("Truncated input after 14 characters!\n");
+        printf("Truncated input after 32 characters!\n");
         while ((cleanUp = getchar()) != '\n' && cleanUp != EOF) { }
     }
 
@@ -186,9 +189,9 @@ void listProgramMemory(void) {
         operand = SIGN_EXTEND(IMMEDIATE(instruction));
     
         printf("[%08d]: ", programCounter-1);
-        changeTextColor(GREEN, BLACK, RESET);
+        changeTextColor(GREEN, TRANSPARENT, RESET);
         printf("%6s ", opcodes[opcode]);
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         printf("%d\n", operand);
     }
     
@@ -210,43 +213,43 @@ int processCommand(char* command) {
         printf("%s Enter the number of the instruction,\n", DEBUG_BREAKPOINT);
         printf("%s 0 to clear breakpint or -1 to abort!\n", DEBUG_BREAKPOINT);
         printf("%s Set breakpoint to: ", DEBUG_BREAKPOINT);
-        changeTextColor(MAGENTA, BLACK, RESET);
+        changeTextColor(MAGENTA, TRANSPARENT, RESET);
 
         newBreakpoint = getNumber();
 
         if (newBreakpoint < -1) {
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             printf("%s ", DEBUG_BREAKPOINT);
-            changeTextColor(YELLOW, BLACK, BRIGHT);
+            changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
             printf("Malformed input! Aborting...\n");
         }
         else if (newBreakpoint == -1) {
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             printf("%s ", DEBUG_BREAKPOINT);
-            changeTextColor(MAGENTA, BLACK, RESET);
+            changeTextColor(MAGENTA, TRANSPARENT, RESET);
             printf("Did not change breakpoint!\n");
         }
         else if (newBreakpoint == 0) {
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             printf("%s ", DEBUG_BREAKPOINT);
-            changeTextColor(MAGENTA, BLACK, RESET);
+            changeTextColor(MAGENTA, TRANSPARENT, RESET);
             printf("Clearing breakpoint...\n");
             breakpoint = 0;
         }
         else {
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             printf(
                 "%s Setting breakpoint on instruction ",
                 DEBUG_BREAKPOINT
             );
-            changeTextColor(MAGENTA, BLACK, RESET);
+            changeTextColor(MAGENTA, TRANSPARENT, RESET);
             printf("%d", newBreakpoint);
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             printf("!\n");
             breakpoint = newBreakpoint;
         }
 
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return FALSE;
     }
     else if (strcmp("dump", command) == 0) {
@@ -255,14 +258,13 @@ int processCommand(char* command) {
 
         printf("%s Please specify a file path to dump memory to.\n", DEBUG_DUMP);
         printf("%s ", DEBUG_DUMP);
-        changeTextColor(YELLOW, BLACK, ITALIC);
-        printf("*WARNING* ");
-        printf("IF THE FILE EXISTS IT WILL BE OVERWRITTEN!\n");
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
+        printf("*WARNING* IF THE FILE EXISTS IT WILL BE OVERWRITTEN!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         printf("%s ", DEBUG_DUMP);
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("*WARNING* ");
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         printf("Input will be truncated after 128 characters!\n");
         printf("%s ", DEBUG_DUMP);
 
@@ -289,9 +291,9 @@ int processCommand(char* command) {
         printf("%s like to execute or 'ABORT' to abort.\n", DEBUG_EXEC);
 
         printf("%s ", DEBUG_EXEC);
-        changeTextColor(GREEN, BLACK, RESET);
+        changeTextColor(GREEN, TRANSPARENT, RESET);
         asmInstr = getInput();
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
 
         if (strcasecmp(asmInstr, "ABORT") == 0) {
             printf("%s Aborting...\n", DEBUG_EXEC);
@@ -308,9 +310,9 @@ int processCommand(char* command) {
 
         if (opcode == 42) {
             printf("%s ", DEBUG_EXEC);
-            changeTextColor(YELLOW, BLACK, BRIGHT);
+            changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
             printf("*WARNING* ");
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             printf("%s is an invalid opcode! Aborting...\n", asmInstr);
             return FALSE;
         }
@@ -327,13 +329,17 @@ int processCommand(char* command) {
         return FALSE;
     }
     else if (strcmp("gc", command) == 0) {
+        changeTextColor(WHITE, TRANSPARENT, BRIGHT);
+        printf("[Debugger/GC]: Starting garbage collector...\n");
         gc();
+        printf("[Debugger/GC]: Garbage collector finished!\n");
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         gcRunning = FALSE;
         return FALSE;
     }
     else if (strcmp("help", command) == 0) {
         printf("\n");
-        changeTextColor(YELLOW, BLACK, RESET);
+        changeTextColor(YELLOW, TRANSPARENT, RESET);
         printf("********************* NinjaVM Debugger *********************\n\n");
         printf("Available commands:\n");
         printf(" help\t\t- Prints this info.\n");
@@ -359,7 +365,7 @@ int processCommand(char* command) {
         printf(" verbose\t- Toggles output mode for run command.\n");
         printf("************************************************************\n\n");
         printf("%s Consult the debugger documentation for further information.\n", DEBUGGER);
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return FALSE;
     }
     else if (strcmp("inspect", command) == 0) {
@@ -383,7 +389,7 @@ int processCommand(char* command) {
 
             case 1: { /*Stack*/
                 printf("%s Listing contents of stack:\n\n", DEBUG_INSPECT);
-                changeTextColor(CYAN, BLACK, BRIGHT);
+                changeTextColor(CYAN, TRANSPARENT, BRIGHT);
                 printStack();
                 printf("\n");
                 break;
@@ -391,7 +397,7 @@ int processCommand(char* command) {
 
             case 2: { /*SDA*/
                 printf("%s Listing contents of static data area:\n\n", DEBUG_INSPECT);
-                changeTextColor(CYAN, BLACK, BRIGHT);
+                changeTextColor(CYAN, TRANSPARENT, BRIGHT);
                 printStaticDataArea();
                 printf("\n");
                 break;
@@ -399,7 +405,7 @@ int processCommand(char* command) {
 
             case 3: { /*RET*/
                 printf("%s ", DEBUG_INSPECT);
-                changeTextColor(CYAN, BLACK, BRIGHT);
+                changeTextColor(CYAN, TRANSPARENT, BRIGHT);
                 printf("The current value of the return value register is: ");
                 
                 if (returnValueRegister == NULL) { /* NULL-Pointer */
@@ -415,7 +421,7 @@ int processCommand(char* command) {
                     printf("\tType       : Complex\n");
                     printf("\tReferencing: %d\n", GET_SIZE(returnValueRegister));
                 }
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 break;
             }
             
@@ -427,38 +433,38 @@ int processCommand(char* command) {
             case 5: { /*ObjRef*/
                 printf("%s Enter the address of the object reference:\n", DEBUG_INSPECT);
                 printf("%s ", DEBUG_INSPECT);
-                changeTextColor(YELLOW, BLACK, UNDERLINE);
+                changeTextColor(YELLOW, TRANSPARENT, RESET);
                 printf("*WARNING* ENTERING INVALID ADDRESS CAN CAUSE UNDEFINED BEHAVIOUR!\n");
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 printf("%s 0x", DEBUG_INSPECT);
-                changeTextColor(CYAN, BLACK, BRIGHT);
+                changeTextColor(CYAN, TRANSPARENT, BRIGHT);
                 inspectObject((ObjRef) strtol(getInput(), NULL, 16));
                 break;
             }
 
             default: {
                 printf("%s ", DEBUG_INSPECT);
-                changeTextColor(YELLOW, BLACK, BRIGHT);
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
                 printf("There is no option with number '%u'...\n", inspectNumber);
             }
         }
 
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return FALSE;
     }
     else if(strcmp("quit", command) == 0) {
         printf("[Debugger/Quit]: ");
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("Halting NinjaVM...\n");
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         quit = TRUE;
         return FALSE;
     }
     else if (strcmp("reset", command) == 0) {
         printf("[Debugger/Reset]: ");
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("RESETTING NINJA VIRTUAL MACHINE....\n");
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         pc = 1;
         purgeStack();
         purgeSda();
@@ -484,16 +490,16 @@ int processCommand(char* command) {
     else if (strcmp("verbose", command) == 0) {
         verbose = verbose == TRUE ? FALSE : TRUE;
         printf("%s ", DEBUGGER);
-        changeTextColor(GREEN, BLACK, RESET);
+        changeTextColor(GREEN, TRANSPARENT, BRIGHT);
         printf("Toggled verbose run output: %s\n", verbose == TRUE ? "TRUE" : "FALSE");
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return FALSE;
     }
     else {
         printf("%s ", DEBUGGER);
-        changeTextColor(YELLOW, BLACK, RESET);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("Unrecognized command: '%s'\n", command);
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return FALSE;
     }
 
@@ -512,7 +518,9 @@ void debug(void) {
     quit = FALSE;
     run = FALSE;
 
+    changeTextColor(WHITE, TRANSPARENT, BRIGHT);
     printf("%s Initialization routine completed! Launching program...\n\n", DEBUGGER);
+    changeTextColor(WHITE, TRANSPARENT, RESET);
 
     printf("Ninja Virtual Machine started\n");
     while(quit != TRUE) {
@@ -525,9 +533,9 @@ void debug(void) {
         if (pc == breakpoint && breakpoint != 0) {
             run = FALSE;
             printf("%s ", DEBUG_BREAKPOINT);
-            changeTextColor(MAGENTA, BLACK, RESET);
+            changeTextColor(MAGENTA, TRANSPARENT, RESET);
             printf("Reached breakpoint!\n");
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
         }
     
         doExecute = FALSE;
@@ -539,9 +547,9 @@ void debug(void) {
         if (run == FALSE) {
             printf("[%08d]: ", pc-1);
 
-            changeTextColor(GREEN, BLACK, RESET);
+            changeTextColor(GREEN, TRANSPARENT, RESET);
             printf("%6s ", opcodes[opcode]);
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             printf("%d\n", operand);
 
             printf("%s Enter a command or 'help' for a list of available commands.\n", DEBUGGER);
@@ -557,9 +565,9 @@ void debug(void) {
         if (doExecute) {
             if (run == TRUE && verbose == TRUE) {
                 printf("[%08d]: ", pc-1);
-                changeTextColor(GREEN, BLACK, RESET);
+                changeTextColor(GREEN, TRANSPARENT, RESET);
                 printf("%6s ", opcodes[opcode]);
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 printf("%d\n", operand);
             }
             execute(opcode, operand);
@@ -571,6 +579,7 @@ void debug(void) {
         if (halt == TRUE) quit = TRUE;
     }
 
+    changeTextColor(WHITE, TRANSPARENT, RESET);
     printf("Ninja Virtual Machine stopped\n");
 
     exit(E_EXECOK);

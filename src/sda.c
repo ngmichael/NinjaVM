@@ -28,12 +28,12 @@ void initSda(unsigned int size) {
     sdaSize = size;
     sda = calloc(size, sizeof(ObjRef));
     if (sda == NULL && size > 0) {
-        changeTextColor(RED, BLACK, BRIGHT);
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf(
             "ERROR: Can't initialize sda with %lu Bytes of memory.\n",
             sizeof(int) * size
         );
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_SYS_MEM);
     }
 }
@@ -52,12 +52,12 @@ void popGlobal(unsigned int position) {
     ObjRef value;
 
     if (position >= sdaSize) {
-        changeTextColor(RED, BLACK, BRIGHT);
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf(
             "ERROR: Can't save global variable '%d'! Index out of bounds!\n",
             position
         );
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_SDA_INDEX);
     }
     
@@ -79,12 +79,12 @@ void pushGlobal(unsigned int position) {
     ObjRef value;
 
     if (position >= sdaSize) {
-        changeTextColor(RED, BLACK, BRIGHT);
+        changeTextColor(RED, TRANSPARENT, BRIGHT);
         printf(
             "ERROR: Can't read global variable '%d'! Index out of bounds!\n",
             position
         );
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         exit(E_ERR_SDA_INDEX);
     }
 

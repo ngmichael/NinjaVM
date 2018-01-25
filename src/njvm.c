@@ -42,7 +42,7 @@ void sigsegvHandler(int signum) {
         raise(SIGKILL);
     }
     signalFlag = TRUE;
-    changeTextColor(WHITE, BLACK, RESET);
+    changeTextColor(WHITE, TRANSPARENT, RESET);
     printf("\nERROR: Caught internal exception SIGSEGV!\n");
     memoryDump("njvm_err.log");
     printf("Dump completed! Exiting gracefully...\n");
@@ -99,47 +99,47 @@ int main(int argc, char* argv[]) {
         }
         else if (strcmp("--debug", argv[args]) == 0) {
             runDebugger = TRUE;
-            changeTextColor(WHITE, BLACK, BRIGHT);
+            changeTextColor(WHITE, TRANSPARENT, BRIGHT);
             printf("%s Launching NinjaVM in debug mode...\n", DEBUGGER);
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
         }
         else if (strcmp("--stack", argv[args]) == 0) {
             args++;
             if (args >= argc) {
-                changeTextColor(YELLOW, BLACK, BRIGHT);
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
                 printf("ERROR: Size for '--stack' missing!\n");
                 printf("\tUsage: '--stack <n> KiB' -> --stack 64\n");
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_CLI);
             }
             stackSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
             if (stackSize <= 0) {
-                changeTextColor(YELLOW, BLACK, BRIGHT);
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
                 printf("ERROR: Stack size must be greater than 0!\n");
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_CLI);
             }
         }
         else if (strcmp("--heap", argv[args]) == 0) {
             args++;
             if (args >= argc) {
-                changeTextColor(YELLOW, BLACK, BRIGHT);
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
                 printf("ERROR: Size for '--heap' missing!\n");
                 printf("\tUsage: '--heap <n> KiB' -> --heap 8192\n");
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_CLI);
             }
             heapSize = strtol(argv[args], NULL, 10) * 1024; /* n KiB * 1024 = Bytes*/
             if (heapSize <= 0) {
-                changeTextColor(YELLOW, BLACK, BRIGHT);
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
                 printf("ERROR: Heap size must be greater than 0!\n");
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_CLI);
             }
             if (heapSize > 2146435072) {
-                changeTextColor(YELLOW, BLACK, BRIGHT);
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
                 printf("ERROR: Can not allocate more than 2047 MiB of heap!\n");
-                changeTextColor(WHITE, BLACK, RESET);
+                changeTextColor(WHITE, TRANSPARENT, RESET);
                 exit(E_ERR_CLI);
             }
         }
@@ -158,25 +158,25 @@ int main(int argc, char* argv[]) {
             code = fopen(argv[args], "r");
             /* Check if the file has been opened successfully... */
             if (code == NULL){
-                changeTextColor(YELLOW, BLACK, BRIGHT);
+                changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
                 printf("ERROR: Could not open %s: %s\n", argv[args], strerror(errno));
                 return E_ERR_IO_FILE;
             }
         }
         else {
             /* Catch any unknown arguments and terminate */
-            changeTextColor(YELLOW, BLACK, BRIGHT);
+            changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
             printf("ERROR: Unrecognized argument '%s'\n", argv[args]);
-            changeTextColor(WHITE, BLACK, RESET);
+            changeTextColor(WHITE, TRANSPARENT, RESET);
             return E_ERR_CLI;
         }
     }
 
     /* Check if a codefile has been specified */
     if (code == NULL) {
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("ERROR: No code file specified!\n"); 
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_NO_PROGF;
     }
 
@@ -184,9 +184,9 @@ int main(int argc, char* argv[]) {
     formatIdentifier = calloc(4, sizeof(char));
     fread(formatIdentifier, 4, sizeof(char), code);
     if (strncmp(formatIdentifier, "NJBF", 4) != 0){
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("ERROR: Not a Ninja program!\n");
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_NO_NJPROG;
     }
     free(formatIdentifier);
@@ -194,16 +194,16 @@ int main(int argc, char* argv[]) {
     /* Validate that the Ninja-Program is compiled for this version of the VM. */
     fread(&njvmVersion, 1, sizeof(unsigned int), code);
     if (njvmVersion > VERSION){
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("ERROR: Wrong VM version!\n");
         printf("VM: ");
         changeTextColor(WHITE, GREEN, BRIGHT);
         printf("%02x", VERSION);
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf(", PROGRAM: ");
         changeTextColor(WHITE, RED, BRIGHT);
         printf("%02x\n", njvmVersion);
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_VM_VER;
     }
     
@@ -211,12 +211,12 @@ int main(int argc, char* argv[]) {
     fread(&instructionCount, 1, sizeof(unsigned int), code);
     programMemory = calloc(instructionCount, sizeof(unsigned int));
     if (programMemory == NULL) {
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf(
             "ERROR: System could not allocate %lu of memory for program\n",
             sizeof(unsigned int) * instructionCount
         );
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_SYS_MEM;
     }
 
@@ -228,10 +228,10 @@ int main(int argc, char* argv[]) {
     
     /* Close the file.*/
     if (fclose(code) != 0) {
-        changeTextColor(YELLOW, BLACK, BRIGHT);
+        changeTextColor(YELLOW, TRANSPARENT, BRIGHT);
         printf("ERROR: Could not close program file after reading:\n");
         printf("%s\n", strerror(errno));
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         return E_ERR_IO_FILE;
     }
 
@@ -245,10 +245,10 @@ int main(int argc, char* argv[]) {
 
     /* Launch the debugger if flag is set */
     if (runDebugger == TRUE) {
-        changeTextColor(WHITE, BLACK, BRIGHT);
+        changeTextColor(WHITE, TRANSPARENT, BRIGHT);
         printf("%s Loaded program successfully: %d instructions | %d global variables\n",
             DEBUGGER, instructionCount, globalVariableCount);
-        changeTextColor(WHITE, BLACK, RESET);
+        changeTextColor(WHITE, TRANSPARENT, RESET);
         debug();
         /* We should NEVER reach this part of the function.
            If we do, there is a bug in the debugger.*/

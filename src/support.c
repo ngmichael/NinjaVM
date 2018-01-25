@@ -13,9 +13,9 @@
  * @param msg - the error message
  */
 void fatalError(char* msg) {
-    changeTextColor(RED, BLACK, BRIGHT);
+    changeTextColor(RED, TRANSPARENT, BRIGHT);
     fprintf(stderr, "ERROR: %s\n", msg);
-    changeTextColor(WHITE, BLACK, RESET);
+    changeTextColor(WHITE, TRANSPARENT, RESET);
     exit(E_ERR_BIG_INT);
 }
 
@@ -97,4 +97,8 @@ void changeTextColor(unsigned int foreground, unsigned int background, unsigned 
     char colorString[13];
 	sprintf(colorString, "%c[%d;%d;%dm", 0x1B, state, foreground + 30, background + 40);
 	printf("%s", colorString);
+}
+
+void resetTextColor(void) {
+    changeTextColor(WHITE, TRANSPARENT, RESET);
 }

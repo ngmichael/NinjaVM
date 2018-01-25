@@ -15,16 +15,18 @@
 #define HIDDEN		    8
 #define STRIKETHROUGH 9
 
-#define BLACK 		0
-#define RED		    1
-#define GREEN		  2
-#define YELLOW		3
-#define BLUE		  4
-#define MAGENTA		5
-#define CYAN		  6
-#define	WHITE		  7
+#define BLACK 		  0
+#define RED		      1
+#define GREEN		    2
+#define YELLOW		  3
+#define BLUE		    4
+#define MAGENTA		  5
+#define CYAN		    6
+#define	WHITE		    7
+#define TRANSPARENT 8
 
 void changeTextColor(unsigned int foreground, unsigned int background, unsigned int state);
+void resetTextColor(void);
 
 
 /* object representation */
