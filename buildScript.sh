@@ -22,7 +22,7 @@ cp lib out/ngmh83/lib -r
 cp docs/DebuggerDocumentation.txt out/ngmh83/debug.txt
 
 # Generate readme.txt
-cp docs/ExitCodes.txt out/ngmh83/ExitCodes.txt
+cp docs/ExitCodes.txt out/ngmh83/README
 
 # Generate KSP-HU2.TEAM file
 echo "Michael, Noah George, 5090989
