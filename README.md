@@ -1,3 +1,7 @@
+# English description comes soon
+# For german, read on
+
+
 # **Konzepte systemnaher Programmierung WS 17/18**
 
 Repo zur Verwaltung von Sourcecode aus dem KSP-Praktikum.
